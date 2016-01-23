@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<title>Daily Life</title>
+		<link rel="stylesheet" type="text/css" href="css/style.css">
+	</head>
+	<body>		
+			<script type="text/javascript" src="js/lib/three.min.js"></script>
+			<script type="text/javascript" src="js/lib/peer.js"></script>
+			<script type="text/javascript" src="js/lib/Detector.js"></script>
+
+			<div id="render-canvas"></div>
+
+			<!-- PointerLock | Chrome & Android -->
+			<div id="blocker" style="display: -webkit-box;">
+				<div id="instructions">
+					<img width="60" height="60" src="images/click.gif">
+				</div>
+			</div>
+
+			<!-- cam -->
+			<p id="errorMessage" style="display:none"></p>
+
+			<!-- <video id="video" autoplay loop width="480" height="320" style="display:none"></video>
+			<canvas id="videoImage" width="480" height="320" style="display:none"></canvas>
+
+			<video id="remoteVideo" autoplay loop width="480" height="320" style="display:none"></video>
+			<canvas id="remoteVideoImage" width="480" height="320" style="display:none"></canvas> -->
+
+			<!-- SPEECH -->
+			<div id="results">
+				<span id="final_span" class="final" style="color: #ff0000;"></span>
+				<span id="interim_span" class="interim"></span>
+				<br>
+				<span id="my_span" class="mySpan"></span>
+			</div>
+
+			<script type="text/javascript">
+				// DETECT
+				if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+			</script>
+
+			<!-- Peer.js & WebSocket -->
+			<script type="text/javascript">
+				/* based on codes of Shawn Van Every */
+				/* source: http://itp.nyu.edu/~sve204/liveweb_fall2014/week5.html */
+
+				var my_stream = null, remote_stream = null;
+				var peer = null;
+				var peer_id = null;
+
+				var socket = null;
+				var socketOpened = false;
+
+				var host;
+				var ws;
+				var camID = 0, addNewPlayerYet = false;
+				var updatePreviousPlayer = false;
+
+				var whoIamInLife = -1, initEnvironment = false;
+
+				// Device
+				var audioSource = null, videoSource = null, camUserID = null, camEnvironmentID = null;
+				var mediaConstraints = {};
+
+				// DOM
+				var videos = [];
+				// var video = createVideoTag();
+				// var videoImage = createVideoCanvas();
+				// var videoImageContext = createVideoContext(videoImage);
+				var videoO = createVideoThing();
+				videos.push(videoO);
+
+				// var remote = createVideoTag();
+				// var remoteImage = createVideoCanvas();
+				// var remoteImageContext = createVideoContext(remoteImage);
+				var remote, remoteImage, remoteImageContext;
+				// var remoteO = createVideoThing();
+				// videos.push(remoteO);
+
+				var currentVidAmount = 0;
+
+				navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+				function gotSources(sourceInfos) {
+				  for (var i = 0; i !== sourceInfos.length; ++i) {
+				    var sourceInfo = sourceInfos[i];
+				    // console.log(sourceInfo);
+
+				   	if (sourceInfo.kind === 'video') {
+				   		// console.log(sourceInfo);
+
+				   		if (sourceInfo.facing === 'user') camUserID = sourceInfo.id;
+				   		else if (sourceInfo.facing === 'environment') {
+
+				   			camEnvironmentID = sourceInfo.id;
+				   			mediaConstraints = {
+								video: {
+									optional: [{sourceId: camEnvironmentID}]
+								}, audio: false
+							};
+							navigator.getUserMedia(mediaConstraints, successCallback, errorCallback);
+				   		}
+				   		else {
+				   			camEnvironmentID = sourceInfo.id;
+				   			mediaConstraints = {
+								video: {
+									optional: [{sourceId: camEnvironmentID}]
+								}, audio: false
+							};
+							navigator.getUserMedia(mediaConstraints, successCallback, errorCallback);
+				   		}
+				    } 
+				  }
+				}
+
+			if(typeof MediaStreamTrack.getSources === 'undefined'){
+				alert('This browser does not support MediaStreamTrack.\n\nPlease try Chrome, or update Chrome.');
+			} else {
+			  MediaStreamTrack.getSources(gotSources);
+			}
+
+			function successCallback(stream){
+				my_stream = stream;
+				// video.src = window.URL.createObjectURL(stream) || stream;
+				// video.play();
+
+				videos[0].video.src = window.URL.createObjectURL(stream) || stream;
+				videos[0].video.play();
+
+				currentVidAmount ++;
+				peerConnect();
+			}
+
+			function errorCallback(error){
+				var msg = 'No camera available.';
+				if (error.code == 1) { msg = 'User denied access to use camera.';
+				}
+				document.getElementById('errorMessage').textContent = msg;
+				console.log('navigator.getUserMedia error: ', error);
+			}
+
+			function peerConnect() {
+				peer = new Peer({key: 'k625glo5j67xpqfr'});	//Laura's key
+
+				peer.on('open', function(id){
+					console.log('My peer ID is: ' + id);
+					peer_id = id;
+
+					videos[0].peerid = peer_id;
+
+					connectSocket();
+				});
+
+				peer.on('call', function(incoming_call){
+					console.log("Got a call!");
+
+					incoming_call.answer(my_stream);
+
+					/* get the history! */
+					/* only apply for the second opened browser */
+					/* for showing the previous opened browser */
+					if(currentVidAmount>=1){
+
+						var newbiePeerID = incoming_call.peer;
+
+						incoming_call.on('stream', function(remoteStream){
+
+							// v.Old
+							// videos[1].video.src = window.URL.createObjectURL(remoteStream) || remoteStream;
+							// videos[1].video.play();
+
+							// v.Dynamic
+							var remoteO = createVideoThing();
+							remoteO.video.src = window.URL.createObjectURL(remoteStream) || remoteStream;
+							remoteO.video.play();
+							remoteO.peerid = newbiePeerID;
+							
+
+							for(var i=0; i<dailyLifePlayers.length; i++){
+								if(newbiePeerID == dailyLifePlayers[i].peerid){
+
+									var scTexture = new THREE.Texture( remoteO.videoImage );
+									scTexture.minFilter = THREE.LinearFilter;
+									scTexture.magFilter = THREE.LinearFilter;
+									scTexture.format = THREE.RGBFormat;
+									scTexture.generateMipmaps = false;
+									scTexture.wrapS = scTexture.wrapT = THREE.ClampToEdgeWrapping;
+									scTexture.needsUpdate = true;
+
+									dailyLifePlayers[i].children[1].children[1].material.setValues({map: scTexture});
+									dailyLifePlayers[i].children[1].children[1].material.needsUpdate = true;
+
+									remoteO.videoTexture = scTexture;
+									console.log("old player " + dailyLifePlayers[i].whoIam + " got screen texture!");
+									break;
+								}
+							}
+
+							videos.push(remoteO);
+							currentVidAmount ++;
+						});
+					}
+				});
+			}
+
+			function connectSocket() {
+				host = location.origin.replace(/^http/, 'ws');
+				ws = new WebSocket(host);
+
+				ws.onopen = function(){
+					console.log("Our browsers are connected!");
+
+					/* Connect this new player to every player*/
+					/* JUST ONCE! */
+					// -MOVED- @DeviceControls.js for dynamically creation
+					/*
+					if( !addNewPlayerYet ){
+						var msg = {
+							'type': 'addNewPlayer',
+							'camID': camID,
+							'peerid': peer_id,
+							'id': 0
+						};
+
+						sendMessage( JSON.stringify(msg) );
+						addNewPlayerYet = true;
+					}
+					*/
+				}
+
+				ws.onmessage = function(msg){
+					var data = JSON.parse(msg.data);
+
+					if(data.type == 'addNewPlayer'){
+
+						// If this is not ME && processed by server
+						if(data.peerid != peer_id && data.camID > 0){
+							console.log("Got a new peer: " + data.peerid);
+
+							// Use peer_id to get the stream
+							var call = peer.call(data.peerid, my_stream);
+							// If get the CALL, create new video & Player
+							call.on('stream', function(remoteStream){
+								console.log("Got remote stream!");
+
+								// Create Video
+								// videos[1].video.src = window.URL.createObjectURL(remoteStream) || remoteStream;
+								// videos[1].video.play();
+
+								// v.Dynamic
+								var remoteO = createVideoThing();
+								remoteO.video.src = window.URL.createObjectURL(remoteStream) || remoteStream;
+								remoteO.video.play();
+								remoteO.peerid = data.peerid;
+								videos.push(remoteO);
+
+								// Create Player
+								var newPlayerStartPos = new THREE.Vector3(data.playerStartX,data.playerStartY,data.playerStartZ);
+								var newPlayerStartRotY = data.playerStartRotY;
+
+								var newGuy = createPlayer( newPlayerStartPos, remoteO, data.myHex, data.id, data.peerid );
+								dailyLifePlayers.push(newGuy);
+
+								currentVidAmount ++;
+							});
+						}
+					}
+
+					// Assigned index of ME in the world
+					// Get to know whom I am
+					if(data.type=="index"){
+
+						/* ONLY ONCE */
+						if(!initEnvironment){
+
+							whoIamInLife = data.index;
+							videos[0].peerid = peer_id;
+
+							console.log("I am " + whoIamInLife + " in the Daily Life");
+
+							init();
+							initEnvironment = true;
+						}
+					}
+
+					var playerPosX, playerPosZ, playerRotY, playerQ, eyeQ;
+
+					if(data.type=="updatePlayer"){
+						var playerPosX = data.playerPosX;
+						var playerPosZ = data.playerPosZ;
+						var playerRotY = data.playerRotY;
+						var playerQ = new THREE.Quaternion(data.playerQ._x, data.playerQ._y, data.playerQ._z, data.playerQ._w);
+						var eyeQ = new THREE.Quaternion(data.eyeQ._x, data.eyeQ._y, data.eyeQ._z, data.eyeQ._w);
+
+						// if( dailyLifePlayers[data.index] )
+							updatePlayer(data.index, playerPosX, playerPosZ, playerRotY, playerQ);
+					}
+
+					if(data.type=="updateMurmur"){
+						var playerIndex = ""+data.index;
+						var playerMurmur = data.murmur;
+						
+						allTheMurmur[playerIndex] = playerMurmur;
+					}
+
+					//REMOVE_PLAYER
+					if(data.type == 'removePlayer'){
+						removePlayer(data.removeID);					
+						console.log('removePlayer #' + data.removeID);
+					}
+
+					// ADD_HISTORY_PLAYERS
+					// ONE_TIME_EVENT
+					if(data.length>0 && !updatePreviousPlayer){
+						for(var i=0; i<data.length; i++){
+							// console.log('!');
+
+							// If I'M older than the coming
+							if(whoIamInLife > data[i].id){
+
+								var oldPlayerStartPos = new THREE.Vector3(data[i].playerStartX, data[i].playerStartY, data[i].playerStartZ);
+								var oldPlayerStartRotY = data[i].playerStartRotY;
+								var oldHex = data[i].myHex;
+								var oldPlayerID = data[i].id;
+								var oldPlayerPeerID = data[i].peerid;
+								// console.log("add old play, videos.length: " + videos.length);
+
+								// If video is not updated by PeerJS yet
+								if( (whoIamInLife+1) > videos.length ){
+									console.log("video is not updated by PeerJS yet");
+									var oldPlayer = createPlayer(oldPlayerStartPos, -1, oldHex, oldPlayerID, oldPlayerPeerID);
+									dailyLifePlayers.push(oldPlayer);
+
+								} else {
+									for(var j=0; j<videos.length; j++){
+										if(videos[j].peerid == data[i].peerid){
+
+											var oldPlayer = createPlayer(oldPlayerStartPos, videos[j], oldHex, oldPlayerID, oldPlayerPeerID);
+											dailyLifePlayers.push(oldPlayer);
+
+											console.log('create! ID: ' + data[i].id);
+											break;
+										}
+									}
+								}								
+							}							
+						}
+						updatePreviousPlayer = true;
+					}
+				}
+
+				socketOpened = true;
+			}
+
+			//SYNCING_ISSUE
+			//http://stackoverflow.com/questions/23898477/tornado-websockets-invalidstateerror-still-in-connecting-state
+			//but has better solution... e.g. promises
+			function sendMessage(msg) {
+				waitForSocketConnection(ws, function() {
+					ws.send( msg );
+				});
+				// console.log('* sendMessage');
+			};
+
+
+			function waitForSocketConnection(socket, callback){
+				setTimeout(
+					function(){
+						if (socket.readyState === 1) {
+							if(callback !== undefined){
+								callback();
+								// console.log('* callback');
+							}
+						return;
+					} else {
+						waitForSocketConnection(socket,callback);
+					}
+				}, 5);
+				// console.log('* waitForSocketConnection');
+			};
+
+			function createVideoTag(){
+				var videoo = document.createElement('video');
+				videoo.autoplay = true;
+				videoo.loop = true;
+				videoo.width = 480;
+				videoo.height = 320;
+				return videoo;
+			}
+
+			function createVideoCanvas(){
+				var videooImage = document.createElement("canvas");
+				videooImage.width = 480;
+				videooImage.height = 320;
+				return videooImage;
+			}
+
+			function createVideoContext( _videoImage ){
+				var videooImageContext = _videoImage.getContext('2d');
+				videooImageContext.fillStyle = '0xffffff';
+				videooImageContext.fillRect(0, 0, _videoImage.width, _videoImage.height);
+				return videooImageContext;
+			}
+
+			function createVideoThing(){
+				var videoThing = {};
+
+				var videoo = document.createElement('video');
+				videoo.autoplay = true;
+				videoo.loop = true;
+				videoo.width = 480;
+				videoo.height = 320;
+				videoThing.video = videoo;
+
+				var videooImage = document.createElement("canvas");
+				videooImage.width = 480;
+				videooImage.height = 320;
+				videoThing.videoImage = videooImage;
+
+				var videooImageContext = videooImage.getContext('2d');
+				videooImageContext.fillStyle = '0xffffff';
+				videooImageContext.fillRect(0, 0, videooImage.width, videooImage.height);
+				videoThing.videoImageContext = videooImageContext;
+
+				return videoThing;
+			}
+			</script>
+
+			<script type="text/javascript" src="js/lib/OrbitControls.js"></script>
+			<script type="text/javascript" src="js/controls/DeviceControls.js"></script>
+			<script type="text/javascript" src="js/lib/OBJLoader.js"></script>
+			<script src='js/lib/threex.dynamictexture.js'></script>
+
+			<script type="text/javascript" src="js/lib/BufferLoader.js"></script>
+			<script type="text/javascript" src="js/lib/ImprovedNoise.js"></script>
+			<script type="text/javascript" src="js/lib/StereoEffect.js"></script>
+			<script type="text/javascript" src="js/lib/tween.min.js"></script>
+			<script type="text/javascript" src="js/stats.min.js"></script>
+			<script type="text/javascript" src="js/wave.js"></script>
+			<script type="text/javascript" src="js/sample.js"></script>
+
+			<script type="text/javascript" src="js/script_vSimple.js"></script>
+
+			<script type="text/javascript" src="js/script_functions.js"></script>
+	</body>
+</html>
