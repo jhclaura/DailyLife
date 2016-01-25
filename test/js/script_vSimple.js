@@ -325,14 +325,6 @@ function superInit(){
 	// wave
 		waterwaveTex = new THREE.ImageUtils.loadTexture('images/wave.png');
 		loader.load( "models/waterwave.js", function( geometry ) {	
-			// v.1	
-			// waterwave = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { map: waterwaveTex, morphTargets: true, transparent: true, opacity: 0.5 } ) );
-			// waterwave.scale.set(1.7, 1.7, 1.7);
-			// waterwave.position.z = 3;
-			// waterwave.position.y = -12;
-			// scene.add( waterwave );
-
-			//v.2
 			waterwave = new AniObject( 0.3, waterKeyframeSet, waterAniOffsetSet, geometry,
 									   new THREE.MeshBasicMaterial({ map: waterwaveTex, morphTargets: true, transparent: true, opacity: 0.5 }),
 									   new THREE.Vector3(0,-12,3), 1.7 );
@@ -383,10 +375,6 @@ function superInit(){
 		personTex = THREE.ImageUtils.loadTexture('images/galleryGuyTex.png');
 		loader.load( "models/person3.js", function( geometry ) {
 			personGeo = geometry;
-			// person = new THREE.Mesh( personGeo, new THREE.MeshLambertMaterial( { map: personTex, morphTargets: true } ) );
-			// person.position.x = -15;
-			// person.updateMorphTargets();
-			// scene.add( person );
 		});
 
 	///////////////////////////////////////////////////////
@@ -981,64 +969,11 @@ function update()
 
 	// PERSON_ANIMATION
 		if(person){
-			// v.1
-			// aniStep++;
-			// aniTime = aniStep * slowAni % (keyduration+1);
-			// keyframe = Math.floor( aniTime ) + animOffset;
-
-			// //
-			// if ( keyframe != currentKeyframe ) {
-			// 	person.body.morphTargetInfluences[ lastKeyframe ] = 0;
-			// 	person.body.morphTargetInfluences[ currentKeyframe ] = 1;
-			// 	person.body.morphTargetInfluences[ keyframe ] = 0;
-
-			// 	lastKeyframe = currentKeyframe;
-			// 	currentKeyframe = keyframe;
-			// }
-
-			// // end of standUp, start to walk
-			// if ( keyframe == (animOffsetSet[6]+keyframeSet[6]-1) ) {
-			// 	changeAni( 0 );
-			// }
-			// // end of sit down, sit freeze
-			// if ( keyframe == (animOffsetSet[1]+keyframeSet[1]-1) ) {
-			// 	changeAni( 2 );
-			// }
-			// // end of push, push freeze
-			// if ( keyframe == (animOffsetSet[3]+keyframeSet[3]-1) ) {
-			// 	changeAni( 4 );
-			// }
-			// // end of release, sit freeze
-			// if ( keyframe == (animOffsetSet[5]+keyframeSet[5]-1) ) {
-			// 	changeAni( 2 );
-			// }
-
-			// v.2
 			person.update(null);
 			person.switchAni();
 		}
 
 	if(waterwave){
-		// time = Date.now() % durationW;
-		// keyframeW = Math.floor( time / interpolationW ) + 1 + animOffsetW;
-		
-		//v.1
-		/*
-		aniStepW++;
-		aniTimeW = aniStepW * slowAniW % (keydurationW+1);
-		keyframeW = Math.floor( aniTimeW ) + animOffsetW;
-
-		if ( keyframeW != currentKeyframeW ) {
-
-			waterwave.morphTargetInfluences[ lastKeyframeW ] = 0;
-			waterwave.morphTargetInfluences[ currentKeyframeW ] = 1;
-			waterwave.morphTargetInfluences[ keyframeW ] = 0;
-
-			lastKeyframeW = currentKeyframeW;
-			currentKeyframeW = keyframeW;
-		}
-		*/
-		//v.2
 		waterwave.update(null);
 	}
 	
