@@ -142,6 +142,7 @@ var perlin = new ImprovedNoise(), noiseQuality = 1;
 	var fGuyHandHigh = false, sGuyHandHigh = false;
 	var bodyGeo;
 	var dailyLifeME, colorME, dailyLifePlayers = [];
+	var dailyLifePlayerDict = {};
 
 	var person, personGeo, personMat, toiletMat;
 	var poop, poopGeo, poopTex, poopMat;
@@ -373,8 +374,9 @@ function superInit(){
 
 	// PERSON 
 		personTex = THREE.ImageUtils.loadTexture('images/galleryGuyTex.png');
-		loader.load( "models/person3.js", function( geometry ) {		
-			person = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { map: personTex, morphTargets: true } ) );
+		loader.load( "models/person3.js", function( geometry ) {
+			personGeo = geometry;
+			person = new THREE.Mesh( personGeo, new THREE.MeshLambertMaterial( { map: personTex, morphTargets: true } ) );
 			person.position.x = -15;
 			person.updateMorphTargets();
 			scene.add( person );
@@ -536,8 +538,12 @@ function init()
 
 	setTimeout(function(){
 		// firstGuy = createSimplePlayer( myPosition, myColor, whoIamInLife );
-		firstGuy = createSitPlayer( myPosition, myColor, whoIamInLife );
-		dailyLifePlayers.push(firstGuy);
+		//v1
+		// firstGuy = createSitPlayer( myPosition, myColor, whoIamInLife );
+		// dailyLifePlayers.push(firstGuy);
+		//v2
+		firstGuy = new Person( myPosition, myColor, whoIamInLife );
+		dailyLifePlayerDict[ whoIamInLife ] = firstGuy;
 		console.log("Me built!");
 		// secondGuy = createPlayer( new THREE.Vector3(0,0,-3), yourMat );
 		// dailyLifePlayers.push(secondGuy);

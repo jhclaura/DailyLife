@@ -1,6 +1,6 @@
 
-// THE SIT PERSON OBJECT
-function Person( _pos, _color, _id ) {
+// THE ANI PERSON OBJECT
+function AniPerson( _pos, _color, _id ) {
 
 	this.color = _color;
 	this.whoIam = _id;

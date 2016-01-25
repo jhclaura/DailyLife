@@ -164,8 +164,12 @@
 								var newPlayerStartRotY = data.playerStartRotY;
 
 								// var newGuy = createSimplePlayer( newPlayerStartPos, data.myHex, data.id );
-								var newGuy = createSitPlayer( newPlayerStartPos, data.myHex, data.id );
-								dailyLifePlayers.push(newGuy);
+								// var newGuy = createSitPlayer( newPlayerStartPos, data.myHex, data.id );
+								// dailyLifePlayers.push(newGuy);
+
+								var newGuy = new Person(newPlayerStartPos, data.myHex, data.id);
+
+								dailyLifePlayerDict[data.id]=newGuy;
 
 								currentPplAmount ++;
 							// });
@@ -199,7 +203,9 @@
 						var eyeQ = new THREE.Quaternion(data.eyeQ._x, data.eyeQ._y, data.eyeQ._z, data.eyeQ._w);
 
 						// if( dailyLifePlayers[data.index] )
-							updatePlayer(data.index, playerPosX, playerPosZ, playerRotY, playerQ);
+							// updatePlayer(data.index, playerPosX, playerPosZ, playerRotY, playerQ);
+
+						dailyLifePlayerDict[ data.index ].update( playerPosX, playerPosZ, playerRotY, playerQ );
 					}
 
 					if(data.type=="updateMurmur"){
@@ -252,8 +258,12 @@
 								// }
 
 								// var oldPlayer = createSimplePlayer(oldPlayerStartPos, oldHex, oldPlayerID );
-								var oldPlayer = createSitPlayer(oldPlayerStartPos, oldHex, oldPlayerID );
-								dailyLifePlayers.push(oldPlayer);
+								// v1
+								// var oldPlayer = createSitPlayer(oldPlayerStartPos, oldHex, oldPlayerID );
+								// dailyLifePlayers.push(oldPlayer);
+								// v2
+								var oldPlayer = new Person(oldPlayerStartPos, oldHex, oldPlayerID );
+								dailyLifePlayerDict[ oldPlayerID ] = oldPlayer;
 								console.log("create history players #" + data[i].id);
 							}							
 						}
