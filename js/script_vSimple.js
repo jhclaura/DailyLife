@@ -148,7 +148,7 @@ var myPosition, myStartRotY;
 
 var model, texture;
 var dummy;
-var perlin = new ImprovedNoise(), noiseQuality = 1;
+var perlin, noiseQuality = 1;
 
 var textureLoader;
 var keyIsPressed;
@@ -302,6 +302,8 @@ connectSocket();
 // FUNCTIONS 
 ///////////////////////////////////////////////////////////
 function superInit(){
+
+	perlin = new ImprovedNoise();
 
 	// PARTICLES_SPARKS
 	/*
