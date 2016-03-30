@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<title>Daily Life</title>
+		<link rel="stylesheet" type="text/css" href="css/style.css">
+	</head>
+	<body>		
+		<script type="text/javascript" src="js/lib/three.min.js"></script>
+		<script type="text/javascript" src="js/lib/Detector.js"></script>
+
+		<div id="render-canvas"></div>
+
+		<!-- PointerLock | Chrome & Android -->
+		<!-- <div id="blocker" style="display: -webkit-box;">
+			<div id="instructions">
+				<img width="60" height="60" src="images/click.gif">
+			</div>
+		</div> -->
+
+		<!-- cam -->
+		<!-- <p id="errorMessage" style="display:none"></p> -->
+
+		<!-- SPEECH -->
+		<!-- <div id="results">
+			<span id="final_span" class="final" style="color: #ff0000;"></span>
+			<span id="interim_span" class="interim"></span>
+			<br>
+			<span id="my_span" class="mySpan"></span>
+		</div> -->
+
+		<script type="text/javascript">
+			//device detection
+			//source: http://stackoverflow.com/questions/3514784/what-is-the-best-way-to-detect-a-mobile-device-in-jquery
+			var isMobile = false; //initiate as false
+			var whichMobile = "";
+			if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+				isMobile = true;
+			}
+			console.log("isMobile: " + isMobile);
+
+			// tell android or iOS
+			if( /Android/i.test(navigator.userAgent) ) {
+				console.log("I'm android!");
+				whichMobile = "android";
+			}
+			if( /iPhone|iPad|iPod/i.test(navigator.userAgent) ) {
+				console.log("I'm iOS!");
+				whichMobile = "iOS_mobile";
+			}
+
+			// if it's desktop, create click.gif div for PointerlockAPI
+			// if( whichMobile != "iOS_mobile" ) {
+			if( !isMobile ) {
+				var clickDiv = document.createElement('div');
+				clickDiv.id = "blocker";
+				clickDiv.style = "display: -webkit-box;";
+				document.getElementsByTagName("body")[0].appendChild(clickDiv);
+
+				var ins = document.createElement('div');
+				ins.id = "instructions";
+				var fingerImg = document.createElement('img');
+				fingerImg.setAttribute("src", "images/click.gif");
+				fingerImg.setAttribute("width", "60");
+				fingerImg.setAttribute("height", "60");
+				ins.appendChild(fingerImg);
+				clickDiv.appendChild(ins);
+			}
+
+			// DETECT
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			//
+			function byId(_id) {
+				return document.getElementById(_id);
+			}
+
+			function byClass(_class) {
+				return document.getElementsByClassName(_class);
+			}
+
+			var renderCanvas = byId("render-canvas");
+			var blockerDiv = byId("blocker");
+
+			renderCanvas.style.display = "none";
+			if(blockerDiv) blockerDiv.style.display = "none";
+
+			// NAME
+			var playerNName = "";
+			var playerNameInput = document.createElement('textarea');
+			playerNameInput.id = "playerName";
+			playerNameInput.setAttribute("placeholder", "Who's this lucky one sitting on the toilet?");
+
+			var modeSelection = document.createElement('div');
+			modeSelection.setAttribute("style", "width: 50%; position:absolute; left:0; right:0; top:0; bottom:0; margin:auto; line-height: 26px; text-align:center; font-size:14pt; height:26px;");
+			modeSelection.style.background =  "#FFFFFF";
+
+			var isItVR = false;
+
+			var normalMode = document.createElement('a');
+			normalMode.id = "normalMode";
+			normalMode.innerHTML = "Normal";
+			normalMode.onclick = function(){
+				isItVR = false;
+				
+				if(playerNameInput.value==playerNName){
+					playerNName = "Anonymous";
+				} else {
+					playerNName = playerNameInput.value;
+				}
+
+				renderCanvas.style.display = "inline";
+				if(blockerDiv) blockerDiv.style.display = "-webkit-box";
+				modeSelection.style.display = "none";
+
+				// superInit();
+				// connectSocket();
+				init();
+
+			}
+
+			var vrMode = document.createElement('a');
+			vrMode.id = "vrMode";
+			vrMode.innerHTML = "VR";
+			vrMode.onclick = function(){
+				isItVR = true;
+
+				if(playerNameInput.value==playerNName){
+					playerNName = "Anonymous";
+				} else {
+					playerNName = playerNameInput.value;
+				}
+
+				renderCanvas.style.display = "inline";
+				if(blockerDiv) blockerDiv.style.display = "-webkit-box";
+				modeSelection.style.display = "none";
+
+				// superInit();
+				// connectSocket();
+				init();
+			}
+
+			modeSelection.appendChild(playerNameInput);
+			modeSelection.appendChild(normalMode);
+			modeSelection.appendChild(vrMode);
+
+			document.body.appendChild(modeSelection);
+		</script>
+
+		<!-- Peer.js & WebSocket -->
+		<script type="text/javascript">
+			/* based on codes of Shawn Van Every */
+			/* source: http://itp.nyu.edu/~sve204/liveweb_fall2014/week5.html */
+
+			var socket = null;
+			var socketOpened = false;
+
+			var host;
+			var ws;
+			var camID = 0, addNewPlayerYet = false;
+			var updatePreviousPlayer = false;
+
+			var whoIamInLife = -1, initEnvironment = false;
+
+			var currentPplAmount = 0;
+
+			function connectSocket() {
+				currentPplAmount ++;
+
+				host = location.origin.replace(/^http/, 'ws');
+				ws = new WebSocket(host);
+
+				ws.onopen = function(){
+					console.log("Our browsers are connected!");
+
+					/* Connect this new player to every player*/
+					/* JUST ONCE! */
+					// -MOVED- @DeviceControls.js for dynamically creation
+					/*
+					if( !addNewPlayerYet ){
+						var msg = {
+							'type': 'addNewPlayer',
+							'camID': camID,
+							'peerid': peer_id,
+							'id': 0
+						};
+
+						sendMessage( JSON.stringify(msg) );
+						addNewPlayerYet = true;
+					}
+					*/
+				}
+
+				ws.onmessage = function(msg){
+					var data = JSON.parse(msg.data);
+
+					if(data.type == 'addNewPlayer'){
+
+						// If this is not ME && processed by server
+						if(data.id != whoIamInLife && data.camID > 0){
+							console.log("Got a new player, id: " + data.id);
+
+							// // Use peer_id to get the stream
+							// var call = peer.call(data.peerid, my_stream);
+							// // If get the CALL, create new video & Player
+							// call.on('stream', function(remoteStream){
+							// 	console.log("Got remote stream!");
+
+								// Create Video
+								// videos[1].video.src = window.URL.createObjectURL(remoteStream) || remoteStream;
+								// videos[1].video.play();
+
+								// v.Dynamic
+								// var remoteO = createVideoThing();
+								// remoteO.video.src = window.URL.createObjectURL(remoteStream) || remoteStream;
+								// remoteO.video.play();
+								// remoteO.peerid = data.peerid;
+								// videos.push(remoteO);
+
+								// Create Player
+								var newPlayerStartPos = new THREE.Vector3(data.playerStartX, data.playerStartY, data.playerStartZ);
+								var newPlayerStartRotY = data.playerStartRotY;
+
+								// var newGuy = createSimplePlayer( newPlayerStartPos, data.myHex, data.id );
+								// var newGuy = createSitPlayer( newPlayerStartPos, data.myHex, data.id );
+								// dailyLifePlayers.push(newGuy);
+
+								var newGuy = new Person(newPlayerStartPos, data.myHex, data.id, data.nname);
+
+								dailyLifePlayerDict[data.id]=newGuy;
+
+								currentPplAmount ++;
+							// });
+						}
+					}
+
+					// Assigned index of ME in the world
+					// Get to know whom I am
+					if(data.type=="index"){
+
+						/* ONLY ONCE */
+						if(!initEnvironment){
+
+							whoIamInLife = data.index;
+							// videos[0].peerid = peer_id;
+
+							console.log("I am " + whoIamInLife + " in the Daily Life");
+
+							// init();
+							superInit();
+
+							initEnvironment = true;
+						}
+					}
+
+					var playerPosX, playerPosY, playerPosZ, playerRotY, playerQ, playerQ3;
+
+					if(data.type=="updatePlayer"){
+						playerPosX = data.playerPosX;
+						playerPosY = data.playerPosY;
+						playerPosZ = data.playerPosZ;
+						playerRotY = data.playerRotY;
+						playerQ = new THREE.Quaternion(data.playerQ._x, data.playerQ._y, data.playerQ._z, data.playerQ._w);
+
+						// if( dailyLifePlayers[data.index] )
+							// updatePlayer(data.index, playerPosX, playerPosZ, playerRotY, playerQ);
+
+						if( dailyLifePlayerDict[ data.index ] )
+							dailyLifePlayerDict[ data.index ].update( playerPosX, playerPosY, playerPosZ, playerRotY, playerQ );
+					}
+
+					if(data.type=="updateMurmur"){
+						var playerIndex = ""+data.index;
+						var playerMurmur = data.murmur;
+						
+						allTheMurmur[playerIndex] = playerMurmur;
+					}
+
+					if(data.type=="shootPoop"){
+
+						// only shoot if it's not MY_Data, cuz I've already shoot
+						if(data.index != whoIamInLife){
+
+							// if it's aim at someone
+							if(data.toWhom != -1){
+								
+								// moveMacaPoop( data.index, data.toWhom );
+								createHeart( data.index, data.toWhom );
+
+								// if it's to ME
+								if(data.toWhom == whoIamInLife){
+										// toIndex displace message
+										firstGuy.wordTexture.clear('#dc5e64').drawText("You got a poop heart from " + dailyLifePlayerDict[ data.index ].nname + " <3", undefined, 96, 'white');
+								}
+							} else {
+								var poopPos = new THREE.Vector3(data.playerPos.x, data.playerPos.y, data.playerPos.z);
+								var poopQ = new THREE.Vector3(data.playerDir.x, data.playerDir.y, data.playerDir.z);
+
+								createPoop(poopPos, poopQ);
+							}
+						}
+					}
+
+					//REMOVE_PLAYER
+					if(data.type == 'removePlayer'){
+						removePlayer(data.removeID);					
+						console.log('removePlayer #' + data.removeID);
+					}
+
+					// ADD_HISTORY_PLAYERS
+					// ONE_TIME_EVENT
+					if(data.length>0 && !updatePreviousPlayer){
+						for(var i=0; i<data.length; i++){
+							// console.log('!');
+							console.log("whoIamInLife: " + whoIamInLife + ", data[i].id: " + data[i].id );
+
+							// If I'm older than the coming
+							if(whoIamInLife > data[i].id){
+
+								var oldPlayerStartPos = new THREE.Vector3(data[i].playerStartX, data[i].playerStartY, data[i].playerStartZ);
+								var oldPlayerStartRotY = data[i].playerStartRotY;
+								var oldHex = data[i].myHex;
+								var oldPlayerID = data[i].id;
+								var oldPlayerName = data[i].nname;
+
+								// var oldPlayerPeerID = data[i].peerid;
+								// console.log("add old play, videos.length: " + videos.length);
+
+								// If video is not updated by PeerJS yet
+								// if( (whoIamInLife+1) > videos.length ){
+								// 	console.log("video is not updated by PeerJS yet");
+								// 	var oldPlayer = createPlayer(oldPlayerStartPos, -1, oldHex, oldPlayerID, oldPlayerPeerID);
+								// 	dailyLifePlayers.push(oldPlayer);
+
+								// } else {
+								// 	for(var j=0; j<videos.length; j++){
+								// 		if(videos[j].peerid == data[i].peerid){
+
+								// 			var oldPlayer = createPlayer(oldPlayerStartPos, videos[j], oldHex, oldPlayerID, oldPlayerPeerID);
+								// 			dailyLifePlayers.push(oldPlayer);
+
+								// 			console.log('create! ID: ' + data[i].id);
+								// 			break;
+								// 		}
+								// 	}
+								// }
+
+								// var oldPlayer = createSimplePlayer(oldPlayerStartPos, oldHex, oldPlayerID );
+								// v1
+								// var oldPlayer = createSitPlayer(oldPlayerStartPos, oldHex, oldPlayerID );
+								// dailyLifePlayers.push(oldPlayer);
+								// v2
+								var oldPlayer = new Person( oldPlayerStartPos, oldHex, oldPlayerID, oldPlayerName );
+								dailyLifePlayerDict[ oldPlayerID ] = oldPlayer;
+								console.log("create history players #" + data[i].id);
+							}							
+						}
+						updatePreviousPlayer = true;
+					}
+				}
+				socketOpened = true;
+			}
+
+			//SYNCING_ISSUE
+			//http://stackoverflow.com/questions/23898477/tornado-websockets-invalidstateerror-still-in-connecting-state
+			//but has better solution... e.g. promises
+			function sendMessage(msg) {
+				waitForSocketConnection(ws, function() {
+					ws.send( msg );
+				});
+				// console.log('* sendMessage');
+			};
+
+
+			function waitForSocketConnection(socket, callback){
+				setTimeout(
+					function(){
+						if (socket.readyState === 1) {
+							if(callback !== undefined){
+								callback();
+								// console.log('* callback');
+							}
+						return;
+					} else {
+						waitForSocketConnection(socket,callback);
+					}
+				}, 5);
+				// console.log('* waitForSocketConnection');
+			};
+
+			function createVideoTag(){
+				var videoo = document.createElement('video');
+				videoo.autoplay = true;
+				videoo.loop = true;
+				videoo.width = 480;
+				videoo.height = 320;
+				return videoo;
+			}
+
+			function createVideoCanvas(){
+				var videooImage = document.createElement("canvas");
+				videooImage.width = 480;
+				videooImage.height = 320;
+				return videooImage;
+			}
+
+			function createVideoContext( _videoImage ){
+				var videooImageContext = _videoImage.getContext('2d');
+				videooImageContext.fillStyle = '0xffffff';
+				videooImageContext.fillRect(0, 0, _videoImage.width, _videoImage.height);
+				return videooImageContext;
+			}
+
+			function createVideoThing(){
+				var videoThing = {};
+
+				var videoo = document.createElement('video');
+				videoo.autoplay = true;
+				videoo.loop = true;
+				videoo.width = 480;
+				videoo.height = 320;
+				videoThing.video = videoo;
+
+				var videooImage = document.createElement("canvas");
+				videooImage.width = 480;
+				videooImage.height = 320;
+				videoThing.videoImage = videooImage;
+
+				var videooImageContext = videooImage.getContext('2d');
+				videooImageContext.fillStyle = '0xffffff';
+				videooImageContext.fillRect(0, 0, videooImage.width, videooImage.height);
+				videoThing.videoImageContext = videooImageContext;
+
+				return videoThing;
+			}
+		</script>
+
+		<script type="text/javascript" src="js/lib/OrbitControls.js"></script>
+		<script type="text/javascript" src="js/controls/DeviceControls.js"></script>
+		<script type="text/javascript" src="js/lib/OBJLoader.js"></script>
+		<script src='js/lib/threex.dynamictexture.js'></script>
+		<script type="text/javascript" src="js/lib/howler.js"></script>
+
+		<script type="text/javascript" src="js/lib/BufferLoader.js"></script>
+		<script type="text/javascript" src="js/lib/physi.js"></script>
+		<script type="text/javascript" src="js/lib/ImprovedNoise.js"></script>
+		<script type="text/javascript" src="js/lib/StereoEffect.js"></script>
+		<script type="text/javascript" src="js/lib/tween.min.js"></script>
+		<script type="text/javascript" src="js/stats.min.js"></script>
+		<script type="text/javascript" src="js/wave.js"></script>
+		<script type="text/javascript" src="js/sample.js"></script>
+		<script type="text/javascript" src="js/person.js"></script>
+		<script type="text/javascript" src="js/AniObject.js"></script>
+		<script type="text/javascript" src="js/script_vSimple.js"></script>
+
+		<script type="text/javascript" src="js/script_functions.js"></script>
+	</body>
+</html>
