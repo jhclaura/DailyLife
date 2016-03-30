@@ -124,69 +124,6 @@ var socketHandlers = function(socket,msg){
 			console.log('that socket was closed');
 		}
 	}
-
-
-	//BROADCAST_HISTORY_OF_PLAYERS
-	// for(var i=0; i<allSockets.length; i++){
-	// 	try{
-
-	// 		// MEG_FROM_PointerLockControls
-	// 		if(msg.type=='addNewPlayer'){
-
-	// 			//console.log('addNewPlayer: #' + );
-
-	// 			// msg.newPlayerID = allSocketIDs[i];
-	// 			//msg.newPlayerID = msg.myID;
-
-	// 			//GENERATE_RED_STORK_ONLY_ONCE
-	// 			if(msg.camID==0){
-	// 				msg.npID = socket.id;
-	// 				console.log('newPlayerID -->' + socket.id);
-
-
-					
-	// 				msg.camID++;
-	// 				// console.log('camID -->' + msg.camID);
-
-
-	// 				redPlayer.push(msg);
-	// 			}
-
-	// 			// console.log(redPlayer);
-
-	// 			//allSockets[i].send(JSON.stringify(msg));
-
-	// 			allSockets[i].send(JSON.stringify(redPlayer));
-
-	// 			// console.log('Server sent a BROADCAST thing.');				
-	// 			console.log(redPlayer.length);
-	// 		}
-	// 	}
-	// 	catch(error){
-	// 		console.log('that socket was closed');
-	// 	}
-	// }
-
-	//RESTORE_AddStork
-	// for(var i=0; i<allSockets.length; i++){
-
-	// 	try{
-	// 		if(msg.type=='addNewPlayer'){
-
-	// 			if(msg.camID==0){
-	// 				redPlayer.push(msg);
-	// 				msg.camID++;
-	// 			}
-
-	// 			allSockets[i].send(JSON.stringify(redPlayer));				
-	// 			console.log(redPlayer.length);
-	// 		}
-	// 	}
-	// 	catch(error){
-	// 		console.log('that socket was closed');
-	// 	}
-
-	// }
 };
 
 ///////////////////////////////////////////////////////////
