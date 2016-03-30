@@ -34,7 +34,6 @@ lifeIndex.type = "index";
 
 var mySocket = undefined;
 
-// Should I cap a world's total pp number??
 wss.on('connection', function(ws){
 
 	mySocket = ws;
@@ -102,7 +101,7 @@ var socketHandlers = function(socket,msg){
 				// ONLY_HAPPENS_ONCE
 				if(msg.camID==0){
 					msg.id = socket.id;
-					// console.log('newPlayer Peer ID -->' + msg.peerid);
+					console.log('newPlayer Peer ID -->' + msg.peerid);
 					msg.camID++;
 					// console.log('camID -->' + msg.camID);
 
@@ -117,7 +116,7 @@ var socketHandlers = function(socket,msg){
 			if(msg.type=='addNewPlayer'){
 				allSockets[i].send(JSON.stringify(players));
 				// console.log('Server sent a BROADCAST thing.');				
-				// console.log(players.length);
+				console.log(players.length);
 			}
 		}
 		catch(error){
