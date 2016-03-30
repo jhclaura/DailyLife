@@ -20,6 +20,8 @@
   "bugs": {
     "url": "https://github.com/jhclaura/DailyLife/issues"
   },
-  "homepage": "https://github.com/jhclaura/DailyLife",
-  "description": ""
+  "description": "",
+  "engines": {
+    "node": "4.2.2"
+  }
 }
