@@ -36,7 +36,6 @@ var mySocket = undefined;
 
 // object - index: occupancy
 var occuList = {};
-var occuIndex = 1;
 
 // Should I cap a world's total pp number??
 wss.on('connection', function(ws){
@@ -44,43 +43,17 @@ wss.on('connection', function(ws){
 	mySocket = ws;
 
 	thisId++;
-	/*
 	ws.id = thisId;
 
 	// remember the id & socket match
 	allSockets.push(ws);
-	*/
+	// allSocketIDs.push(thisId);
 
 	console.log("new player #%d connected!", thisId);
 
-	var haveEmptySeat = false;
-	for( prop in occuList ){
-		// if it's an empty seat
-		if( occuList[prop] != "occupied" ){
-			// get the index of the seat 
-			occuIndex = prop;
-			haveEmptySeat = true;
-
-			// change it to be unoccupied
-			occuList[prop] = "occupied";
-			break;
-		}
-	}
-
-	// all the seat are already occupied
-	if(!haveEmptySeat){
-		occuIndex = Object.keys(occuList).length + 1;
-		// console.log( "occuIndex: " + occuIndex );
-		occuList[occuIndex] = "occupied";
-	}
-
-	ws.id = occuIndex;
-	allSockets.push(ws);
-
 	// SEND BACK Index
 	if(mySocket){
-		// lifeIndex.index = thisId;
-		lifeIndex.index = occuIndex;
+		lifeIndex.index = thisId;
 		mySocket.send( JSON.stringify(lifeIndex) );
 	}
 
@@ -106,16 +79,11 @@ wss.on('connection', function(ws){
 				players.splice(i,1);
 
 				socketHandlers(ws, msg);
-
-				//
-				occuList[ws.id] = "empty";
-
 				break;
 			}
 		}
 		mySocket = undefined;
-	});
-
+	});	
 });
 
 

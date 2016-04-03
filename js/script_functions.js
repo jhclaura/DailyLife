@@ -55,6 +55,14 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function getRandomIntPN(min, max) {
+	var value = Math.floor(Math.random() * (max - min + 1)) + min;
+	if(Math.random()>0.5)
+	    return value;
+	else
+		return value*-1;
+}
+
 function onWindowResize() {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();

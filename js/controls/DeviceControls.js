@@ -928,10 +928,13 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 					scope.getOutBathroomPosition.copy(yawObject.position);				
 					scope.getOutBathroomPosition.add( v1.multiplyScalar( -90 ) );
 
-					EnterSceneTwo();
-				},500);				
-				updatedBathroom = true;	
+					//
+					pplCount.rotation.y = vv1.y;
 
+					EnterSceneTwo();
+				},500);
+				
+				updatedBathroom = true;	
 			}
 	 	}
 
@@ -992,6 +995,9 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		this.getOutBathroomPosition.copy( yawObject.position );
 		v1.copy( zAxis ).applyQuaternion( yawObject.quaternion );
 		this.getOutBathroomPosition.add( v1.multiplyScalar( -90 ) );
+
+		//
+		pplCount.rotation.y = yawObject.rotation.y;
 
 		EnterSceneTwo();
 	}

@@ -122,7 +122,6 @@
 				// superInit();
 				// connectSocket();
 				init();
-
 			}
 
 			var vrMode = document.createElement('a');
@@ -320,11 +319,14 @@
 					// ONE_TIME_EVENT
 					if(data.length>0 && !updatePreviousPlayer){
 						for(var i=0; i<data.length; i++){
-							// console.log('!');
+							console.log('total data lenght: ' + data.length);
 							console.log("whoIamInLife: " + whoIamInLife + ", data[i].id: " + data[i].id );
 
 							// If I'm older than the coming
-							if(whoIamInLife > data[i].id){
+							// if(whoIamInLife > data[i].id){
+
+							// if I'm not the coming player
+							if(whoIamInLife != data[i].id){
 
 								var oldPlayerStartPos = new THREE.Vector3(data[i].playerStartX, data[i].playerStartY, data[i].playerStartZ);
 								var oldPlayerStartRotY = data[i].playerStartRotY;

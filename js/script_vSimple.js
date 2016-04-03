@@ -144,11 +144,11 @@ var screenHeight = window.innerHeight;
 var time, clock;
 
 var myStartX = 0, myStartZ = 0, myStartY = 180; //2
-var myPosition, myStartRotY;
+var myPosition, myStartRotY, worldBubble, pplCount, pplCountTex, pplCountMat;
 
 var model, texture;
 var dummy;
-var perlin, noiseQuality = 1;
+var perlin = new ImprovedNoise(), noiseQuality = 1;
 
 var textureLoader;
 var keyIsPressed;
@@ -207,6 +207,7 @@ var keyIsPressed;
 	var aniStepW=0, aniTimeW=0, slowAniW=0.3, keydurationW = 17;
 	var keyframeW, animOffsetW=1, currentKeyframeW=0, lastKeyframeW=0;
 	var bathroom, bathroomGeo, bathroomTex, bathroomMat, bathroomLight, glowTexture;
+	var graffitiTex, floorTex, doorTex;
 	var intestineTex, intestineAnimator, intestineTexs = [], intestinesAnimator, intestineMat;
 	var toiletCenters = [], myWorldCenter;
 	var meInSGroup, meInBGroup, meInWorld;
@@ -291,6 +292,7 @@ var keyIsPressed;
 	var partyLightMat;
 
 
+
 ////////////////////////////////////////////////////////////
 
 // init();		// Init after CONNECTION
@@ -302,8 +304,6 @@ connectSocket();
 // FUNCTIONS 
 ///////////////////////////////////////////////////////////
 function superInit(){
-
-	perlin = new ImprovedNoise();
 
 	// PARTICLES_SPARKS
 	/*
@@ -512,6 +512,19 @@ function superInit(){
 			loadModelBathroom( "models/bathroom.js" );
 		});
 		*/
+		bathroomTex = textureLoader.load('images/bathroom.png');
+		bathroomMat = new THREE.MeshLambertMaterial({map: bathroomTex});
+
+		graffitiTex = textureLoader.load('images/graffitiS.png');
+		graffitiTex.wrapS = graffitiTex.wrapT = THREE.RepeatWrapping;
+		graffitiTex.repeat.set( 4, 4 );
+
+		floorTex = textureLoader.load('images/floor.jpg');
+		floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping;
+		floorTex.repeat.set( 4, 4 );
+
+		doorTex = textureLoader.load('images/door.png');
+
 		//v2
 		// intestineMat = new THREE.MeshBasicMaterial( {map: intestineTex});
 
@@ -546,7 +559,16 @@ function superInit(){
 		// 	side: THREE.DoubleSide
 		// });
 
-		loadModelBathrooms( "models/br_w2.js", "models/br_g.js", "models/br_y.js", "models/bathroom2.js" );
+		// loadModelBathrooms( "models/br_w2.js", "models/br_g.js", "models/br_y.js", "models/bathroom2.js" );
+		
+		loadModelBathroomsV2( "models/bathroom/b_door.js",
+							  "models/bathroom/b_sides.js",
+							  "models/bathroom/b_floor.js",
+							  "models/bathroom/b_smallStuff.js",
+							  "models/bathroom/b_smallWhite.js",
+							  "models/bathroom/paper_bottom.js",
+							  "models/bathroom/paper_top.js",
+							  "models/bathroom2.js" );
 
 		// setTimeout(function(){
 		// 	var testBall = new THREE.Mesh( new THREE.SphereGeometry(5), intestineMat);
@@ -860,8 +882,40 @@ function superInit(){
 		portalLight.visible = false;
 		scene.add(portalLight);
 		portalLights.push(portalLight);
-
 	}	
+
+	// WORLD_BUBBLE
+	worldBubble = new THREE.Mesh(new THREE.BoxGeometry(130,800,130), new THREE.MeshBasicMaterial({color: 0x9791ff, transparent: true, opacity: 0.3, side: THREE.DoubleSide}));
+	scene.add( worldBubble );
+	loader.load( "models/simpleBigToilet.js", function( geometry ) {
+		var bigSimpleToilet = new THREE.Mesh(geometry, toiletMat);
+		var bst = new THREE.Object3D();
+
+		for(var i=-2; i<3; i++) {
+			if(i>=0) i++;
+			for(var j=-2; j<3; j++){
+				for(var k=-2; k<3; k++){
+					if(k>=0) k++;
+					var bbb = bigSimpleToilet.clone();
+					bbb.position.set( i*60, j*50, k*60 );
+					bst.add(bbb);
+				}
+			}
+		}
+
+		scene.add(bst);
+	});
+
+	// PEOPLE_COUNT
+		pplCountTex = new THREEx.DynamicTexture(1024,1024);
+		pplCountTex.context.font = "bolder 150px StupidFont";
+		pplCountTex.clear('#dc5e64').drawText("Total poopers:<br>0", undefined, 250, 'yellow');
+		pplCountMat = new THREE.MeshBasicMaterial({map: pplCountTex.texture, side: THREE.DoubleSide, transparent: true});
+		pplCount = new THREE.Mesh(new THREE.PlaneGeometry( pplCountTex.canvas.width, pplCountTex.canvas.height), pplCountMat );
+		pplCount.scale.set(0.02,0.02,0.02);
+		pplCount.position.y = 80;
+		pplCount.rotation.x = Math.PI/2;
+		scene.add( pplCount );
 
 	setTimeout(function(){
 		var poopMaterial = new THREE.MeshLambertMaterial({map: poopTex});
@@ -1381,21 +1435,26 @@ function loadModelBathrooms( _w, _g, _y, _t ){
 	loader = new THREE.JSONLoader();
 	bathroom = new THREE.Object3D();
 	var br;
+
 	loader.load( _w, function( geometry1 ){
-		br = new THREE.Mesh(geometry1, new THREE.MeshLambertMaterial({color: 0xcccccc}));
+		// br = new THREE.Mesh(geometry1, new THREE.MeshLambertMaterial({color: 0xcccccc}));
+		br = new THREE.Mesh(geometry1, bathroomMat);
 
 		bathroom.add(br);
-		br = new THREE.Mesh(new THREE.PlaneGeometry(14,10,1,1), new THREE.MeshLambertMaterial({color: 0xcccccc}));
+		// br = new THREE.Mesh(new THREE.PlaneGeometry(14,10,1,1), new THREE.MeshLambertMaterial({color: 0xcccccc}));
+		br = new THREE.Mesh(new THREE.PlaneGeometry(14,10,1,1), bathroomMat);
 		br.rotation.y = Math.PI;
 		br.position.z += 3.3;
 		bathroom.add(br);
 
 		loader.load( _g, function( geometry2 ){
-			br = new THREE.Mesh(geometry2, new THREE.MeshLambertMaterial({color: 0xfffac4}));
+			// br = new THREE.Mesh(geometry2, new THREE.MeshLambertMaterial({color: 0xfffac4}));
+			br = new THREE.Mesh(geometry2, bathroomMat);
 			bathroom.add(br);
 
 			loader.load( _y, function( geometry3 ){
-				br = new THREE.Mesh(geometry3, new THREE.MeshLambertMaterial({color: 0xffea00}));
+				// br = new THREE.Mesh(geometry3, new THREE.MeshLambertMaterial({color: 0xffea00}));
+				br = new THREE.Mesh(geometry3, bathroomMat);
 				bathroom.add(br);
 
 				var tp = toilet_paper.clone();
@@ -1456,6 +1515,119 @@ function loadModelBathrooms( _w, _g, _y, _t ){
 			});
 		});	
 	});
+}
+
+function loadModelBathroomsV2( _door, _side, _floor, _s, s_white, p_b, p_t, _t ){
+	loader = new THREE.JSONLoader();
+	bathroom = new THREE.Object3D();
+	bathroom_stuff = new THREE.Object3D();
+
+	var br;
+	var whiteMat = new THREE.MeshLambertMaterial({color: 0xcccccc});
+
+	// loader.load( s_white, function( geometry1 ){
+	// 	br = new THREE.Mesh(geometry1, whiteMat);
+	// 	bathroom_stuff.add(br);
+
+		// back panel
+		br = new THREE.Mesh(new THREE.PlaneGeometry(14,10,1,1), whiteMat);
+		br.rotation.y = Math.PI;
+		br.position.z += 3.3;
+		bathroom_stuff.add(br);
+
+		loader.load( _door, function( geometry2 ){
+			br = new THREE.Mesh(geometry2, new THREE.MeshLambertMaterial({map: doorTex}));
+			// br = new THREE.Mesh(geometry2, bathroomMat);
+			bathroom_stuff.add(br);
+
+			loader.load( _side, function( geometry4 ){
+				br = new THREE.Mesh(geometry4, new THREE.MeshLambertMaterial({map: graffitiTex}));	//0xfffac4
+				// br = new THREE.Mesh(geometry4, bathroomMat);
+				bathroom_stuff.add(br);
+
+				loader.load( _floor, function( geometry5 ){
+					br = new THREE.Mesh(geometry5, new THREE.MeshLambertMaterial({map: floorTex}));	//0xfffac4
+					// br = new THREE.Mesh(geometry4, bathroomMat);
+					bathroom_stuff.add(br);
+
+					// small stuff
+					loader.load( _s, function( geometry3 ){
+						br = new THREE.Mesh(geometry3, new THREE.MeshLambertMaterial({color: 0xffea00}));
+						// br = new THREE.Mesh(geometry3, bathroomMat);
+						bathroom_stuff.add(br);
+
+						var tp = toilet_paper.clone();
+						tp.scale.set(0.5,0.5,0.5);
+						tp.rotation.y = -Math.PI/2;
+						//3.3,-1,0
+						var tp2 = tp.clone();
+						tp.position.set(3.1,-1.5,-3.5);
+						//3.3,-1,1.5
+						tp2.position.set(3.1,-1.5,-2);
+						bathroom_stuff.add(tp);
+						bathroom_stuff.add(tp2);
+
+						var fakeT = new THREE.Mesh( personToilet, toiletMat );
+						fakeT.scale.set(3,3,3);
+						fakeT.rotation.y = Math.PI;
+						var ft = fakeT.clone();
+						ft.position.set(6.5,0,0);
+						bathroom_stuff.add(ft);
+						ft = fakeT.clone();
+						ft.position.set(-6.5,0,0);
+						bathroom_stuff.add(ft);
+
+						// intestine
+						loader.load( _t, function( geometry4 ){
+							// 0xf7c0c1
+							// br = new THREE.Mesh(geometry4, new THREE.MeshLambertMaterial({color: 0xff265d, side: THREE.DoubleSide}));
+							// br = new THREE.Mesh(geometry4, new THREE.MeshLambertMaterial({map: bathroomTex, side: THREE.DoubleSide}));
+
+							geometry4.faceVertexUvs[ 1 ] = geometry4.faceVertexUvs[ 0 ];
+
+							br = new THREE.Mesh(geometry4, intestineMat);
+
+							bathroom_stuff.add(br);
+
+							bathroom.add(bathroom_stuff);
+							bathroom.scale.set(1.5,1.5,1.5);
+
+							// LIGHT!
+								bathroomLight = new THREE.Object3D();
+
+								geo = new THREE.TetrahedronGeometry(1.5);
+								mat = new THREE.MeshLambertMaterial({color: 0xfffac4});
+								var meshTemp = new THREE.Mesh( geo, mat );
+								meshTemp.rotation.x = -35 * Math.PI/180;
+								meshTemp.rotation.z = 30 * Math.PI/180;
+								meshTemp.position.y = -29.;
+								bathroomLight.add(meshTemp);
+
+								geo = new THREE.BoxGeometry(0.2,30,0.2);
+								transY(geo, -14);	// -14.5
+								meshTemp = new THREE.Mesh(geo, mat);
+								bathroomLight.add(meshTemp);
+
+								light = new THREE.PointLight(0xffff00, 1, 50);
+								glowTexture = textureLoader.load( "images/glow_edit.png" );
+								mat = new THREE.SpriteMaterial({map: glowTexture, color: 0xffef3b, transparent: false, blending: THREE.AdditiveBlending});
+								meshTemp = new THREE.Sprite(mat);
+								meshTemp.scale.set(2,2,2);	//big
+								light.add(meshTemp);
+								light.position.y = -30;
+								bathroomLight.add(light);
+
+								bathroomLight.position.set(0,35,-5);
+
+								bathroom.add(bathroomLight);
+
+							scene.add(bathroom);
+						});
+					});
+				});
+			});
+		});	
+	// });
 }
 
 function loadModelPoop( _poop ){
@@ -1732,7 +1904,7 @@ function update()
 		}		
 
 	// Bathroom Light!
-	bathroom.children[7].rotation.z = sinWave.run()/2;
+	bathroom.children[1].rotation.z = sinWave.run()/2;
 
 	//
 	time = Date.now();
@@ -1833,12 +2005,13 @@ function EnterSceneTwo() {
 		new TWEEN.Tween( bathroom.position )
 		.to( controls.getOutBathroomPosition, 7500 )
 		.easing( TWEEN.Easing.Cubic.InOut )
+		.delay( 2000 )
 		.start();
 		//
 		// firstGuy.wordTexture.clear();
 
 		// Light exchanges!
-		new TWEEN.Tween( bathroom.children[7].children[2] )
+		new TWEEN.Tween( bathroom.children[1].children[2] )
 		.to( {intensity: 0}, 1000 )
 		.start();
 
@@ -1863,7 +2036,7 @@ function EnterSceneTwo() {
 			setTimeout(function(){
 				bathroom.visible = false;
 			}, 16000);
-		}, 8500);
+		}, 10500);
 
 	}, 6*1000);
 }
@@ -1974,7 +2147,7 @@ function EnterSceneEnd() {
 			.start();
 
 		// Light exchanges!
-		new TWEEN.Tween( bathroom.children[7].children[2] )
+		new TWEEN.Tween( bathroom.children[1].children[2] )
 		.to( {intensity: 1}, 2000 )
 		.start();
 
