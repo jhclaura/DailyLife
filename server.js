@@ -28,6 +28,7 @@ var wss = new WebSocketServer({'server': server});
 
 var allSockets = [], allSocketIDs = [];
 var thisId = -1;	// first one will be 0
+var totalCount = -1;
 
 var lifeIndex = {};
 lifeIndex.type = "index";
@@ -44,6 +45,7 @@ wss.on('connection', function(ws){
 	mySocket = ws;
 
 	thisId++;
+	totalCount++;
 	/*
 	ws.id = thisId;
 
@@ -108,10 +110,13 @@ wss.on('connection', function(ws){
 				// allSocketIDs.splice(i,1);
 				allPlayers.splice(i,1);
 
-				socketHandlers(ws, msg);
-
 				//
 				occuList[ws.id] = "empty";
+				totalCount--;
+
+				msg.totalCount = totalCount;
+				//
+				socketHandlers(ws, msg);
 
 				break;
 			}
@@ -146,6 +151,7 @@ var socketHandlers = function(socket,msg){
 
 					//
 					msg.worldId = socket.worldId;
+					msg.totalCount = totalCount;
 
 					allPlayers.push(msg);	// restoring all the players
 				}

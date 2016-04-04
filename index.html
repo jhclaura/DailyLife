@@ -204,41 +204,43 @@
 
 						// If this is not ME && processed by server
 						// && we are in the same world!
-						if(data.id != whoIamInLife && data.camID > 0
-						   && data.worldId == meInWorld ){
-							console.log("Got a new player, id: " + data.id);
+						if(data.id != whoIamInLife && data.camID > 0){
+						   	if( data.worldId == meInWorld ){
+								console.log("Got a new player, id: " + data.id);
 
-							// // Use peer_id to get the stream
-							// var call = peer.call(data.peerid, my_stream);
-							// // If get the CALL, create new video & Player
-							// call.on('stream', function(remoteStream){
-							// 	console.log("Got remote stream!");
+								// // Use peer_id to get the stream
+								// var call = peer.call(data.peerid, my_stream);
+								// // If get the CALL, create new video & Player
+								// call.on('stream', function(remoteStream){
+								// 	console.log("Got remote stream!");
 
-								// Create Video
-								// videos[1].video.src = window.URL.createObjectURL(remoteStream) || remoteStream;
-								// videos[1].video.play();
+									// Create Video
+									// videos[1].video.src = window.URL.createObjectURL(remoteStream) || remoteStream;
+									// videos[1].video.play();
 
-								// v.Dynamic
-								// var remoteO = createVideoThing();
-								// remoteO.video.src = window.URL.createObjectURL(remoteStream) || remoteStream;
-								// remoteO.video.play();
-								// remoteO.peerid = data.peerid;
-								// videos.push(remoteO);
+									// v.Dynamic
+									// var remoteO = createVideoThing();
+									// remoteO.video.src = window.URL.createObjectURL(remoteStream) || remoteStream;
+									// remoteO.video.play();
+									// remoteO.peerid = data.peerid;
+									// videos.push(remoteO);
 
-								// Create Player
-								var newPlayerStartPos = new THREE.Vector3(data.playerStartX, data.playerStartY, data.playerStartZ);
-								var newPlayerStartRotY = data.playerStartRotY;
+									// Create Player
+									var newPlayerStartPos = new THREE.Vector3(data.playerStartX, data.playerStartY, data.playerStartZ);
+									var newPlayerStartRotY = data.playerStartRotY;
 
-								// var newGuy = createSimplePlayer( newPlayerStartPos, data.myHex, data.id );
-								// var newGuy = createSitPlayer( newPlayerStartPos, data.myHex, data.id );
-								// dailyLifePlayers.push(newGuy);
+									// var newGuy = createSimplePlayer( newPlayerStartPos, data.myHex, data.id );
+									// var newGuy = createSitPlayer( newPlayerStartPos, data.myHex, data.id );
+									// dailyLifePlayers.push(newGuy);
 
-								var newGuy = new Person(newPlayerStartPos, data.myHex, data.id, data.nname);
+									var newGuy = new Person(newPlayerStartPos, data.myHex, data.id, data.nname);
 
-								dailyLifePlayerDict[data.id]=newGuy;
+									dailyLifePlayerDict[data.id]=newGuy;
 
-								currentPplAmount ++;
-							// });
+									currentPplAmount ++;
+								// });
+							}
+							UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data.totalCount );
 						}
 					}
 
@@ -314,9 +316,12 @@
 					}
 
 					//REMOVE_PLAYER
-					if(data.type == 'removePlayer' && data.worldIndex == meInWorld){
-						removePlayer(data.removeID);					
-						console.log('removePlayer #' + data.removeID);
+					if(data.type == 'removePlayer'){
+						if(data.worldIndex == meInWorld){
+							removePlayer(data.removeID);					
+							console.log('removePlayer #' + data.removeID);
+						}
+						UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data.totalCount );
 					}
 
 					// ADD_HISTORY_PLAYERS

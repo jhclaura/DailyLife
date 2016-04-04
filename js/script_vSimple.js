@@ -922,13 +922,17 @@ function superInit(){
 		// PEOPLE_COUNT
 			pplCountTex = new THREEx.DynamicTexture(1024,1024);
 			pplCountTex.context.font = "bolder 150px StupidFont";
-			pplCountTex.clear('#dc5e64').drawText("Total poopers:", undefined, 250, 'yellow');
-			pplCountTex.drawText("0", undefined, 500, 'yellow');
+			pplCountTex.clear().drawText("Pooper", undefined, 100, 'white');
+			pplCountTex.drawText("Count", undefined, 250, 'white');
+			pplCountTex.drawText("this world: 1", undefined, 500, 'white');
+			pplCountTex.drawText("total: 1", undefined, 650, 'white');
 			pplCountMat = new THREE.MeshBasicMaterial({map: pplCountTex.texture, side: THREE.DoubleSide, transparent: true});
-			pplCount = new THREE.Mesh(new THREE.PlaneGeometry( pplCountTex.canvas.width, pplCountTex.canvas.height), pplCountMat );
-			pplCount.scale.set(0.02,0.02,0.02);
+			var pCountMesh = new THREE.Mesh(new THREE.PlaneGeometry( pplCountTex.canvas.width, pplCountTex.canvas.height), pplCountMat );
+			pCountMesh.rotation.x = Math.PI/2;
+			pplCount = new THREE.Object3D();
+			pplCount.add(pCountMesh);
+			pplCount.scale.set(0.04,0.04,0.04);
 			pplCount.position.y = 80;
-			pplCount.rotation.x = Math.PI/2;
 			scene.add( pplCount );
 
 		var poopMaterial = new THREE.MeshLambertMaterial({map: poopTex});
@@ -1273,6 +1277,8 @@ function init()
 		// use vrmanager instead
 		// window.addEventListener('click', fullscreen, false);
 
+		pplCount.rotation.y = controls.rotY();
+
 	},500);
 
 	// AniPerson
@@ -1291,6 +1297,8 @@ function init()
 			if(i==4)
 				scene.add(personCircle);
 		}
+
+		personCircle.visible = false;
 	
 	// CONTROLS
 	// controls = new THREE.OrbitControls( camera, renderer.domElement );
@@ -1487,7 +1495,7 @@ function loadModelBathrooms( _w, _g, _y, _t ){
 					// br = new THREE.Mesh(geometry4, new THREE.MeshLambertMaterial({color: 0xff265d, side: THREE.DoubleSide}));
 					// br = new THREE.Mesh(geometry4, new THREE.MeshLambertMaterial({map: bathroomTex, side: THREE.DoubleSide}));
 
-					geometry4.faceVertexUvs[ 1 ] = geometry4.faceVertexUvs[ 0 ];
+					// geometry4.faceVertexUvs[ 1 ] = geometry4.faceVertexUvs[ 0 ];
 
 					br = new THREE.Mesh(geometry4, intestineMat);
 
@@ -1806,14 +1814,15 @@ function update()
 		// 	person.update(null);
 		// 	person.switchAni();
 		// }
-
-		if(persons.length==5){
-			for(var i=0; i<persons.length; i++){
-				persons[i].update(null);
-				persons[i].switchAni();
+		if(personCircle.visible){
+			if(persons.length==5){
+				for(var i=0; i<persons.length; i++){
+					persons[i].update(null);
+					persons[i].switchAni();
+				}
 			}
+			personCircle.rotation.y += 0.003;
 		}
-		personCircle.rotation.y += 0.003;
 
 
 	if(waterwave.body.morphTargetInfluences.length>0){
@@ -2189,4 +2198,11 @@ function EnterSceneEnd() {
 	console.log("remove word bubble!");
 
 	inScEnd = true;
+}
+
+function UpdatePplCount( thisWorldCount, totalCount ) {
+	pplCountTex.clear().drawText("Pooper", undefined, 100, 'white');
+	pplCountTex.drawText("Count", undefined, 250, 'white');
+	pplCountTex.drawText("this world: " + thisWorldCount, undefined, 500, 'white');
+	pplCountTex.drawText("total: " + totalCount, undefined, 650, 'white');
 }
