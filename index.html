@@ -105,7 +105,7 @@
 
 			var normalMode = document.createElement('a');
 			normalMode.id = "normalMode";
-			normalMode.innerHTML = "Normal";
+			normalMode.innerHTML = "Start";
 			normalMode.onclick = function(){
 				isItVR = false;
 				
@@ -124,32 +124,32 @@
 				init();
 			}
 
-			var vrMode = document.createElement('a');
-			vrMode.id = "vrMode";
-			vrMode.innerHTML = "VR";
-			vrMode.onclick = function(){
-				isItVR = true;
+			// var vrMode = document.createElement('a');
+			// vrMode.id = "vrMode";
+			// vrMode.innerHTML = "VR";
+			// vrMode.onclick = function(){
+			// 	isItVR = true;
 
-				if(playerNameInput.value==playerNName){
-					playerNName = "Anonymous";
-				} else {
-					playerNName = playerNameInput.value;
-				}
+			// 	if(playerNameInput.value==playerNName){
+			// 		playerNName = "Anonymous";
+			// 	} else {
+			// 		playerNName = playerNameInput.value;
+			// 	}
 
-				renderCanvas.style.display = "inline";
-				if(blockerDiv) blockerDiv.style.display = "-webkit-box";
-				modeSelection.style.display = "none";
+			// 	renderCanvas.style.display = "inline";
+			// 	if(blockerDiv) blockerDiv.style.display = "-webkit-box";
+			// 	modeSelection.style.display = "none";
 
-				// superInit();
-				// connectSocket();
-				init();
-			}
+			// 	// superInit();
+			// 	// connectSocket();
+			// 	init();
+			// }
 
-			modeSelection.appendChild(playerNameInput);
-			modeSelection.appendChild(normalMode);
-			modeSelection.appendChild(vrMode);
+			// modeSelection.appendChild(playerNameInput);
+			// modeSelection.appendChild(normalMode);
+			// modeSelection.appendChild(vrMode);
 
-			document.body.appendChild(modeSelection);
+			// document.body.appendChild(modeSelection);
 		</script>
 
 		<!-- Peer.js & WebSocket -->
