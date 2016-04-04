@@ -924,8 +924,8 @@ function superInit(){
 			pplCountTex.context.font = "bolder 150px StupidFont";
 			pplCountTex.clear().drawText("Pooper", undefined, 100, 'white');
 			pplCountTex.drawText("Count", undefined, 250, 'white');
-			pplCountTex.drawText("this world: 1", undefined, 500, 'white');
-			pplCountTex.drawText("total: 1", undefined, 650, 'white');
+			pplCountTex.drawText("this world: 0", undefined, 500, 'white');
+			pplCountTex.drawText("total: 0", undefined, 650, 'white');
 			pplCountMat = new THREE.MeshBasicMaterial({map: pplCountTex.texture, side: THREE.DoubleSide, transparent: true});
 			var pCountMesh = new THREE.Mesh(new THREE.PlaneGeometry( pplCountTex.canvas.width, pplCountTex.canvas.height), pplCountMat );
 			pCountMesh.rotation.x = Math.PI/2;
@@ -1975,8 +1975,11 @@ function removePlayer(playerID){
 	// }
 	// dailyLifePlayers.splice(goneIndex,1);
 	// dailyLifeMurmurs.splice(goneIndex,1);
-
-	scene.remove( dailyLifePlayerDict[playerID].player );
+	if(dailyLifePlayerDict[playerID].player){
+		scene.remove( dailyLifePlayerDict[playerID].player );
+		//
+		delete dailyLifePlayerDict[playerID];
+	}
 }
 
 function startSpeech(event) {

@@ -321,6 +321,7 @@
 							removePlayer(data.removeID);					
 							console.log('removePlayer #' + data.removeID);
 						}
+						console.log("removed; total: " + Object.keys(dailyLifePlayerDict).length);
 						UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data.totalCount );
 					}
 
@@ -374,11 +375,12 @@
 								var oldPlayer = new Person( oldPlayerStartPos, oldHex, oldPlayerID, oldPlayerName );
 								dailyLifePlayerDict[ oldPlayerID ] = oldPlayer;
 								console.log("create history players #" + data[i].id + ", in world #" + data[i].worldId);
+
+								UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data[i].totalCount );
 							}							
 						}
 						updatePreviousPlayer = true;
 						//
-						UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data[0].totalCount );
 					}
 				}
 				socketOpened = true;

@@ -27,8 +27,7 @@ var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({'server': server});
 
 var allSockets = [], allSocketIDs = [];
-var thisId = -1;	// first one will be 0
-var totalCount = -1;
+var totalCount = 0;	// first one will be 1
 
 var lifeIndex = {};
 lifeIndex.type = "index";
@@ -39,14 +38,12 @@ var mySocket = undefined;
 var occuList = {};
 var occuIndex = 1;
 
-// Should I cap a world's total pp number??
 wss.on('connection', function(ws){
 
 	mySocket = ws;
 
-	thisId++;
 	totalCount++;
-	ws.totalCount = totalCount;
+	// ws.totalCount = totalCount;
 	/*
 	ws.id = thisId;
 
@@ -54,7 +51,7 @@ wss.on('connection', function(ws){
 	allSockets.push(ws);
 	*/
 
-	console.log("new player #%d connected!", thisId);
+	// console.log("new player #%d connected!", thisId);
 
 	var haveEmptySeat = false;
 	for( prop in occuList ){
@@ -81,6 +78,8 @@ wss.on('connection', function(ws){
 	ws.worldId = Math.floor(occuIndex/18);
 	allSockets.push(ws);
 
+	console.log("new player connected! total #: #%d", totalCount);
+
 	// SEND BACK INDEX INFO!
 	if(mySocket){
 		// lifeIndex.index = thisId;
@@ -101,22 +100,23 @@ wss.on('connection', function(ws){
 			// Found the CLOSE socket in allSockets
 			// if this is the one, remove it
 			if(allSockets[i]==ws){
+
+				occuList[ws.id] = "empty";
+				totalCount--;
+
 				var msg = {
 					'type': 'removePlayer',
 					'removeID': ws.id,
-					'worldId': ws.worldId
+					'worldId': ws.worldId,
+					'totalCount': totalCount
 				};
-				console.log("player #%d disconnected.", ws.id);		// allSocketIDs[i]
+				// console.log("player #%d disconnected.", ws.id);		// allSocketIDs[i]
+				console.log("a player disconnected. total #: #%d", totalCount);
 
 				allSockets.splice(i,1);
 				// allSocketIDs.splice(i,1);
 				allPlayers.splice(i,1);
 
-				//
-				occuList[ws.id] = "empty";
-				totalCount--;
-
-				msg.totalCount = totalCount;
 				//
 				socketHandlers(ws, msg);
 
@@ -132,6 +132,11 @@ wss.on('connection', function(ws){
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 
+/*
+	what if ws disconnect after connect, but before 'addNewPlayer'??
+
+
+*/
 
 
 //
