@@ -550,11 +550,12 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		if(lookAtMiniPoop)
 			scope.align();
 
-		if(lookingAtSomeone != -1)
-			moveMacaPoop( whoIamInLife, lookingAtSomeone );
-		else if(lookAtFlush){
+		if(lookAtFlush){
 			EnterSceneEnd();
 		} else {
+			if (lookingAtSomeone != -1)
+				moveMacaPoop( whoIamInLife, lookingAtSomeone );
+			else
 				createPoop( yawObject.position, scope.getDirection() );
 
 			var msg = {
