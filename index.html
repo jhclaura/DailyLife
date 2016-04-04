@@ -377,11 +377,11 @@
 								// v2
 								var oldPlayer = new Person( oldPlayerStartPos, oldHex, oldPlayerID, oldPlayerName );
 								dailyLifePlayerDict[ oldPlayerID ] = oldPlayer;
-								console.log("create history players #" + data[i].id + ", in world #" + data[i].worldId);
-
-								UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data[i].totalCount );
-								totalPplInWorldsCount = data[i].totalCount;
-							}							
+								console.log("create history players #" + data[i].id + ", in world #" + data[i].worldId);								
+							}
+							
+							UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data[i].totalCount );
+							totalPplInWorldsCount = data[i].totalCount;							
 						}
 						updatePreviousPlayer = true;
 						//
