@@ -37,7 +37,7 @@ var mySocket = undefined;
 
 // object - index: occupancy
 var occuList = {};
-var occuIndex = 1, worldIndex;
+var occuIndex = 1;
 
 // Should I cap a world's total pp number??
 wss.on('connection', function(ws){
@@ -46,6 +46,7 @@ wss.on('connection', function(ws){
 
 	thisId++;
 	totalCount++;
+	ws.totalCount = totalCount;
 	/*
 	ws.id = thisId;
 
@@ -84,7 +85,7 @@ wss.on('connection', function(ws){
 	if(mySocket){
 		// lifeIndex.index = thisId;
 		lifeIndex.index = occuIndex;
-		lifeIndex.worldIndex = Math.floor(occuIndex/18);
+		lifeIndex.worldId = Math.floor(occuIndex/18);
 
 		mySocket.send( JSON.stringify(lifeIndex) );
 	}
@@ -102,7 +103,8 @@ wss.on('connection', function(ws){
 			if(allSockets[i]==ws){
 				var msg = {
 					'type': 'removePlayer',
-					'removeID': ws.id
+					'removeID': ws.id,
+					'worldId': ws.worldId
 				};
 				console.log("player #%d disconnected.", ws.id);		// allSocketIDs[i]
 
@@ -163,8 +165,7 @@ var socketHandlers = function(socket,msg){
 			// SERVER_SEND_ARRAY_THING
 			if(msg.type=='addNewPlayer'){
 				allSockets[i].send(JSON.stringify(allPlayers));
-				// console.log('Server sent a BROADCAST thing.');				
-				// console.log(players.length);
+				// console.log('Server sent an array thing.');				
 			}
 		}
 		catch(error){

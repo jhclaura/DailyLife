@@ -253,7 +253,7 @@
 
 							whoIamInLife = data.index;
 							// videos[0].peerid = peer_id;
-							meInWorld = data.worldIndex;
+							meInWorld = data.worldId;
 
 							console.log("I am " + whoIamInLife + " in the Daily Life world: " + meInWorld);
 
@@ -266,7 +266,7 @@
 
 					var playerPosX, playerPosY, playerPosZ, playerRotY, playerQ, playerQ3;
 
-					if(data.type=="updatePlayer" && data.worldIndex == meInWorld){
+					if(data.type=="updatePlayer" && data.worldId == meInWorld){
 						playerPosX = data.playerPosX;
 						playerPosY = data.playerPosY;
 						playerPosZ = data.playerPosZ;
@@ -287,7 +287,7 @@
 						allTheMurmur[playerIndex] = playerMurmur;
 					}
 
-					if(data.type=="shootPoop" && data.worldIndex == meInWorld){
+					if(data.type=="shootPoop" && data.worldId == meInWorld){
 
 						// only shoot if it's not MY_Data, cuz I've already shoot
 						if(data.index != whoIamInLife){
@@ -317,7 +317,7 @@
 
 					//REMOVE_PLAYER
 					if(data.type == 'removePlayer'){
-						if(data.worldIndex == meInWorld){
+						if(data.worldId == meInWorld){
 							removePlayer(data.removeID);					
 							console.log('removePlayer #' + data.removeID);
 						}
@@ -329,14 +329,14 @@
 					if(data.length>0 && !updatePreviousPlayer){
 						for(var i=0; i<data.length; i++){
 							// console.log('total data lenght: ' + data.length);
-							// console.log("whoIamInLife: " + whoIamInLife + ", data id: " + data[i].id + ", data worldId: " + data[i].worldId );
+							console.log("whoIamInLife: " + whoIamInLife + ", data id: " + data[i].id + ", data worldId: " + data[i].worldId );
 
 							// If I'm older than the coming
 							// if(whoIamInLife > data[i].id){
 
 							// if I'm not the coming player
 							// && we are in the same world
-							if(whoIamInLife != data[i].id && data.worldIndex == meInWorld){
+							if(whoIamInLife != data[i].id && data[i].worldId == meInWorld){
 
 								var oldPlayerStartPos = new THREE.Vector3(data[i].playerStartX, data[i].playerStartY, data[i].playerStartZ);
 								var oldPlayerStartRotY = data[i].playerStartRotY;
@@ -377,6 +377,8 @@
 							}							
 						}
 						updatePreviousPlayer = true;
+						//
+						UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data[0].totalCount );
 					}
 				}
 				socketOpened = true;

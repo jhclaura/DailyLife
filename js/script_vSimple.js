@@ -1364,7 +1364,8 @@ function myKeyPressed( event ){
 					'index': whoIamInLife,
 					'toWhom': lookingAtSomeone,
 					'playerPos': controls.position(),
-					'playerDir': controls.getDirection()
+					'playerDir': controls.getDirection(),
+					'worldId': meInWorld
 				};
 
 				if(ws){

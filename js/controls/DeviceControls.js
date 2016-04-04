@@ -563,7 +563,8 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 				'index': whoIamInLife,
 				'toWhom': lookingAtSomeone,
 				'playerPos': yawObject.position,
-				'playerDir': scope.getDirection()
+				'playerDir': scope.getDirection(),
+				'worldId': meInWorld
 			};
 
 			if(ws){
@@ -845,7 +846,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 					'playerQ' : eyeFinalQ2,
 					'eyeQ' : eyeFinalQ,
 					'playerQ3' : eyeFinalQ3,
-					'worldIndex': meInWorld
+					'worldId': meInWorld
 				};
 
 				if(ws){
@@ -979,7 +980,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 				'playerQ' : eyeFinalQ2,
 				'eyeQ' : eyeFinalQ,
 				'playerQ3' : eyeFinalQ3,
-				'worldIndex': meInWorld
+				'worldId': meInWorld
 			};
 
 			if(ws){
