@@ -1271,6 +1271,8 @@ function init()
 		dailyLifePlayerDict[ whoIamInLife ] = firstGuy;
 		// firstGuy.wordTexture.clear('cyan').drawText(firstGuy.nname, undefined, 200, 'red');
 		console.log("Me built!");
+		UpdatePplCount( Object.keys(dailyLifePlayerDict).length, totalPplInWorldsCount );
+
 		// secondGuy = createPlayer( new THREE.Vector3(0,0,-3), yourMat );
 		// dailyLifePlayers.push(secondGuy);
 
@@ -1975,7 +1977,7 @@ function removePlayer(playerID){
 	// }
 	// dailyLifePlayers.splice(goneIndex,1);
 	// dailyLifeMurmurs.splice(goneIndex,1);
-	if(dailyLifePlayerDict[playerID].player){
+	if(dailyLifePlayerDict[playerID]){
 		scene.remove( dailyLifePlayerDict[playerID].player );
 		//
 		delete dailyLifePlayerDict[playerID];
