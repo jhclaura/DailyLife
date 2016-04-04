@@ -210,9 +210,10 @@ var keyIsPressed;
 	var graffitiTex, floorTex, doorTex;
 	var intestineTex, intestineAnimator, intestineTexs = [], intestinesAnimator, intestineMat;
 	var toiletCenters = [], myWorldCenter;
-	var meInSGroup, meInBGroup, meInWorld;
+	var meInSGroup, meInBGroup;
 	var poopIsTalking = false, lookAtMiniPoop = false, poopTalkCount = 0;
 	var poopCount = 0;
+	var flushHandler, lookAtFlush = false;
 
 // WEB_AUDIO_API!
 	var usingWebAudio = true, bufferLoader, convolver, mixer;
@@ -276,6 +277,7 @@ var keyIsPressed;
 // TRANSITION
 	var initTime, meditationTime, celebrationTime, endTime;
 	var descendTween;
+	var inScMeditation = false, inScCelebration = false, inScEnd = false;
 
 // PARTICLES
 	var emitter, particleGroup;
@@ -338,8 +340,8 @@ function superInit(){
 
 	// Assign position
 		console.log("whoIamInLife: " + whoIamInLife);
-		meInWorld = Math.floor(whoIamInLife/18);			// which world
-		meInBGroup = Math.floor(whoIamInLife/18) % 3;		// which toilet
+		// meInWorld = Math.floor(whoIamInLife/18);			// which world
+		// meInBGroup = Math.floor(whoIamInLife/18) % 3;		// which toilet
 		meInSGroup = ( whoIamInLife%18 )%18;					// which on a toilet
 		myStartX = Math.sin(Math.PI*2/18*meInSGroup)*18;
 		myStartZ = Math.cos(Math.PI*2/18*meInSGroup)*18;
@@ -350,7 +352,7 @@ function superInit(){
 		// Math.sin(Math.PI*2/6*i)*18, 0, Math.cos(Math.PI*2/6*i)*18
 		myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ );
 		// myPosition.set( Math.sin(Math.PI*2/6*meInSGroup)*18, 150, Math.cos(Math.PI*2/6*meInSGroup)*18 );
-		console.log("Me in Group: " + meInBGroup + ", seat: " + meInSGroup);
+		console.log("Me in world: " + meInWorld + ", seat: " + meInSGroup);
 
 	//Prevent scrolling for Mobile
 	document.body.addEventListener('touchmove', function(event) {
@@ -799,6 +801,11 @@ function superInit(){
 		lookDummy = new THREE.Mesh(redDot, mat);
 		scene.add(lookDummy);
 
+	// FLUSH_HANDLER
+		flushHandler = new THREE.Mesh( new THREE.SphereGeometry(1), mat);
+		flushHandler.position.y = 20;
+		scene.add(flushHandler);
+
 	// Sinwave
 		sinWave = new SinWave(timeWs[0], frequencyW, amplitudeW, offsetW);
 
@@ -885,39 +892,45 @@ function superInit(){
 	}	
 
 	// WORLD_BUBBLE
-	worldBubble = new THREE.Mesh(new THREE.BoxGeometry(130,800,130), new THREE.MeshBasicMaterial({color: 0x9791ff, transparent: true, opacity: 0.3, side: THREE.DoubleSide}));
-	scene.add( worldBubble );
-	loader.load( "models/simpleBigToilet.js", function( geometry ) {
-		var bigSimpleToilet = new THREE.Mesh(geometry, toiletMat);
-		var bst = new THREE.Object3D();
+	// - to create other-world feeling
+	// - TOO HEAVY :(
+		/*
+			worldBubble = new THREE.Mesh(new THREE.BoxGeometry(130,800,130), new THREE.MeshBasicMaterial({color: 0x9791ff, transparent: true, opacity: 0.3, side: THREE.DoubleSide}));
+			scene.add( worldBubble );
+			loader.load( "models/simpleBigToilet.js", function( geometry ) {
+				var bigSimpleToilet = new THREE.Mesh(geometry, toiletMat);
+				var bst = new THREE.Object3D();
 
-		for(var i=-2; i<3; i++) {
-			if(i>=0) i++;
-			for(var j=-2; j<3; j++){
-				for(var k=-2; k<3; k++){
-					if(k>=0) k++;
-					var bbb = bigSimpleToilet.clone();
-					bbb.position.set( i*60, j*50, k*60 );
-					bst.add(bbb);
+				for(var i=-2; i<3; i++) {
+					if(i>=0) i++;
+					for(var j=-2; j<3; j++){
+						for(var k=-2; k<3; k++){
+							if(k>=0) k++;
+							var bbb = bigSimpleToilet.clone();
+							bbb.position.set( i*60, j*50, k*60 );
+							bst.add(bbb);
+						}
+					}
 				}
-			}
-		}
 
-		scene.add(bst);
-	});
-
-	// PEOPLE_COUNT
-		pplCountTex = new THREEx.DynamicTexture(1024,1024);
-		pplCountTex.context.font = "bolder 150px StupidFont";
-		pplCountTex.clear('#dc5e64').drawText("Total poopers:<br>0", undefined, 250, 'yellow');
-		pplCountMat = new THREE.MeshBasicMaterial({map: pplCountTex.texture, side: THREE.DoubleSide, transparent: true});
-		pplCount = new THREE.Mesh(new THREE.PlaneGeometry( pplCountTex.canvas.width, pplCountTex.canvas.height), pplCountMat );
-		pplCount.scale.set(0.02,0.02,0.02);
-		pplCount.position.y = 80;
-		pplCount.rotation.x = Math.PI/2;
-		scene.add( pplCount );
+				scene.add(bst);
+			});
+		*/
 
 	setTimeout(function(){
+
+		// PEOPLE_COUNT
+			pplCountTex = new THREEx.DynamicTexture(1024,1024);
+			pplCountTex.context.font = "bolder 150px StupidFont";
+			pplCountTex.clear('#dc5e64').drawText("Total poopers:", undefined, 250, 'yellow');
+			pplCountTex.drawText("0", undefined, 500, 'yellow');
+			pplCountMat = new THREE.MeshBasicMaterial({map: pplCountTex.texture, side: THREE.DoubleSide, transparent: true});
+			pplCount = new THREE.Mesh(new THREE.PlaneGeometry( pplCountTex.canvas.width, pplCountTex.canvas.height), pplCountMat );
+			pplCount.scale.set(0.02,0.02,0.02);
+			pplCount.position.y = 80;
+			pplCount.rotation.x = Math.PI/2;
+			scene.add( pplCount );
+
 		var poopMaterial = new THREE.MeshLambertMaterial({map: poopTex});
 
 		// v.1
@@ -1883,6 +1896,12 @@ function update()
 			// vTest
 			// eyeIntersects[ 0 ].object.material.color = new THREE.Color(0,1,0);
 
+			if ( eyeIntersects[ 0 ].object == flushHandler ){
+				lookAtFlush = true;
+			} else {
+				lookAtFlush = false;
+			}
+
 			if ( eyeIntersects.length > 1 ) {
 
 				// console.log(eyeIntersects[ 0 ].object);
@@ -1973,21 +1992,11 @@ function fullscreen() {
 	} else if (container.webkitRequestFullscreen) {
 		container.webkitRequestFullscreen();
 	}
-
-	// if(!initSound){
-
-	// 	/////////////////////////////
-	// 	//    OFFICIAL START!!!    //
-	// 	/////////////////////////////
-	// 	sound_bathroom.play();
-	// 	sound_fire.play();
-	// 	sound_forest.play();
-
-	// 	initSound = true;		
-	// }
 }
 
 function EnterSceneTwo() {
+	if(inScMeditation) return;
+
 	if(!initSound){
 
 		/////////////////////////////
@@ -2039,9 +2048,13 @@ function EnterSceneTwo() {
 		}, 10500);
 
 	}, 6*1000);
+
+	inScMeditation = true;
 }
 
 function EnterSceneCelebrate() {
+	if(inScCelebration) return;
+
 	var hackIndex=0;
 	var hackIndex2=0;
 	// PORTALS
@@ -2095,6 +2108,8 @@ function EnterSceneCelebrate() {
 	}, 2000);
 
 	InitParticles();
+
+	inScCelebration = true;
 }
 
 function doPortalAni( index ){
@@ -2107,6 +2122,8 @@ function doPortalAni( index ){
 
 
 function EnterSceneEnd() {
+
+	if(inScEnd) return;
 
 	// stop the celebration
 	clearInterval( portalPoopAnimation );
@@ -2170,4 +2187,6 @@ function EnterSceneEnd() {
 							 scene );
 	scene.remove( firstGuy.player.children[0] );
 	console.log("remove word bubble!");
+
+	inScEnd = true;
 }

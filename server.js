@@ -8,7 +8,7 @@ var server = http.createServer(app);
 
 var port = process.env.PORT || 7000;
 
-var players = [];
+var allPlayers = [];
 
 //
 server.listen(port);
@@ -36,7 +36,7 @@ var mySocket = undefined;
 
 // object - index: occupancy
 var occuList = {};
-var occuIndex = 1;
+var occuIndex = 1, worldIndex;
 
 // Should I cap a world's total pp number??
 wss.on('connection', function(ws){
@@ -75,12 +75,15 @@ wss.on('connection', function(ws){
 	}
 
 	ws.id = occuIndex;
+	ws.worldId = Math.floor(occuIndex/18);
 	allSockets.push(ws);
 
-	// SEND BACK Index
+	// SEND BACK INDEX INFO!
 	if(mySocket){
 		// lifeIndex.index = thisId;
 		lifeIndex.index = occuIndex;
+		lifeIndex.worldIndex = Math.floor(occuIndex/18);
+
 		mySocket.send( JSON.stringify(lifeIndex) );
 	}
 
@@ -103,7 +106,7 @@ wss.on('connection', function(ws){
 
 				allSockets.splice(i,1);
 				// allSocketIDs.splice(i,1);
-				players.splice(i,1);
+				allPlayers.splice(i,1);
 
 				socketHandlers(ws, msg);
 
@@ -121,7 +124,7 @@ wss.on('connection', function(ws){
 
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////
+
 
 
 //
@@ -141,7 +144,10 @@ var socketHandlers = function(socket,msg){
 					msg.camID++;
 					// console.log('camID -->' + msg.camID);
 
-					players.push(msg);	// restoring all the players
+					//
+					msg.worldId = socket.worldId;
+
+					allPlayers.push(msg);	// restoring all the players
 				}
 			}
 
@@ -150,7 +156,7 @@ var socketHandlers = function(socket,msg){
 
 			// SERVER_SEND_ARRAY_THING
 			if(msg.type=='addNewPlayer'){
-				allSockets[i].send(JSON.stringify(players));
+				allSockets[i].send(JSON.stringify(allPlayers));
 				// console.log('Server sent a BROADCAST thing.');				
 				// console.log(players.length);
 			}

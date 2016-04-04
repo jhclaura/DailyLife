@@ -213,7 +213,8 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			'playerStartZ': myStartZ,
 			'playerStartRotY': yawObject.rotation.y,
 			'myHex': myColor,
-			'nname': playerNName
+			'nname': playerNName,
+			'worldId' = -1;
 		};
 
 		sendMessage( JSON.stringify(msg) );
@@ -551,19 +552,22 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 
 		if(lookingAtSomeone != -1)
 			moveMacaPoop( whoIamInLife, lookingAtSomeone );
-		else
-			createPoop( yawObject.position, scope.getDirection() );
+		else if(lookAtFlush){
+			EnterSceneEnd();
+		} else {
+				createPoop( yawObject.position, scope.getDirection() );
 
-		var msg = {
-			'type': 'shootPoop',
-			'index': whoIamInLife,
-			'toWhom': lookingAtSomeone,
-			'playerPos': yawObject.position,
-			'playerDir': scope.getDirection()
-		};
+			var msg = {
+				'type': 'shootPoop',
+				'index': whoIamInLife,
+				'toWhom': lookingAtSomeone,
+				'playerPos': yawObject.position,
+				'playerDir': scope.getDirection()
+			};
 
-		if(ws){
-			sendMessage( JSON.stringify(msg) );
+			if(ws){
+				sendMessage( JSON.stringify(msg) );
+			}
 		}
 
 		//
@@ -839,7 +843,8 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 					'playerRotY': yawObject.rotation.y,
 					'playerQ' : eyeFinalQ2,
 					'eyeQ' : eyeFinalQ,
-					'playerQ3' : eyeFinalQ3
+					'playerQ3' : eyeFinalQ3,
+					'worldIndex': meInWorld
 				};
 
 				if(ws){
@@ -972,7 +977,8 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 				'playerRotY': yawObject.rotation.y,
 				'playerQ' : eyeFinalQ2,
 				'eyeQ' : eyeFinalQ,
-				'playerQ3' : eyeFinalQ3
+				'playerQ3' : eyeFinalQ3,
+				'worldIndex': meInWorld
 			};
 
 			if(ws){

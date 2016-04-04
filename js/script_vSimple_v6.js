@@ -913,7 +913,8 @@ function superInit(){
 	// PEOPLE_COUNT
 		pplCountTex = new THREEx.DynamicTexture(1024,1024);
 		pplCountTex.context.font = "bolder 150px StupidFont";
-		pplCountTex.clear('#dc5e64').drawText("Total poopers:<br>0", undefined, 250, 'yellow');
+		pplCountTex.clear('#dc5e64').drawText("Total poopers:", undefined, 250, 'yellow');
+		pplCountTex.drawText("0", undefined, 300, 'yellow');
 		pplCountMat = new THREE.MeshBasicMaterial({map: pplCountTex.texture, side: THREE.DoubleSide, transparent: true});
 		pplCount = new THREE.Mesh(new THREE.PlaneGeometry( pplCountTex.canvas.width, pplCountTex.canvas.height), pplCountMat );
 		pplCount.scale.set(0.02,0.02,0.02);

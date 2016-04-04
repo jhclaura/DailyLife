@@ -166,6 +166,7 @@
 			var updatePreviousPlayer = false;
 
 			var whoIamInLife = -1, initEnvironment = false;
+			var meInWorld = -1;
 
 			var currentPplAmount = 0;
 
@@ -202,7 +203,9 @@
 					if(data.type == 'addNewPlayer'){
 
 						// If this is not ME && processed by server
-						if(data.id != whoIamInLife && data.camID > 0){
+						// && we are in the same world!
+						if(data.id != whoIamInLife && data.camID > 0
+						   $$ data.worldId == meInWorld ){
 							console.log("Got a new player, id: " + data.id);
 
 							// // Use peer_id to get the stream
@@ -248,8 +251,9 @@
 
 							whoIamInLife = data.index;
 							// videos[0].peerid = peer_id;
+							meInWorld = data.worldIndex;
 
-							console.log("I am " + whoIamInLife + " in the Daily Life");
+							console.log("I am " + whoIamInLife + " in the Daily Life world: " + meInWorld);
 
 							// init();
 							superInit();
@@ -260,7 +264,7 @@
 
 					var playerPosX, playerPosY, playerPosZ, playerRotY, playerQ, playerQ3;
 
-					if(data.type=="updatePlayer"){
+					if(data.type=="updatePlayer" && data.worldIndex == meInWorld){
 						playerPosX = data.playerPosX;
 						playerPosY = data.playerPosY;
 						playerPosZ = data.playerPosZ;
@@ -281,7 +285,7 @@
 						allTheMurmur[playerIndex] = playerMurmur;
 					}
 
-					if(data.type=="shootPoop"){
+					if(data.type=="shootPoop" && data.worldIndex == meInWorld){
 
 						// only shoot if it's not MY_Data, cuz I've already shoot
 						if(data.index != whoIamInLife){
@@ -310,7 +314,7 @@
 					}
 
 					//REMOVE_PLAYER
-					if(data.type == 'removePlayer'){
+					if(data.type == 'removePlayer' && data.worldIndex == meInWorld){
 						removePlayer(data.removeID);					
 						console.log('removePlayer #' + data.removeID);
 					}
@@ -319,14 +323,15 @@
 					// ONE_TIME_EVENT
 					if(data.length>0 && !updatePreviousPlayer){
 						for(var i=0; i<data.length; i++){
-							console.log('total data lenght: ' + data.length);
-							console.log("whoIamInLife: " + whoIamInLife + ", data[i].id: " + data[i].id );
+							// console.log('total data lenght: ' + data.length);
+							// console.log("whoIamInLife: " + whoIamInLife + ", data id: " + data[i].id + ", data worldId: " + data[i].worldId );
 
 							// If I'm older than the coming
 							// if(whoIamInLife > data[i].id){
 
 							// if I'm not the coming player
-							if(whoIamInLife != data[i].id){
+							// && we are in the same world
+							if(whoIamInLife != data[i].id && data.worldIndex == meInWorld){
 
 								var oldPlayerStartPos = new THREE.Vector3(data[i].playerStartX, data[i].playerStartY, data[i].playerStartZ);
 								var oldPlayerStartRotY = data[i].playerStartRotY;
@@ -363,7 +368,7 @@
 								// v2
 								var oldPlayer = new Person( oldPlayerStartPos, oldHex, oldPlayerID, oldPlayerName );
 								dailyLifePlayerDict[ oldPlayerID ] = oldPlayer;
-								console.log("create history players #" + data[i].id);
+								console.log("create history players #" + data[i].id + ", in world #" + data[i].worldId);
 							}							
 						}
 						updatePreviousPlayer = true;
