@@ -214,7 +214,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			'playerStartRotY': yawObject.rotation.y,
 			'myHex': myColor,
 			'nname': playerNName,
-			'worldId' = -1;
+			'worldId': -1
 		};
 
 		sendMessage( JSON.stringify(msg) );

@@ -205,7 +205,7 @@
 						// If this is not ME && processed by server
 						// && we are in the same world!
 						if(data.id != whoIamInLife && data.camID > 0
-						   $$ data.worldId == meInWorld ){
+						   && data.worldId == meInWorld ){
 							console.log("Got a new player, id: " + data.id);
 
 							// // Use peer_id to get the stream
