@@ -6,13 +6,47 @@
  */
 
 WebVRConfig = {
+  /**
+   * webvr-polyfill configuration
+   */
+
+  // Forces availability of VR mode.
+  //FORCE_ENABLE_VR: true, // Default: false.
+  // Complementary filter coefficient. 0 for accelerometer, 1 for gyro.
+  //K_FILTER: 0.98, // Default: 0.98.
+  // How far into the future to predict during fast motion.
+  //PREDICTION_TIME_S: 0.040, // Default: 0.040 (in seconds).
+  // Flag to disable touch panner. In case you have your own touch controls
+  //TOUCH_PANNER_DISABLED: true, // Default: false.
+  // Enable yaw panning only, disabling roll and pitch. This can be useful for
+  // panoramas with nothing interesting above or below.
+  //YAW_ONLY: true, // Default: false.
+
+  // Scales the recommended buffer size reported by WebVR, which can improve
+  // performance.
   BUFFER_SCALE: 0.5, // Default: 1.0.
-  PREVENT_DISTORTION: true
+
+  /**
+   * webvr-boilerplate configuration
+   */
+  // Forces distortion in VR mode.
+  //FORCE_DISTORTION: true, // Default: false.
+  // Override the distortion background color.
+  // DISTORTION_BGCOLOR: {x: 1, y: 0, z: 0, w: 1}, // Default: (0,0,0,1).
+  // Prevent distortion from happening.
+  PREVENT_DISTORTION: true, // Default: false.
+  // Show eye centers for debugging.
+  // SHOW_EYE_CENTERS: true, // Default: false.
+  // Prevent the online DPDB from being fetched.
+  // NO_DPDB_FETCH: true,  // Default: false.
 };
 
 // PointerLockControls
 // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
 	var element = document.body;
+	var pointerControls, dateTime = Date.now();
+	var objects = [];
+	var rays = [];
 	var blocker, instructions;
 
 	var havePointerLock = 
@@ -21,6 +55,7 @@ WebVRConfig = {
 				'webkitPointerLockElement' in document;
 
 	if ( havePointerLock ) {
+		// console.log("havePointerLock");
 		blocker = document.getElementById('blocker');
 		instructions = document.getElementById('instructions');
 
@@ -56,18 +91,22 @@ WebVRConfig = {
 		document.addEventListener( 'mozpointerlockerror', pointerlockerror, false );
 		document.addEventListener( 'webkitpointerlockerror', pointerlockerror, false );
 
+
 		if(isMobile) {
 			console.log("isTouchDevice");
 			// instructions.addEventListener( 'touchend', funToCall, false );
 		} else {
 			instructions.addEventListener( 'click', funToCall, false );
 		}
+
 	} else {
-		instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
+		//instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
+		
 	}
 
 	function funToCall(event){
-		// console.log("click or touch!");
+
+		console.log("click or touch!");
 		instructions.style.display = 'none';
 
 		// Ask the browser to lock the pointer
@@ -75,23 +114,22 @@ WebVRConfig = {
 
 		controls.enabled = true;
 
-		// if ( /Firefox/i.test( navigator.userAgent ) ) {
-		// 	var fullscreenchange = function ( event ) {
-		// 		if ( document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element ) {
-		// 			document.removeEventListener( 'fullscreenchange', fullscreenchange );
-		// 			document.removeEventListener( 'mozfullscreenchange', fullscreenchange );
-		// 			element.requestPointerLock();
-		// 		}
-		// 	}
-		// 	document.addEventListener( 'fullscreenchange', fullscreenchange, false );
-		// 	document.addEventListener( 'mozfullscreenchange', fullscreenchange, false );
+		if ( /Firefox/i.test( navigator.userAgent ) ) {
+			var fullscreenchange = function ( event ) {
+				if ( document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element ) {
+					document.removeEventListener( 'fullscreenchange', fullscreenchange );
+					document.removeEventListener( 'mozfullscreenchange', fullscreenchange );
+					element.requestPointerLock();
+				}
+			}
+			document.addEventListener( 'fullscreenchange', fullscreenchange, false );
+			document.addEventListener( 'mozfullscreenchange', fullscreenchange, false );
 
-		// 	element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
-		// 	element.requestFullscreen();
-		// } else {
-		// 	element.requestPointerLock();
-		// }
-		element.requestPointerLock();
+			element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
+			element.requestFullscreen();
+		} else {
+			element.requestPointerLock();
+		}
 	}
 
 ////////////////////////////////////////////////////////////	
@@ -256,6 +294,7 @@ var keyIsPressed;
 	var partyLightMat;
 
 
+
 ////////////////////////////////////////////////////////////
 
 // init();		// Init after CONNECTION
@@ -267,6 +306,21 @@ connectSocket();
 // FUNCTIONS 
 ///////////////////////////////////////////////////////////
 function superInit(){
+
+	// PARTICLES_SPARKS
+	/*
+	counter = new SPARKS.SteadyCounter( 70 );
+	emitter = new SPARKS.Emitter( counter );
+
+	emitter.addInitializer(new SPARKS.Position( new SPARKS.PointZone( new THREE.Vector3(0,0,0) ) ) );
+	emitter.addInitializer(new SPARKS.Lifetime(0,5));
+	emitter.addInitializer(new SPARKS.Velocity(new SPARKS.PointZone(new THREE.Vector3(0,100,00))));
+
+	emitter.addAction(new SPARKS.Age());
+	emitter.addAction(new SPARKS.Move()); 
+	emitter.addAction(new SPARKS.RandomDrift(2*500,500,2*500));
+	emitter.addAction(new SPARKS.Accelerate(0,-40,0));
+	*/
 
 	// WAVES
 		// for(var i=0; i<7; i++){
@@ -288,7 +342,7 @@ function superInit(){
 		console.log("whoIamInLife: " + whoIamInLife);
 		// meInWorld = Math.floor(whoIamInLife/18);			// which world
 		// meInBGroup = Math.floor(whoIamInLife/18) % 3;		// which toilet
-		meInSGroup = ( whoIamInLife%18 )%18;					// which seat on the toilet
+		meInSGroup = ( whoIamInLife%18 )%18;					// which on a toilet
 		myStartX = Math.sin(Math.PI*2/18*meInSGroup)*18;
 		myStartZ = Math.cos(Math.PI*2/18*meInSGroup)*18;
 
