@@ -34,7 +34,6 @@ var mySocket = undefined;
 // object list - index: whether it's occupied or not
 var occuList = {};
 
-// THE_SEAT_INDEX, default is 1
 var occuIndex = 1;
 
 ///////////////////////////////////////////////////////////
@@ -45,103 +44,104 @@ wss.on('connection', function(ws){
 
 	mySocket = ws;
 
-	// TRACK TOTAL # OF PPL
 	totalCount++;
+	// ws.totalCount = totalCount;
+	/*
+	ws.id = thisId;
 
-	// GET_THE_SEAT_INDEX
+	// remember the id & socket match
+	allSockets.push(ws);
+	*/
 
-		// loop through all the elements in occuList
-		// if there's a vacancy, get the index of the seat
-		// and change the status to be occupied
-		var haveEmptySeat = false;
-		for( prop in occuList ){
-			// if it's an empty seat
-			if( occuList[prop] != "occupied" ){
-				// get the index of the seat 
-				occuIndex = prop;
-				haveEmptySeat = true;
+	// console.log("new player #%d connected!", thisId);
 
-				// change it to be unoccupied
-				occuList[prop] = "occupied";
-				break;
-			}
+	var haveEmptySeat = false;
+	for( prop in occuList ){
+		// if it's an empty seat
+		if( occuList[prop] != "occupied" ){
+			// get the index of the seat 
+			occuIndex = prop;
+			haveEmptySeat = true;
+
+			// change it to be unoccupied
+			occuList[prop] = "occupied";
+			break;
 		}
+	}
 
-		// if all the seat are already occupied
-		// create a new seat and get the index
-		if(!haveEmptySeat){
-			occuIndex = Object.keys(occuList).length + 1;
-			occuList[occuIndex] = "occupied";
-		}
+	// all the seat are already occupied
+	if(!haveEmptySeat){
+		occuIndex = Object.keys(occuList).length + 1;
+		// console.log( "occuIndex: " + occuIndex );
+		occuList[occuIndex] = "occupied";
+	}
 
 	ws.id = occuIndex;
-	ws.worldId = Math.floor(occuIndex/18);	// which world you belong to
-
+	ws.worldId = Math.floor(occuIndex/18);
 	allSockets.push(ws);
-	console.log("new player connected! index: %d, total #: %d", occuIndex, totalCount);
+
+	console.log("new player connected! total #: #%d", totalCount);
 
 	// SEND BACK INDEX INFO!
 	if(mySocket){
-
+		// lifeIndex.index = thisId;
 		lifeIndex.index = occuIndex;
 		lifeIndex.worldId = Math.floor(occuIndex/18);
 
 		mySocket.send( JSON.stringify(lifeIndex) );
 	}
 
-	// GET MESSAGE!
 	ws.on('message', function(data){
 		var msg = JSON.parse(data);
 		socketHandlers(ws,msg);
 	});
 
-	// SOCKET IS CLOSED!
 	ws.on('close', function(){
-
-		// loop through all the sockets
-		// to update the tracking data & send out the msg
 		for(var i=0; i<allSockets.length; i++){
 
-			// Found the CLOSED socket in allSockets
+			// Found the CLOSE socket in allSockets
 			// if this is the one, remove it
 			if(allSockets[i]==ws){
 
-				// change the status of seat to be vacancy
 				occuList[ws.id] = "empty";
-
-				// update the total # of ppl
 				totalCount--;
 
-				// prepare msg to send out to all the sockets
 				var msg = {
 					'type': 'removePlayer',
 					'removeID': ws.id,
 					'worldId': ws.worldId,
 					'totalCount': totalCount
 				};
-
 				// console.log("player #%d disconnected.", ws.id);		// allSocketIDs[i]
-				console.log("a player #%d disconnected. total #: %d", ws.id, totalCount);
+				console.log("a player disconnected. total #: #%d", totalCount);
 
-				// update & splice the sockets array
 				allSockets.splice(i,1);
-				// update & splice the players array
+				// allSocketIDs.splice(i,1);
 				allPlayers.splice(i,1);
 
 				//
 				socketHandlers(ws, msg);
+
 				break;
 			}
 		}
-
 		mySocket = undefined;
 	});
+
 });
 
 
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 
+/*
+	what if ws disconnect after connect, but before 'addNewPlayer'??
+
+
+*/
+
+
+//
 var socketHandlers = function(socket,msg){
 
 	//GENERAL_SENDING_DATA
@@ -179,8 +179,6 @@ var socketHandlers = function(socket,msg){
 			console.log('that socket was closed');
 		}
 	}
-
-	// HOW TO USE WS's BROADCAST FUNCTION???
 };
 
 ///////////////////////////////////////////////////////////
