@@ -511,14 +511,14 @@ function superInit(){
 
 		// loadModelBathrooms( "models/br_w2.js", "models/br_g.js", "models/br_y.js", "models/bathroom2.js" );
 		
-		loadModelBathroomsV2( "models/bathroom/b_door.js",
-							  "models/bathroom/b_sides.js",
-							  "models/bathroom/b_floor.js",
-							  "models/bathroom/b_smallStuff.js",
-							  "models/bathroom/b_smallWhite.js",
-							  "models/bathroom/paper_bottom.js",
-							  "models/bathroom/paper_top.js",
-							  "models/bathroom2.js" );
+		// loadModelBathroomsV2( "models/bathroom/b_door.js",
+		// 					  "models/bathroom/b_sides.js",
+		// 					  "models/bathroom/b_floor.js",
+		// 					  "models/bathroom/b_smallStuff.js",
+		// 					  "models/bathroom/b_smallWhite.js",
+		// 					  "models/bathroom/paper_bottom.js",
+		// 					  "models/bathroom/paper_top.js",
+		// 					  "models/bathroom2.js" );
 
 		// setTimeout(function(){
 		// 	var testBall = new THREE.Mesh( new THREE.SphereGeometry(5), intestineMat);
@@ -1399,6 +1399,15 @@ function loadSitModelPlayer( _head, _body, _toilet ){
 	// TOILET
 	loader.load( _toilet, function( geometry3 ){
 		personToilet = geometry3.clone();
+
+		loadModelBathroomsV2( "models/bathroom/b_door.js",
+							  "models/bathroom/b_sides.js",
+							  "models/bathroom/b_floor.js",
+							  "models/bathroom/b_smallStuff.js",
+							  "models/bathroom/b_smallWhite.js",
+							  "models/bathroom/paper_bottom.js",
+							  "models/bathroom/paper_top.js",
+							  "models/bathroom2.js" );
 	});
 }
 
