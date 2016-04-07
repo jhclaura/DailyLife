@@ -2158,3 +2158,13 @@ function UpdatePplCount( thisWorldCount, totalCount ) {
 	pplCountTex.drawText("this world: " + thisWorldCount, undefined, 500, 'white');
 	pplCountTex.drawText("total: " + totalCount, undefined, 650, 'white');
 }
+
+function onWindowResize() {
+	effect.setSize( window.innerWidth, window.innerHeight );
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+}
+
+function isTouchDevice() { 
+	return 'ontouchstart' in window || !!(navigator.msMaxTouchPoints);
+}

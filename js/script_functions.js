@@ -63,19 +63,6 @@ function getRandomIntPN(min, max) {
 		return value*-1;
 }
 
-function onWindowResize() {
-	camera.aspect = window.innerWidth / window.innerHeight;
-	camera.updateProjectionMatrix();
-
-	renderer.setSize( window.innerWidth, window.innerHeight );
-	if(isItVR)
-		effect.setSize( window.innerWidth, window.innerHeight );
-}
-
-function isTouchDevice() { 
-	return 'ontouchstart' in window || !!(navigator.msMaxTouchPoints);
-}
-
 
 // function built based on Stemkoski's
 // http://stemkoski.github.io/Three.js/Texture-Animation.html
