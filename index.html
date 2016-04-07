@@ -75,16 +75,26 @@
 			// NAME
 			var playerNName = "";
 			var playerNameInput = document.createElement('textarea');
+			// playerNameInput.style.backgroundColor = "transparent";
 			playerNameInput.id = "playerName";
 			playerNameInput.setAttribute("placeholder", "Who's this lucky one sitting on the toilet?");
 
 			var modeSelection = document.createElement('div');
 			modeSelection.setAttribute("style", "width: 50%; position:absolute; left:0; right:0; top:0; bottom:0; margin:auto; line-height: 26px; text-align:center; font-size:14pt; height:26px;");
-			modeSelection.style.background =  "#FFFFFF";
+			// modeSelection.style.background =  "#FFFFFF";
+
+			var loadingImg = document.createElement('img');
+			loadingImg.setAttribute("src", "images/loadingbox.gif");
+			loadingImg.setAttribute("width", "60");
+			loadingImg.setAttribute("height", "60");
+			loadingImg.style.margin = "0 auto";
+			loadingImg.style.display = "block";
 
 			var startLink = document.createElement('a');
 			startLink.id = "startLink";
 			startLink.innerHTML = "Start";
+			startLink.style.display = "none";
+
 			startLink.onclick = function(){
 				
 				if(playerNameInput.value==playerNName){
@@ -104,6 +114,7 @@
 
 			modeSelection.appendChild(playerNameInput);
 			modeSelection.appendChild(startLink);
+			modeSelection.appendChild(loadingImg);
 			document.body.appendChild(modeSelection);
 		</script>
 

@@ -105,6 +105,8 @@ var screenWidth = window.innerWidth;
 var screenHeight = window.innerHeight;
 var time, clock;
 
+var loadedCount = 0;
+
 var myStartX = 0, myStartZ = 0, myStartY = 180; //2
 var myPosition, myStartRotY, worldBubble, pplCount, pplCountTex, pplCountMat;
 
@@ -585,6 +587,8 @@ function superInit(){
 			bigToilet.position.copy( toiletCenters[0]);
 			scene.add( bigToilet );
 
+			loadingCount();
+
 			// var dupToilet = new THREE.Mesh( bigToiletGeo.clone(), bigToiletMat );
 			// dupToilet.scale.set(1.5, 1.5, 1.5);
 			// dupToilet.position.copy( toiletCenters[1]);
@@ -609,6 +613,8 @@ function superInit(){
 			bigToiletTubeAni.position.copy( toiletCenters[0]);
 			bigToiletTubeAni.visible = false;
 			scene.add( bigToiletTubeAni );
+
+			loadingCount();
 		});
 
 	// wave
@@ -628,6 +634,8 @@ function superInit(){
 			waterwave = new AniObjectPhysijs( 0.3, waterKeyframeSet, waterAniOffsetSet, geometry,
 									   water_material,
 									   waterPos, 1.7 );*/
+
+			loadingCount();
 		} );
 
 	/*
@@ -713,6 +721,8 @@ function superInit(){
 		personTex = textureLoader.load('images/galleryGuyTex.png');
 		loader.load( "models/person3.js", function( geometry ) {
 			personGeo = geometry;
+
+			loadingCount();
 		});
 
 	// STAR
@@ -1367,6 +1377,8 @@ function loadModelPlayer( _body, _left_arm, _right_arm, _head ){
 	loader.load( _head, function(geometry4){
 		geometry4.center();
 		guyHeadGeo = geometry4.clone();
+
+		loadingCount();
 	});
 }
 
@@ -1398,6 +1410,8 @@ function loadModelBathroom( _geo ){
 		bathroom = new THREE.Mesh(bathroomGeo, bathroomMat);
 		bathroom.scale.set(1.5,1.5,1.5);
 		bathroom.rotation.y += Math.PI;
+
+		loadingCount();
 	});
 }
 
@@ -1481,6 +1495,8 @@ function loadModelBathrooms( _w, _g, _y, _t ){
 						bathroom.add(bathroomLight);
 
 					scene.add(bathroom);
+
+					loadingCount();
 				});
 			});
 		});	
@@ -1592,6 +1608,8 @@ function loadModelBathroomsV2( _door, _side, _floor, _s, s_white, p_b, p_t, _t )
 								bathroom.add(bathroomLight);
 
 							scene.add(bathroom);
+
+							loadingCount();
 						});
 					});
 				});
@@ -1637,6 +1655,7 @@ function loadModelPoop( _poop ){
 		poop.add(ps_LL);
 
 		// createBox();
+		loadingCount();
 	});
 }
 
@@ -1648,6 +1667,8 @@ function loadModelPoopMacaron( _poop ){
 		poopMGeo.computeBoundingSphere();
 
 		poopM = new THREE.Mesh(poopMGeo, poopMMat);
+
+		loadingCount();
 	});
 }
 
@@ -1659,6 +1680,8 @@ function loadModelPoopHeart( _poopH ){
 		poopHeartGeo.computeBoundingSphere();
 
 		poopHeart = new THREE.Mesh(poopHeartGeo, poopHeartMat);
+
+		loadingCount();
 	});
 }
 
@@ -2167,4 +2190,14 @@ function onWindowResize() {
 
 function isTouchDevice() { 
 	return 'ontouchstart' in window || !!(navigator.msMaxTouchPoints);
+}
+
+function loadingCount() {
+	loadedCount ++;
+
+	if(loadedCount>=9) {
+		// hide the loading gif and display start link
+		startLink.style.display = "block";
+		loadingImg.style.display = "none";
+	}
 }
