@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Daily Life VR - Poop</title>
+		<title>Daily Life</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no">
@@ -16,6 +16,24 @@
 		<script type="text/javascript" src="js/lib/Detector.js"></script>
 
 		<div id="render-canvas"></div>
+
+		<!-- PointerLock | Chrome & Android -->
+		<!-- <div id="blocker" style="display: -webkit-box;">
+			<div id="instructions">
+				<img width="60" height="60" src="images/click.gif">
+			</div>
+		</div> -->
+
+		<!-- cam -->
+		<!-- <p id="errorMessage" style="display:none"></p> -->
+
+		<!-- SPEECH -->
+		<!-- <div id="results">
+			<span id="final_span" class="final" style="color: #ff0000;"></span>
+			<span id="interim_span" class="interim"></span>
+			<br>
+			<span id="my_span" class="mySpan"></span>
+		</div> -->
 
 		<script type="text/javascript">
 			//device detection
@@ -38,18 +56,19 @@
 			}
 
 			// if it's desktop, create click.gif div for PointerlockAPI
+			// if( whichMobile != "iOS_mobile" ) {
 			if( !isMobile ) {
 				var clickDiv = document.createElement('div');
 				clickDiv.id = "blocker";
 				clickDiv.style = "display: -webkit-box;";
 				document.getElementsByTagName("body")[0].appendChild(clickDiv);
 
+				var ins = document.createElement('div');
+				ins.id = "instructions";
 				var fingerImg = document.createElement('img');
 				fingerImg.setAttribute("src", "images/click.gif");
 				fingerImg.setAttribute("width", "60");
 				fingerImg.setAttribute("height", "60");
-				var ins = document.createElement('div');
-				ins.id = "instructions";
 				ins.appendChild(fingerImg);
 				clickDiv.appendChild(ins);
 			}
@@ -82,10 +101,13 @@
 			modeSelection.setAttribute("style", "width: 50%; position:absolute; left:0; right:0; top:0; bottom:0; margin:auto; line-height: 26px; text-align:center; font-size:14pt; height:26px;");
 			modeSelection.style.background =  "#FFFFFF";
 
-			var startLink = document.createElement('a');
-			startLink.id = "startLink";
-			startLink.innerHTML = "Start";
-			startLink.onclick = function(){
+			var isItVR = false;
+
+			var normalMode = document.createElement('a');
+			normalMode.id = "normalMode";
+			normalMode.innerHTML = "Start";
+			normalMode.onclick = function(){
+				isItVR = false;
 				
 				if(playerNameInput.value==playerNName){
 					playerNName = "Anonymous";
@@ -102,8 +124,31 @@
 				init();
 			}
 
+			// var vrMode = document.createElement('a');
+			// vrMode.id = "vrMode";
+			// vrMode.innerHTML = "VR";
+			// vrMode.onclick = function(){
+			// 	isItVR = true;
+
+			// 	if(playerNameInput.value==playerNName){
+			// 		playerNName = "Anonymous";
+			// 	} else {
+			// 		playerNName = playerNameInput.value;
+			// 	}
+
+			// 	renderCanvas.style.display = "inline";
+			// 	if(blockerDiv) blockerDiv.style.display = "-webkit-box";
+			// 	modeSelection.style.display = "none";
+
+			// 	// superInit();
+			// 	// connectSocket();
+			// 	init();
+			// }
+
 			modeSelection.appendChild(playerNameInput);
-			modeSelection.appendChild(startLink);
+			modeSelection.appendChild(normalMode);
+			// modeSelection.appendChild(vrMode);
+
 			document.body.appendChild(modeSelection);
 		</script>
 
@@ -159,24 +204,43 @@
 					if(data.type == 'addNewPlayer'){
 
 						// If this is not ME && processed by server
+						// && we are in the same world!
 						if(data.id != whoIamInLife && data.camID > 0){
-
-							// If we are in the same world, create player
 						   	if( data.worldId == meInWorld ){
 								console.log("Got a new player, id: " + data.id);
 
-								// Create Player
-								var newPlayerStartPos = new THREE.Vector3(data.playerStartX, data.playerStartY, data.playerStartZ);
-								var newPlayerStartRotY = data.playerStartRotY;
+								// // Use peer_id to get the stream
+								// var call = peer.call(data.peerid, my_stream);
+								// // If get the CALL, create new video & Player
+								// call.on('stream', function(remoteStream){
+								// 	console.log("Got remote stream!");
 
-								var newGuy = new Person(newPlayerStartPos, data.myHex, data.id, data.nname);
+									// Create Video
+									// videos[1].video.src = window.URL.createObjectURL(remoteStream) || remoteStream;
+									// videos[1].video.play();
 
-								dailyLifePlayerDict[data.id] = newGuy;
+									// v.Dynamic
+									// var remoteO = createVideoThing();
+									// remoteO.video.src = window.URL.createObjectURL(remoteStream) || remoteStream;
+									// remoteO.video.play();
+									// remoteO.peerid = data.peerid;
+									// videos.push(remoteO);
 
-								currentPplAmount ++;
+									// Create Player
+									var newPlayerStartPos = new THREE.Vector3(data.playerStartX, data.playerStartY, data.playerStartZ);
+									var newPlayerStartRotY = data.playerStartRotY;
+
+									// var newGuy = createSimplePlayer( newPlayerStartPos, data.myHex, data.id );
+									// var newGuy = createSitPlayer( newPlayerStartPos, data.myHex, data.id );
+									// dailyLifePlayers.push(newGuy);
+
+									var newGuy = new Person(newPlayerStartPos, data.myHex, data.id, data.nname);
+
+									dailyLifePlayerDict[data.id]=newGuy;
+
+									currentPplAmount ++;
+								// });
 							}
-
-							// update people counting of this world & total worlds
 							UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data.totalCount );
 							totalPplInWorldsCount = data.totalCount;
 						}
@@ -190,9 +254,10 @@
 						if(!initEnvironment){
 
 							whoIamInLife = data.index;
+							// videos[0].peerid = peer_id;
 							meInWorld = data.worldId;
 
-							console.log("I am #" + whoIamInLife + " in the #" + meInWorld + " Daily Life world";
+							console.log("I am " + whoIamInLife + " in the Daily Life world: " + meInWorld);
 
 							// init();
 							superInit();
@@ -202,7 +267,7 @@
 					}
 
 					var playerPosX, playerPosY, playerPosZ, playerRotY, playerQ, playerQ3;
-					// update player ONLY IF we are in the same world
+
 					if(data.type=="updatePlayer" && data.worldId == meInWorld){
 						playerPosX = data.playerPosX;
 						playerPosY = data.playerPosY;
@@ -210,27 +275,38 @@
 						playerRotY = data.playerRotY;
 						playerQ = new THREE.Quaternion(data.playerQ._x, data.playerQ._y, data.playerQ._z, data.playerQ._w);
 
+						// if( dailyLifePlayers[data.index] )
+							// updatePlayer(data.index, playerPosX, playerPosZ, playerRotY, playerQ);
+
 						if( dailyLifePlayerDict[ data.index ] )
 							dailyLifePlayerDict[ data.index ].update( playerPosX, playerPosY, playerPosZ, playerRotY, playerQ );
 					}
 
-					// update poop shooting ONLY IF we are in the same world
+					if(data.type=="updateMurmur"){
+						var playerIndex = ""+data.index;
+						var playerMurmur = data.murmur;
+						
+						allTheMurmur[playerIndex] = playerMurmur;
+					}
+
 					if(data.type=="shootPoop" && data.worldId == meInWorld){
 
-						// only shoot if it's not MY DATA, cuz I've already shot
+						// only shoot if it's not MY_Data, cuz I've already shoot
 						if(data.index != whoIamInLife){
 
-							// if it's aim at someone, create poop heart
-							if(data.toWhom != -1){								
+							// if it's aim at someone
+							if(data.toWhom != -1){
+								
+								// moveMacaPoop( data.index, data.toWhom );
 								createHeart( data.index, data.toWhom );
 
-								// if the heart is to ME, display the message
+								// if it's to ME
 								if(data.toWhom == whoIamInLife){
-
-									firstGuy.wordTexture.clear('#dc5e64').drawText("You got a poop heart from " + dailyLifePlayerDict[ data.index ].nname + " <3", undefined, 96, 'white');
-									setTimeout(function(){
-										firstGuy.wordTexture.clear();
-									},5000);
+										// toIndex displace message
+										firstGuy.wordTexture.clear('#dc5e64').drawText("You got a poop heart from " + dailyLifePlayerDict[ data.index ].nname + " <3", undefined, 96, 'white');
+										setTimeout(function(){
+											firstGuy.wordTexture.clear();
+										},5000);
 								}
 							} else {
 								var poopPos = new THREE.Vector3(data.playerPos.x, data.playerPos.y, data.playerPos.z);
@@ -253,7 +329,7 @@
 					}
 
 					// ADD_HISTORY_PLAYERS
-					// ONE_TIME_EVENT_IN_THE_BEGINNING
+					// ONE_TIME_EVENT
 					if(data.length>0 && !updatePreviousPlayer){
 						for(var i=0; i<data.length; i++){
 							// console.log('total data lenght: ' + data.length);
@@ -262,8 +338,8 @@
 							// If I'm older than the coming
 							// if(whoIamInLife > data[i].id){
 
-							// if I'm not the coming player && we are in the same world
-							// this is a history player I want to create!!!
+							// if I'm not the coming player
+							// && we are in the same world
 							if(whoIamInLife != data[i].id && data[i].worldId == meInWorld){
 
 								var oldPlayerStartPos = new THREE.Vector3(data[i].playerStartX, data[i].playerStartY, data[i].playerStartZ);
@@ -272,6 +348,33 @@
 								var oldPlayerID = data[i].id;
 								var oldPlayerName = data[i].nname;
 
+								// var oldPlayerPeerID = data[i].peerid;
+								// console.log("add old play, videos.length: " + videos.length);
+
+								// If video is not updated by PeerJS yet
+								// if( (whoIamInLife+1) > videos.length ){
+								// 	console.log("video is not updated by PeerJS yet");
+								// 	var oldPlayer = createPlayer(oldPlayerStartPos, -1, oldHex, oldPlayerID, oldPlayerPeerID);
+								// 	dailyLifePlayers.push(oldPlayer);
+
+								// } else {
+								// 	for(var j=0; j<videos.length; j++){
+								// 		if(videos[j].peerid == data[i].peerid){
+
+								// 			var oldPlayer = createPlayer(oldPlayerStartPos, videos[j], oldHex, oldPlayerID, oldPlayerPeerID);
+								// 			dailyLifePlayers.push(oldPlayer);
+
+								// 			console.log('create! ID: ' + data[i].id);
+								// 			break;
+								// 		}
+								// 	}
+								// }
+
+								// var oldPlayer = createSimplePlayer(oldPlayerStartPos, oldHex, oldPlayerID );
+								// v1
+								// var oldPlayer = createSitPlayer(oldPlayerStartPos, oldHex, oldPlayerID );
+								// dailyLifePlayers.push(oldPlayer);
+								// v2
 								var oldPlayer = new Person( oldPlayerStartPos, oldHex, oldPlayerID, oldPlayerName );
 								dailyLifePlayerDict[ oldPlayerID ] = oldPlayer;
 								console.log("create history players #" + data[i].id + ", in world #" + data[i].worldId);								
@@ -281,6 +384,7 @@
 							totalPplInWorldsCount = data[i].totalCount;							
 						}
 						updatePreviousPlayer = true;
+						//
 					}
 				}
 				socketOpened = true;
@@ -293,6 +397,7 @@
 				waitForSocketConnection(ws, function() {
 					ws.send( msg );
 				});
+				// console.log('* sendMessage');
 			};
 
 
@@ -309,13 +414,81 @@
 						waitForSocketConnection(socket,callback);
 					}
 				}, 5);
+				// console.log('* waitForSocketConnection');
 			};
+
+			function createVideoTag(){
+				var videoo = document.createElement('video');
+				videoo.autoplay = true;
+				videoo.loop = true;
+				videoo.width = 480;
+				videoo.height = 320;
+				return videoo;
+			}
+
+			function createVideoCanvas(){
+				var videooImage = document.createElement("canvas");
+				videooImage.width = 480;
+				videooImage.height = 320;
+				return videooImage;
+			}
+
+			function createVideoContext( _videoImage ){
+				var videooImageContext = _videoImage.getContext('2d');
+				videooImageContext.fillStyle = '0xffffff';
+				videooImageContext.fillRect(0, 0, _videoImage.width, _videoImage.height);
+				return videooImageContext;
+			}
+
+			function createVideoThing(){
+				var videoThing = {};
+
+				var videoo = document.createElement('video');
+				videoo.autoplay = true;
+				videoo.loop = true;
+				videoo.width = 480;
+				videoo.height = 320;
+				videoThing.video = videoo;
+
+				var videooImage = document.createElement("canvas");
+				videooImage.width = 480;
+				videooImage.height = 320;
+				videoThing.videoImage = videooImage;
+
+				var videooImageContext = videooImage.getContext('2d');
+				videooImageContext.fillStyle = '0xffffff';
+				videooImageContext.fillRect(0, 0, videooImage.width, videooImage.height);
+				videoThing.videoImageContext = videooImageContext;
+
+				return videoThing;
+			}
+		</script>
+
+		<!-- source: http://stemkoski.github.io/Three.js/Shader-Halo.html -->
+		<script id="vertexShader" type="x-shader/x-vertex">
+			varying vec3 vNormal;
+			void main() 
+			{
+			    vNormal = normalize( normalMatrix * normal );
+			    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			}
+		</script>
+
+		<!-- fragment shader a.k.a. pixel shader -->
+		<script id="fragmentShader" type="x-shader/x-vertex"> 
+			varying vec3 vNormal;
+			void main() 
+			{
+				float intensity = pow( 0.7 - dot( vNormal, vec3( 0.0, 0.0, 1.0 ) ), 4.0 ); 
+			    gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 ) * intensity;
+			}
 		</script>
 
 		<script src="js/lib/controls/VRControls.js"></script>
 		<script src="js/lib/effects/VREffect.js"></script>
 		<script src="js/lib/webvr-polyfill.js"></script>
 		<script src="js/lib/webvr-manager.js"></script>
+
 
 		<script type="text/javascript" src="js/lib/OrbitControls.js"></script>
 		<script type="text/javascript" src="js/controls/DeviceControls.js"></script>
