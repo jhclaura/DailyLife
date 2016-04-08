@@ -995,6 +995,7 @@ function superInit(){
 	// window.addEventListener('click', startSpeech, false);
 	window.addEventListener('keydown', myKeyPressed, false);
 	window.addEventListener('keyup', myKeyUp, false);
+	window.addEventListener('mousedown', myMouseDown, false);
 }
 
 function InitParticles() {
@@ -1347,6 +1348,37 @@ function myKeyPressed( event ){
 
 function myKeyUp(event){
 	keyIsPressed = false;
+}
+
+function myMouseDown(event) {
+	if(yogaOver){	// bring back after developing
+		poopCount ++;
+	}
+
+	if(lookingAtSomeone != -1){
+		createHeart( whoIamInLife, lookingAtSomeone );
+	} else {
+		createPoop( controls.position(), controls.getDirection() );
+	}
+	
+	if(poopCount == 3){
+		// enter celebration period
+		sound_poop.play();
+	}
+
+	// Send POSITION + DIRECTION to server!!
+		var msg = {
+			'type': 'shootPoop',
+			'index': whoIamInLife,
+			'toWhom': lookingAtSomeone,
+			'playerPos': controls.position(),
+			'playerDir': controls.getDirection(),
+			'worldId': meInWorld
+		};
+
+		if(ws){
+			sendMessage( JSON.stringify(msg) );
+		}
 }
 
 function loadModelPlayer( _body, _left_arm, _right_arm, _head ){
@@ -2024,6 +2056,8 @@ function EnterSceneTwo() {
 		setTimeout(function(){	
 
 			controls.setMovYAnimation( -181.8, 11000 );
+			//
+			firstGuy.player.children[0].visible = false;
 
 			switchSound_1 = true;
 			sound_stomach.fadeIn(1,6000);
@@ -2038,6 +2072,12 @@ function EnterSceneTwo() {
 			setTimeout(function(){
 				bathroom.visible = false;
 			}, 16000);
+
+			// bring the body back
+			setTimeout(function(){
+				firstGuy.player.children[0].visible = true;
+			}, 11000);
+
 		}, 10500);
 
 	}, 6*1000);
@@ -2120,6 +2160,7 @@ function EnterSceneEnd() {
 
 	// stop the celebration
 	clearInterval( portalPoopAnimation );
+
 	// remove particles
 	// remove all physijs poop
 
@@ -2136,12 +2177,16 @@ function EnterSceneEnd() {
 		newPos.y = [-16,-16,-16,-22,-23,-36.5,-50];
 		newPos.z = [0,-6.5,-13,-10,-1,-1,-1];
 		controls.createTweenForMove( newPos, 21000 );
+		//
+		firstGuy.player.children[0].visible = false;
 
 		setTimeout(function(){
 			new TWEEN.Tween( bathroom.rotation )
 				.to( {y:0}, 2000 )
 				.easing(TWEEN.Easing.Back.InOut)
 				.start();
+			//
+			firstGuy.player.children[0].visible = true;
 		},21000);
 
 		// exchange tube
@@ -2174,7 +2219,7 @@ function EnterSceneEnd() {
 	}, 20000);
 
 	// Remove something
-	console.log( firstGuy.player.children[0] );
+	// console.log( firstGuy.player.children[0] );
 	THREE.SceneUtils.detach( firstGuy.player.children[0].children[1],
 							 firstGuy.player.children[0],
 							 scene );

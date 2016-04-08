@@ -592,8 +592,6 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		var movementX = touchCurrentLoc.clone().sub(touchStartLoc).x;
 		var movementY = touchCurrentLoc.clone().sub(touchStartLoc).y;
 
-		// console.log("movementX: " + movementX + ", movementY: " + movementY);
-
 		//HRAD_ROTATION
 		// replace by device orientation
 		/*	
@@ -612,54 +610,44 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		*/
 
 		//MOVE_AROUND
-		// v.1
-		/*
 		if( event.touches.length>=2) {
 			var touchSecond = event.touches[1];
 
-			touch2ndCurrentLoc.set(touchSecond.clientX, touchSecond.clientY);
+			// if( (touchStartLoc.x<window.innerWidth/2 && touchSecond.clientX>=window.innerWidth/2)
+			// 	|| (touchStartLoc.x>=window.innerWidth/2 && touchSecond.clientX<=window.innerWidth/2) ){
 
-			var movement2X = touch2ndCurrentLoc.clone().sub(touch2ndStartLoc).x;
-			var movement2Y = touch2ndCurrentLoc.clone().sub(touch2ndStartLoc).y;
+				touch2ndCurrentLoc.set(touchSecond.clientX, touchSecond.clientY);
 
-			if(movement2X > 15){
-				moveRight = true;
-				console.log("moveRight");
-			}
+				var movement2X = touch2ndCurrentLoc.clone().sub(touch2ndStartLoc).x;
+				var movement2Y = touch2ndCurrentLoc.clone().sub(touch2ndStartLoc).y;
 
-			if(movement2X < -15){
-				moveLeft = true;
-				console.log("moveLeft");
-			}
+				// console.log("movement2X: " + movement2X + ", movement2Y: " + movement2Y);
 
-			if(movement2Y > 15){
-				moveBackward = true;
-				console.log("moveBackward");
-			}
+				if(movement2X > 15){
+					moveRight = true;
+					console.log("moveRight");
+				}
 
-			if(movement2Y < -15){
-				moveForward = true;
-				console.log("moveForward");
-			}
+				if(movement2X < -15){
+					moveLeft = true;
+					console.log("moveLeft");
+				}
+
+				if(movement2Y > 15){
+					moveBackward = true;
+					console.log("moveBackward");
+				}
+
+				if(movement2Y < -15){
+					moveForward = true;
+					console.log("moveForward");
+				}
+			// }
 		} else {
 			moveLeft = false;
 			moveRight = false;
 			moveBackward = false;
 			moveForward = false;
-		}
-		*/
-
-		// v.2
-		if(movementY < -20){
-			moveForward = true;
-			moveBackward = false;
-		}
-		else if(movementY > 20) {
-			moveForward = false;
-			moveBackward = true;
-		} else {
-			moveForward = false;
-			moveBackward = false;
 		}
 		// console.log(event.touches.length);
 	};
@@ -960,16 +948,11 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	 	this.neckAngle.setFromQuaternion( eyeFinalQ2 );
 			
 		//
+
 		yawObject.translateY( velocity.y );
 		yawObject.translateX( velocity.x );
+		yawObject.translateZ( velocity.z );
 
-		if( thisIsTouchDevice ){
-			translateOnZAxis( yawObject, velocity.z );
-		} else {
-			yawObject.translateZ( velocity.z );
-		}
-		
-		//
 		// yawObject.position.y = myStartY;
 
 		// if ( yawObject.position.y < 1 ) {
@@ -1038,18 +1021,6 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 
 	this.disconnect = function() {
 		this.freze = true;
-	};
-
-	// translate object by distance along axis in world space
-	// axis is assumed to be normalized
-	var translateOnZAxis = function ( obj, distance ) {
-		var v1 = new THREE.Vector3(0,0,1);
-		var q1 = obj.quaternion.clone();
-		q1._x = 0;
-		q1._z = 0;
-		q1.normalize();
-		v1.applyQuaternion( q1 );
-		obj.position.add( v1.multiplyScalar( distance ) );
 	};
 
 };
