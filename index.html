@@ -3,7 +3,7 @@
 	<head>
 		<title>Daily Life VR - Poop</title>
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<!-- <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"> -->
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no">
 		<meta name="mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-capable" content="yes" />
@@ -18,6 +18,7 @@
 		<script type="text/javascript" src="js/lib/Detector.js"></script>
 
 		<script type="text/javascript">
+
 			//device detection
 			//source: http://stackoverflow.com/questions/3514784/what-is-the-best-way-to-detect-a-mobile-device-in-jquery
 			var isMobile = false; //initiate as false
@@ -306,7 +307,6 @@
 				});
 			};
 
-
 			function waitForSocketConnection(socket, callback){
 				setTimeout(
 					function(){
@@ -324,14 +324,12 @@
 		</script>
 
 		<!-- WebVR Boilerplate -->
-		<script src="js/lib/controls/VRControls.js"></script>
+		<!-- <script src="js/lib/controls/VRControls.js"></script> -->
 		<script src="js/lib/effects/VREffect.js"></script>
 		<script src="js/lib/webvr-polyfill.js"></script>
 		<script src="js/lib/webvr-manager.js"></script>
 
-		<script type="text/javascript" src="js/lib/OrbitControls.js"></script>
 		<script type="text/javascript" src="js/controls/DeviceControls.js"></script>
-		<script type="text/javascript" src="js/lib/OBJLoader.js"></script>
 		<script src='js/lib/threex.dynamictexture.js'></script>
 		<script type="text/javascript" src="js/lib/howler.js"></script>
 		<script type="text/javascript" src="js/lib/SPE.min.js"></script>
@@ -340,7 +338,6 @@
 		<script type="text/javascript" src="js/lib/BufferLoader.js"></script>
 		<script type="text/javascript" src="js/lib/physi.js"></script>
 		<script type="text/javascript" src="js/lib/ImprovedNoise.js"></script>
-		<script type="text/javascript" src="js/lib/StereoEffect.js"></script>
 		<script type="text/javascript" src="js/lib/tween.min.js"></script>
 		<script type="text/javascript" src="js/stats.min.js"></script>
 		<script type="text/javascript" src="js/wave.js"></script>

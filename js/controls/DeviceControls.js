@@ -173,7 +173,9 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		// playerStartRotY = yawObject.rotation.y;
 
 	//
-	var controlsEnabled = false;
+	this.movingEnabled = false;
+	this.clickingTouchingEnabled = false;
+
 	var moveForward = false;
 	var moveBackward = false;
 	var moveLeft = false;
@@ -402,7 +404,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	var onMouseMove = function ( event ) {
 
 		if ( scope.enabled === false ) return;
-		if (rotatable === false) return;
+		if ( rotatable === false ) return;
 
 		var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
 		var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
@@ -443,8 +445,49 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 
 		// console.log("aa");
 	};
+
+	function myMouseDown(event) {
+
+		if ( scope.clickingTouchingEnabled === false ) return;
+
+		// if(yogaOver){	// bring back after developing
+		// 	poopCount ++;
+		// }
+
+		if(lookAtFlush){
+			EnterSceneEnd();
+		} else {
+			if(lookingAtSomeone != -1){
+				createHeart( whoIamInLife, lookingAtSomeone );
+			} else {
+				createPoop( yawObject.position, scope.getDirection() );
+			}
+			
+			if(poopCount == 3){
+				// enter celebration period
+				sound_poop.play();
+			}
+
+			// Send POSITION + DIRECTION to server!!
+				var msg = {
+					'type': 'shootPoop',
+					'index': whoIamInLife,
+					'toWhom': lookingAtSomeone,
+					'playerPos': yawObject.position,
+					'playerDir': scope.getDirection(),
+					'worldId': meInWorld
+				};
+
+				if(ws){
+					sendMessage( JSON.stringify(msg) );
+				}
+		}
+	}
 	
 	var onKeyDown = function ( event ) {
+		if ( scope.movingEnabled === false ) return;
+		if ( scope.enabled === false ) return;
+
 		keyActive = true;
 		switch ( event.keyCode ) {
 
@@ -475,6 +518,9 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	}.bind(this);
 
 	var onKeyUp = function ( event ) {
+		if ( scope.movingEnabled === false ) return;
+		if ( scope.enabled === false ) return;
+
 		keyActive = false;
 
 		switch( event.keyCode ) {
@@ -503,10 +549,20 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 
 	// DEVICE
 	var onTouchStart = function ( event ) {
-		touchActive = true;
+
+		if (scope.clickingTouchingEnabled === false) return;
 
 		if (scope.enabled === false) return;
 		if (rotatable === false) return;
+
+		touchActive = true;
+
+		setTimeout(function(){
+			if(touchActive){
+				moveForward = true;
+			}
+		}, 1500);
+		
 
 		var touch = event.touches[0];
 
@@ -550,6 +606,10 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		// if(lookAtMiniPoop)
 		// 	scope.align();
 
+		if(yogaOver){	// bring back after developing
+			poopCount ++;
+		}
+
 		if(lookAtFlush){
 			EnterSceneEnd();
 		} else {
@@ -574,11 +634,14 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 
 		//
 		// controls.align();
+
+		// moveForward = true;
 	};
 
 
 	var onTouchMove = function ( event ) {
 
+		if (scope.movingEnabled === false) return;
 		if (scope.enabled === false) return;
 		if (rotatable === false) return;
 
@@ -665,6 +728,10 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	};
 
 	var onTouchEnd = function ( event ) {
+		if (scope.clickingTouchingEnabled === false) return;
+		if (scope.movingEnabled === false) return;
+		if (scope.enabled === false) return;
+
 		touchActive = false;
 
 		moveLeft = false;
@@ -675,17 +742,17 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		// console.log(event);
 	};
 
-	//
-
-	document.addEventListener( 'mousemove', onMouseMove, false );
-	document.addEventListener( 'keydown', onKeyDown, false );
-	document.addEventListener( 'keyup', onKeyUp, false );
 
 	//TOUCH
 	if(thisIsTouchDevice) {
 		document.addEventListener( 'touchstart', onTouchStart, false );
-		document.addEventListener( 'touchmove', onTouchMove, false );
+		// document.addEventListener( 'touchmove', onTouchMove, false );
 		document.addEventListener( 'touchend', onTouchEnd, false );
+	} else {
+		document.addEventListener( 'mousemove', onMouseMove, false );
+		document.addEventListener( 'mousedown', myMouseDown, false );
+		document.addEventListener( 'keydown', onKeyDown, false );
+		document.addEventListener( 'keyup', onKeyUp, false );
 	}
 
 	if(!isMobile)
@@ -872,8 +939,6 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	this.update = function ( delta ) {
 
 		if (scope.enabled === false) return;
-
-		// DEVICE
 		if (scope.freeze) return;
 
 		// VR_Control

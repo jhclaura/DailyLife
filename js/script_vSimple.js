@@ -6,8 +6,9 @@
  */
 
 WebVRConfig = {
-  BUFFER_SCALE: 0.5, // Default: 1.0.
-  PREVENT_DISTORTION: true
+	MOUSE_KEYBOARD_CONTROLS_DISABLED: true, // Default: false.
+	BUFFER_SCALE: 0.5, // Default: 1.0.
+	PREVENT_DISTORTION: true
 };
 
 // PointerLockControls
@@ -177,7 +178,7 @@ var keyIsPressed;
 	var meInSGroup, meInBGroup;
 	var poopIsTalking = false, lookAtMiniPoop = false, poopTalkCount = 0;
 	var poopCount = 0;
-	var flushHandler, lookAtFlush = false;
+	var flushHandler, lookAtFlush = false, exitTexture, flushColorChanged = false;
 
 // WEB_AUDIO_API!
 	var usingWebAudio = true, bufferLoader, convolver, mixer;
@@ -306,6 +307,9 @@ function superInit(){
 	document.body.addEventListener('touchmove', function(event) {
 	  event.preventDefault();
 	}, false);
+
+	// activate after landing
+	// window.addEventListener('mousedown', myMouseDown, false);
 
 	// WEB_AUDIO_API --------------------------------------
 		// bufferLoader = new BufferLoader(
@@ -748,17 +752,31 @@ function superInit(){
 		stars.push(st);
 	}
 
-	// lookDummy!
-		// projector = new THREE.Projector();
+	// RAYCASTER!
 		eyerayCaster = new THREE.Raycaster();
-		
-		var redDot = new THREE.SphereGeometry(0.2);
-		mat  = new THREE.MeshBasicMaterial( {color: 0xff0000, side: THREE.DoubleSide} );
-		lookDummy = new THREE.Mesh(redDot, mat);
-		scene.add(lookDummy);
 
 	// FLUSH_HANDLER
-		flushHandler = new THREE.Mesh( new THREE.SphereGeometry(1), mat);
+		mat  = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+		flushHandler = new THREE.Mesh( new THREE.BoxGeometry(3,1,1), mat );
+
+		exitTexture = new THREEx.DynamicTexture(512,256);
+		exitTexture.context.font = "bolder 250px StupidFont";
+		exitTexture.clear('white').drawText("EXIT", undefined, 220, 'red');
+		mat = new THREE.MeshBasicMaterial({map: exitTexture.texture, side: THREE.DoubleSide, transparent: true});
+		mesh = new THREE.Mesh(new THREE.PlaneGeometry( exitTexture.canvas.width, exitTexture.canvas.height), mat );
+		mesh.scale.set(0.0055,0.0055,0.0055);
+		mesh.rotation.x = Math.PI/2;
+		mesh.position.y = -0.52;
+		flushHandler.add(mesh);
+
+		mat = new THREE.MeshBasicMaterial({color: 0xffffff});
+		var meshh = new THREE.Mesh( new THREE.BoxGeometry(0.2,30,0.2), mat);
+		var meshhh = meshh.clone();
+		meshh.position.set(-1.4, 15, 0);
+		meshhh.position.set(1.4, 15, 0);
+		flushHandler.add(meshh);
+		flushHandler.add(meshhh);
+
 		flushHandler.position.y = 20;
 		scene.add(flushHandler);
 
@@ -808,17 +826,8 @@ function superInit(){
 	// Portals
 	var portalMat = new THREE.MeshNormalMaterial();
 	var portalGeo = new THREE.TorusGeometry( 10, 3, 10, 10 );
-	var portalLightGeo = new THREE.CylinderGeometry( 7, 20, 120, 10 );
+	var portalLightGeo = new THREE.CylinderGeometry( 7, 20, 120, 7 );
 	var portalLightMat = new THREE.MeshBasicMaterial( {color: 0xffff00, transparent: true, opacity: 0.2, side: THREE.DoubleSide} );
-
-	// partyLightMat = new THREE.ShaderMaterial({
-	// 	uniforms: {},
-	// 	vertexShader: document.getElementById('vertexShader').textContent,
-	// 	fragmentShader: document.getElementById('fragmentShader').textContent,
-	// 	side: THREE.DoubleSide,
-	// 	blending: THREE.AdditiveBlending,
-	// 	transparent: true
-	// });
 	
 	for(var i=0; i<7; i++){
 
@@ -995,7 +1004,6 @@ function superInit(){
 	// window.addEventListener('click', startSpeech, false);
 	window.addEventListener('keydown', myKeyPressed, false);
 	window.addEventListener('keyup', myKeyUp, false);
-	window.addEventListener('mousedown', myMouseDown, false);
 }
 
 function InitParticles() {
@@ -1075,12 +1083,12 @@ function createPoop( _pos, _dir ) {
 	
 	poopPhyMat = Physijs.createMaterial(
 		new THREE.MeshLambertMaterial({map: poopTex}),	//poopTex
-		.6, // medium friction
+		.8, // medium friction
 		.3 // low restitution
 	);
 	
 
-	poopPhy = new Physijs.ConeMesh(	//ConvexMesh
+	poopPhy = new Physijs.ConvexMesh(	//ConvexMesh or ConeMesh???
 		poopGeo,	//poopGeo
 		poopPhyMat
 	);
@@ -1237,6 +1245,7 @@ function init()
 		// window.addEventListener('click', fullscreen, false);
 
 		pplCount.rotation.y = controls.rotY();
+		flushHandler.rotation.y = controls.rotY();
 
 	},500);
 
@@ -1350,6 +1359,8 @@ function myKeyUp(event){
 	keyIsPressed = false;
 }
 
+// moved to DeviceControls
+/*
 function myMouseDown(event) {
 	if(yogaOver){	// bring back after developing
 		poopCount ++;
@@ -1380,6 +1391,7 @@ function myMouseDown(event) {
 			sendMessage( JSON.stringify(msg) );
 		}
 }
+*/
 
 function loadModelPlayer( _body, _left_arm, _right_arm, _head ){
 	loader = new THREE.JSONLoader();
@@ -1920,8 +1932,16 @@ function update()
 
 			if ( eyeIntersects[ 0 ].object == flushHandler ){
 				lookAtFlush = true;
+				flushHandler.material.color = new THREE.Color(0,1,0);
+				exitTexture.clear('white').drawText("EXIT", undefined, 220, 'green');
+
+				flushColorChanged = true;
 			} else {
 				lookAtFlush = false;
+				flushHandler.material.color = new THREE.Color(1,0,0);
+				exitTexture.clear('white').drawText("EXIT", undefined, 220, 'red');
+
+				flushColorChanged = false;
 			}
 
 			if ( eyeIntersects.length > 1 ) {
@@ -1942,6 +1962,13 @@ function update()
 			}
 		} else {
 			lookingAtSomeone = -1;
+
+			if(flushColorChanged){
+				flushHandler.material.color = new THREE.Color(1,0,0);
+				exitTexture.clear('white').drawText("EXIT", undefined, 220, 'red');
+				console.log("change handle color back!");
+				flushColorChanged = false;
+			}
 		}		
 
 	// Bathroom Light!
@@ -2076,6 +2103,10 @@ function EnterSceneTwo() {
 			// bring the body back
 			setTimeout(function(){
 				firstGuy.player.children[0].visible = true;
+
+				// able to move around and shoot
+				controls.movingEnabled = true;
+				controls.clickingTouchingEnabled = true;
 			}, 11000);
 
 		}, 10500);
@@ -2143,6 +2174,44 @@ function EnterSceneCelebrate() {
 	InitParticles();
 
 	inScCelebration = true;
+
+	// miniPoop out!
+		firstGuy.player.children[0].children[0].rotation.x = Math.PI/8;
+		firstGuy.player.children[0].children[0].children[0].rotation.z = -0.5;
+		firstGuy.player.children[0].children[0].children[1].rotation.z = 0.5;
+
+		var miniWaveTween1 = new TWEEN.Tween(firstGuy.player.children[0].children[0].children[1].rotation)
+							.to({z:1.5}, 100)
+							.repeat(7)
+							.yoyo(true);
+
+		var miniOutTween = new TWEEN.Tween(firstGuy.player.children[0].children[0].position)
+							.to({x:0, y:-0.5, z:1.5}, 2000)
+							.easing( TWEEN.Easing.Elastic.InOut )
+							.onComplete(function(){
+								// say something
+								sample.trigger( 13, 1 );
+							});
+
+		var miniWaveTween2 = new TWEEN.Tween(firstGuy.player.children[0].children[0].children[0].rotation)
+							.to({z:-1.5}, 100)
+							.repeat(7)
+							.yoyo(true)
+							.onComplete(function(){
+								miniShrinkTween.start();
+							});
+		
+		var miniShrinkTween = new TWEEN.Tween(firstGuy.player.children[0].children[0].scale)
+							.to({x:0,y:0,z:0}, 1000)
+							.delay(5000)
+							.easing( TWEEN.Easing.Elastic.InOut )
+							.onComplete(function(){
+								firstGuy.player.children[0].children[0].visible = false;
+							});
+
+		miniOutTween.chain(miniWaveTween1, miniWaveTween2);
+		miniOutTween.start();
+
 }
 
 function doPortalAni( index ){
@@ -2176,7 +2245,7 @@ function EnterSceneEnd() {
 		newPos.x = [0,0,0,0,0,0,0];
 		newPos.y = [-16,-16,-16,-22,-23,-36.5,-50];
 		newPos.z = [0,-6.5,-13,-10,-1,-1,-1];
-		controls.createTweenForMove( newPos, 21000 );
+		controls.createTweenForMove( newPos, 21000 );	// to-do: set duration dynamically
 		//
 		firstGuy.player.children[0].visible = false;
 
@@ -2187,6 +2256,7 @@ function EnterSceneEnd() {
 				.start();
 			//
 			firstGuy.player.children[0].visible = true;
+
 		},21000);
 
 		// exchange tube

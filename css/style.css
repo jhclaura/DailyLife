@@ -13,6 +13,10 @@ body {
 	font-family: StupidFont;
 }
 
+* {
+   -webkit-user-select: none;
+}
+
 #render-canvas {
     width: 100% !important;
     height: 100% !important;

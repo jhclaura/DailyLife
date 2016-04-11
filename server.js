@@ -176,7 +176,7 @@ var socketHandlers = function(socket,msg){
 			}
 		}
 		catch(error){
-			console.log('that socket was closed');
+			console.log('error of socketHandlers: ' + error);
 		}
 	}
 

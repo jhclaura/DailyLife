@@ -20,7 +20,8 @@ function SoundsSample(context) {
              '../audios/shortFart_6.mp3',
              '../audios/slowFart.mp3',
              '../audios/longFart_2.mp3',
-             '../audios/longFart_3.mp3'
+             '../audios/longFart_3.mp3',
+             '../audios/pooptalk_bye.mp3'     // poopBye: 13
             ], onLoaded);
 
   function onLoaded(buffers) {
