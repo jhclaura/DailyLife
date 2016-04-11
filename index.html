@@ -73,16 +73,41 @@
 			renderCanvas.style.display = "none";
 			if(blockerDiv) blockerDiv.style.display = "none";
 
+		</script>
+
+			<div id="splashPage">
+				<h1>Daily Life VR</h1>
+				<h2>Chapter. Pooping</h1>
+				<!-- <img src="images/poopPoster.gif" style="height:50%; margin: 10px auto; display:block;"> -->
+				<textarea id="playerName" placeholder="Who's this lucky one sitting on the toilet?"></textarea>
+				<img id="loadingImg" src="images/loadingbox.gif" width="60" height="60" style="margin:0 auto; display:block;">
+				<a href="#" id="startLink" style="display:none;" onclick="getNameToStart();">Start</a>
+			</div>
+
+		<script>
+			/*
+			var modeSelection = document.createElement('div');
+			// modeSelection.setAttribute("style", "width: 80%; position:absolute; left:0; right:0; top:0; bottom:0; margin:auto; line-height: 26px; text-align:center; font-size:14pt; height:26px;");
+			// modeSelection.setAttribute("style", "position:absolute; left:50%; top:50%; transform: translate(-50%, -50%); margin:auto; line-height: 26px; text-align:center; font-size:16pt;");
+			modeSelection.setAttribute("style", "position:absolute; left:0; right:0; top:0; bottom:0; margin:auto; line-height: 26px; text-align:center; font-size:16pt;");
+			// modeSelection.style.background =  "#FFFFFF";
+
+			var titleCard = document.createElement('h1');
+			titleCard.innerHTML = "Daily Life VR";
+
+			var pooperGif = document.createElement('img');
+			pooperGif.setAttribute("src", "images/poopPoster.gif");
+			// pooperGif.setAttribute("width", "100%");
+			pooperGif.setAttribute("height", "50%");
+			pooperGif.style.margin = "10px auto";
+			pooperGif.style.display = "block";
+
 			// NAME
 			var playerNName = "";
 			var playerNameInput = document.createElement('textarea');
 			// playerNameInput.style.backgroundColor = "transparent";
 			playerNameInput.id = "playerName";
 			playerNameInput.setAttribute("placeholder", "Who's this lucky one sitting on the toilet?");
-
-			var modeSelection = document.createElement('div');
-			modeSelection.setAttribute("style", "width: 50%; position:absolute; left:0; right:0; top:0; bottom:0; margin:auto; line-height: 26px; text-align:center; font-size:14pt; height:26px;");
-			// modeSelection.style.background =  "#FFFFFF";
 
 			var loadingImg = document.createElement('img');
 			loadingImg.setAttribute("src", "images/loadingbox.gif");
@@ -96,7 +121,16 @@
 			startLink.innerHTML = "Start";
 			startLink.style.display = "none";
 
-			startLink.onclick = function(){
+			*/
+			var loadingImg = byId("loadingImg");
+			// var startLink = byId("startLink");
+			var playerNameInput = byId("playerName");
+			playerNameInput.style.height = playerNameInput.scrollHeight + "px";
+			var splashPage = byId("splashPage");
+
+			var playerNName = "";
+
+			var getNameToStart = function(){
 				
 				if(playerNameInput.value==playerNName){
 					playerNName = "Anonymous";
@@ -106,17 +140,19 @@
 
 				renderCanvas.style.display = "inline";
 				if(blockerDiv) blockerDiv.style.display = "-webkit-box";
-				modeSelection.style.display = "none";
+				splashPage.style.display = "none";
 
 				// superInit();
 				// connectSocket();
 				init();
 			}
 
-			modeSelection.appendChild(playerNameInput);
-			modeSelection.appendChild(startLink);
-			modeSelection.appendChild(loadingImg);
-			document.body.appendChild(modeSelection);
+			// modeSelection.appendChild(titleCard);
+			// modeSelection.appendChild(pooperGif);
+			// modeSelection.appendChild(playerNameInput);
+			// modeSelection.appendChild(startLink);
+			// modeSelection.appendChild(loadingImg);
+			// document.body.appendChild(modeSelection);
 		</script>
 
 		<!-- Peer.js & WebSocket -->

@@ -383,7 +383,7 @@ function superInit(){
 		renderer.setPixelRatio(window.devicePixelRatio);
 		// renderer.setSize(window.innerWidth, window.innerHeight);
 
-		// renderer.setClearColor(0xc1ede5, 1);
+		renderer.setClearColor(0x000000, 1);
 		container.appendChild(renderer.domElement);
 
 	// VR_EFFECT
