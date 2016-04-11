@@ -614,7 +614,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			EnterSceneEnd();
 		} else {
 			if (lookingAtSomeone != -1)
-				moveMacaPoop( whoIamInLife, lookingAtSomeone );
+				createHeart( whoIamInLife, lookingAtSomeone );
 			else
 				createPoop( yawObject.position, scope.getDirection() );
 
