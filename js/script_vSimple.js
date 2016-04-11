@@ -1980,14 +1980,8 @@ function update()
 
 function render() 
 {	
-	if(!isItVR) {
-		renderer.render( scene, camera );
-		stats.update();
-	}
-	else {
-		effect.render(scene, camera);
-		stats.update();
-	}
+	effect.render(scene, camera);
+	stats.update();
 }
 
 function changeAni ( aniIndex ) {
