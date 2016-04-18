@@ -237,12 +237,14 @@ var keyIsPressed;
 	var box_geometry, box_material;
 	var lookingAtSomeone = -1;
 
-	var allThePoops = [], freezeVec = new THREE.Vector3(0,0,0), optimizePoopSize = 20;
+	var allThePoops = [], freezeVec = new THREE.Vector3(0,0,0), optimizePoopSize = 10;
 
 // TRANSITION
 	var initTime, meditationTime, celebrationTime, endTime;
 	var descendTween;
 	var inScMeditation = false, inScCelebration = false, inScEnd = false;
+	var isAllOver = false;
+	var noScrolling;
 
 // PARTICLES
 	var emitter, particleGroup;
@@ -270,6 +272,11 @@ connectSocket();
 // FUNCTIONS 
 ///////////////////////////////////////////////////////////
 function superInit(){
+
+	if(isMobile)
+		optimizePoopSize = 10;
+	else
+		optimizePoopSize = 20;
 
 	// WAVES
 		// for(var i=0; i<7; i++){
@@ -304,9 +311,11 @@ function superInit(){
 		console.log("Me in world: " + meInWorld + ", seat: " + meInSGroup);
 
 	//Prevent scrolling for Mobile
-	document.body.addEventListener('touchmove', function(event) {
-	  event.preventDefault();
-	}, false);
+	noScrolling = function(event){
+		event.preventDefault();
+	};
+
+	document.body.addEventListener('touchmove', noScrolling, false);
 
 	// activate after landing
 	// window.addEventListener('mousedown', myMouseDown, false);
@@ -580,7 +589,6 @@ function superInit(){
 		});
 	
 	// big toilet
-		toiletTex = textureLoader.load('images/caveS.jpg');
 		// toiletMat --> basic white
 		bigToiletMat = new THREE.MeshLambertMaterial( { color: 0xffffff, side: THREE.DoubleSide } );
 		bigToiletAniMat = new THREE.MeshBasicMaterial({ map: intestineTex, transparent: true, opacity: 0.0, side: THREE.DoubleSide });
@@ -757,7 +765,7 @@ function superInit(){
 
 	// FLUSH_HANDLER
 		mat  = new THREE.MeshBasicMaterial( {color: 0xff0000} );
-		flushHandler = new THREE.Mesh( new THREE.BoxGeometry(3,1,1), mat );
+		flushHandler = new THREE.Mesh( new THREE.BoxGeometry(5,1,3), mat );
 
 		exitTexture = new THREEx.DynamicTexture(512,256);
 		exitTexture.context.font = "bolder 250px StupidFont";
@@ -1083,13 +1091,13 @@ function createPoop( _pos, _dir ) {
 	
 	poopPhyMat = Physijs.createMaterial(
 		new THREE.MeshLambertMaterial({map: poopTex}),	//poopTex
-		.8, // medium friction
+		.8, // high friction
 		.3 // low restitution
 	);
 	
 
 	poopPhy = new Physijs.ConvexMesh(	//ConvexMesh or ConeMesh???
-		poopGeo,	//poopGeo
+		poopGeo.clone(),	//poopGeo
 		poopPhyMat
 	);
 	poopPhy.collisions = 0;
@@ -1113,7 +1121,11 @@ function createPoop( _pos, _dir ) {
 	//
 	allThePoops.push( poopPhy );
 
-	// Optimize performance!!
+
+	// Optimizing performance!!
+	///////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////
+
 	if(allThePoops.length>optimizePoopSize){
 		// console.log( allThePoops[ allThePoops.length-11 ] );
 
@@ -1124,8 +1136,10 @@ function createPoop( _pos, _dir ) {
 		allThePoops[ allThePoops.length-optimizePoopSize-1 ].setLinearVelocity( freezeVec );
 
 		if(allThePoops.length>optimizePoopSize*4){
-			scene.remove( allThePoops[ allThePoops.length-optimizePoopSize*4-1 ] );
-			allThePoops.splice(allThePoops.length-optimizePoopSize*2-1,1);
+			var removeIndex = allThePoops.length-optimizePoopSize*4-1;
+
+			scene.remove( allThePoops[ removeIndex ] );
+			allThePoops.splice( removeIndex,1 );
 		}
 	}
 }
@@ -1793,14 +1807,16 @@ function finishedLoading(bufferList){
 var lastRender = 0;
 
 function animate(timestamp) {
-	var delta = Math.min(timestamp - lastRender, 500);
-	lastRender = timestamp;
+	if(!isAllOver){
+		var delta = Math.min(timestamp - lastRender, 500);
+		lastRender = timestamp;
 
-	update();
-	
-	// Render the scene through the manager.
-	vrmanager.render(scene, camera, timestamp);
-	stats.update();
+		update();
+		
+		// Render the scene through the manager.
+		vrmanager.render(scene, camera, timestamp);
+		stats.update();
+	}
 
 	requestAnimationFrame(animate);
 }
@@ -2224,6 +2240,7 @@ function EnterSceneEnd() {
 	// stop the celebration
 	clearInterval( portalPoopAnimation );
 
+	// to-do
 	// remove particles
 	// remove all physijs poop
 
@@ -2244,9 +2261,13 @@ function EnterSceneEnd() {
 		firstGuy.player.children[0].visible = false;
 
 		setTimeout(function(){
+
 			new TWEEN.Tween( bathroom.rotation )
 				.to( {y:0}, 2000 )
 				.easing(TWEEN.Easing.Back.InOut)
+				.onComplete(function(){
+					bringBackSplashPage();
+				})
 				.start();
 			//
 			firstGuy.player.children[0].visible = true;
@@ -2291,6 +2312,72 @@ function EnterSceneEnd() {
 	console.log("remove word bubble!");
 
 	inScEnd = true;
+}
+
+function bringBackSplashPage() {
+
+	createFinalStatistic();
+
+	setTimeout(function(){
+
+		renderCanvas.style.opacity = 0;
+
+		setTimeout(function(){
+			renderCanvas.style.display = "none";
+			if(blockerDiv) blockerDiv.style.display = "none";
+			splashPage.style.display = "";
+			splashPage.style.position = "";
+
+			console.log( final_statistic );
+
+			isAllOver = true;
+		}, 2000);
+
+	}, 5000);
+}
+
+function createFinalStatistic() {
+	loadingImg.style.display = "none";
+	playerNameInput.style.display = "none";
+	startLink.style.display = "none";
+	finalBG.style.display = "block";
+
+	// Print out final statistic!
+	finalStat.innerHTML = "Congrats, ";
+	finalStat.innerHTML += final_statistic.playerName + ", for getting out your poop!<br><br>";
+	finalStat.innerHTML += "You have been in Daily Life Bathroom for " + " seconds,<br>";
+	finalStat.innerHTML += "pooping with " + final_statistic.pooperCount + " people.<br><br>";
+	finalStat.innerHTML += "You shot out totally " + final_statistic.totalPoop + " poop.<br>";
+
+	if(Object.keys(final_statistic.meToOthers).length>0){
+		finalStat.innerHTML += "And shot out PoopHeart to:<br>";
+		for(var key in final_statistic.meToOthers){
+			// skip loop if the property is from prototype
+	   		if (!final_statistic.meToOthers.hasOwnProperty(key)) continue;
+
+			finalStat.innerHTML += "       " + key + " * " + final_statistic.meToOthers[key] + ".<br>";
+		}
+	}
+
+	if(Object.keys(final_statistic.othersToMe).length>0){
+		finalStat.innerHTML += "<br>You also received PoopHeart from:<br>";
+		for(var key in final_statistic.othersToMe){
+			// skip loop if the property is from prototype
+	   		if (!final_statistic.othersToMe.hasOwnProperty(key)) continue;
+
+			finalStat.innerHTML += "       " + key + " * " + final_statistic.othersToMe[key] + ".<br>";
+		}
+		finalStat.innerHTML += "How sweet!<br>";
+	}
+
+	finalStat.innerHTML += "<br>Hope you enjoy the pooping experience.<br>";
+	finalStat.innerHTML += "Feel free to poop again, or leave email for update of next Daily Life VR Chapters.<br><br>";
+	finalStat.innerHTML += "Yours truly,<br><a href='http://www.jhclaura.com' target='_blank'>Laura Chen</a> and <a href='http://uselesspress.org/' target='_blank'>Useless Press</a>.";
+
+	// bring back scrolling function
+	document.body.removeEventListener('touchmove', noScrolling, false);
+	// scrollable
+	document.body.style.overflow = "auto";
 }
 
 function UpdatePplCount( thisWorldCount, totalCount ) {

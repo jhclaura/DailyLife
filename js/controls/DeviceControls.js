@@ -459,8 +459,18 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		} else {
 			if(lookingAtSomeone != -1){
 				createHeart( whoIamInLife, lookingAtSomeone );
+				//
+				var h_f_n = dailyLifePlayerDict[ lookingAtSomeone ].nname;
+				if( final_statistic.meToOthers[ h_f_n ] == undefined ){
+					final_statistic.meToOthers[ h_f_n ] = 1;
+				} else {
+					final_statistic.meToOthers[ h_f_n ] ++;
+				}
+
 			} else {
 				createPoop( yawObject.position, scope.getDirection() );
+				//
+				final_statistic.totalPoop ++;
 			}
 			
 			if(poopCount == 3){
@@ -613,10 +623,21 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		if(lookAtFlush){
 			EnterSceneEnd();
 		} else {
-			if (lookingAtSomeone != -1)
+			if (lookingAtSomeone != -1){
 				createHeart( whoIamInLife, lookingAtSomeone );
-			else
+
+				var h_f_n = dailyLifePlayerDict[ lookingAtSomeone ].nname;
+				if( final_statistic.meToOthers[ h_f_n ] == undefined ){
+					final_statistic.meToOthers[ h_f_n ] = 1;
+				} else {
+					final_statistic.meToOthers[ h_f_n ] ++;
+				}
+			}
+			else {
 				createPoop( yawObject.position, scope.getDirection() );
+
+				final_statistic.totalPoop ++;
+			}
 
 			var msg = {
 				'type': 'shootPoop',
@@ -634,7 +655,6 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 
 		//
 		// controls.align();
-
 		// moveForward = true;
 	};
 
