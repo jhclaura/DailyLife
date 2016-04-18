@@ -31,7 +31,9 @@ body {
 	transition: opacity 2s;
 	opacity: 1;
 
+	user-select: none;
 	-webkit-user-select: none;
+	-moz-user-select: none;
 }
 
 
