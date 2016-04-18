@@ -84,9 +84,9 @@
 				<!-- <img id="finalBG" src="images/chalkboard.jpg" height="80%" style="margin:0 auto; display:none;"> -->
 				<div id="finalBG">
 					<div id="finalStat"></div>
-					<a href="../index.html">I want to poop again!</a>
+					<a onclick="reloadPage();">I want to poop again!</a>
 				</div>
-				<a href="#" id="startLink" style="display:none;" onclick="getNameToStart();">Start</a>
+				<a id="startLink" style="display:none;" onclick="getNameToStart();">Start</a>
 			</div>
 
 		<script>
@@ -348,6 +348,10 @@
 					}
 				}, 5);
 			};
+
+			function reloadPage(){
+				location.reload();
+			}
 		</script>
 
 		<!-- WebVR Boilerplate -->
