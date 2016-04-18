@@ -2324,6 +2324,7 @@ function bringBackSplashPage() {
 			if(blockerDiv) blockerDiv.style.display = "none";
 			splashPage.style.display = "";
 			splashPage.style.position = "";
+			splashPage.style.minHeight = "800px";
 
 			console.log( final_statistic );
 
@@ -2338,6 +2339,8 @@ function createFinalStatistic() {
 	playerNameInput.style.display = "none";
 	startLink.style.display = "none";
 	finalBG.style.display = "block";
+	if(isMobile)
+		finalBG.style.width = "90%";
 
 	// Print out final statistic!
 	finalStat.innerHTML = "Congrats, ";

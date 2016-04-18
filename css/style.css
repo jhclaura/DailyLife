@@ -80,7 +80,7 @@ h1 {
 }
 
 #splashPage {
-	position:absolute;
+	/*position: absolute;*/
 	left:0; right:0; top:0; bottom:0;
 	margin: auto;
 	padding: 2em;	
@@ -106,7 +106,7 @@ h1 {
 	text-align:center;
 	padding: 1em;
 
-	font-size:1.5em;
+	font-size:1.3em;
 	color: white;
 	display: none;
 
