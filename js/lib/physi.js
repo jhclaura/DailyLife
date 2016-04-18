@@ -886,9 +886,6 @@ window.Physijs = (function() {
 			this.remove( object.mesh );
 			delete this._vehicles[ object._physijs.id ];
 		} else {
-			//
-			// console.log(object);
-			//
 			THREE.Mesh.prototype.remove.call( this, object );
 			if ( object._physijs ) {
 				delete this._objects[object._physijs.id];
