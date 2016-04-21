@@ -466,18 +466,16 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 				} else {
 					final_statistic.meToOthers[ h_f_n ] ++;
 				}
-
-			} else {
+				poopHeartFromMeCount ++;
+				final_statistic.totalHeart ++;
+			}
+			else {
 				createPoop( yawObject.position, scope.getDirection() );
 				//
+				final_statistic.youPoop ++;
 				final_statistic.totalPoop ++;
 			}
 			
-			if(poopCount == 3){
-				// enter celebration period
-				sound_poop.play();
-			}
-
 			// Send POSITION + DIRECTION to server!!
 				var msg = {
 					'type': 'shootPoop',
@@ -632,10 +630,12 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 				} else {
 					final_statistic.meToOthers[ h_f_n ] ++;
 				}
+				poopHeartFromMeCount ++;
+				final_statistic.totalHeart ++;
 			}
 			else {
 				createPoop( yawObject.position, scope.getDirection() );
-
+				final_statistic.youPoop ++;
 				final_statistic.totalPoop ++;
 			}
 
@@ -1035,7 +1035,8 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 					//
 					pplCount.rotation.y = vv1.y;
 
-					EnterSceneTwo();
+					// EnterSceneTwo();
+					PlayAudios();
 				},500);
 				
 				updatedBathroom = true;	
@@ -1109,7 +1110,8 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		//
 		pplCount.rotation.y = yawObject.rotation.y;
 
-		EnterSceneTwo();
+		// EnterSceneTwo();
+		PlayAudios();
 	}
 
 	// //debug

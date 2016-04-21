@@ -56,9 +56,15 @@ AniPerson.prototype.constructor = AniPerson;
 AniPerson.prototype.switchAni = function(){
 
 	// end of standUp, start to walk
+	// if ( this.keyframe == (this.aniOffsetSet[6]+this.keyframeSet[6]-1) ) {
+	// 	this.changeAni( 0 );
+	// }
+
+	// end of standUp, stand freeze
 	if ( this.keyframe == (this.aniOffsetSet[6]+this.keyframeSet[6]-1) ) {
-		this.changeAni( 0 );
+		this.changeAni( 7 );
 	}
+
 	// end of sit down, sit freeze
 	if ( this.keyframe == (this.aniOffsetSet[1]+this.keyframeSet[1]-1) ) {
 		this.changeAni( 2 );

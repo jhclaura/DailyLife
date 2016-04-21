@@ -84,18 +84,22 @@
 				<!-- <img id="finalBG" src="images/chalkboard.jpg" height="80%" style="margin:0 auto; display:none;"> -->
 				<div id="finalBG">
 					<div id="finalStat"></div>
-					<a href="#" onclick="reloadPage();">I want to poop again!</a>
+					<a onclick="reloadPage();">I want to poop again!</a>
 				</div>
-				<a href="#" id="startLink" style="display:none;" onclick="getNameToStart();">Start</a>
+				<a id="startLink" style="display:none;" onclick="getNameToStart();">Start</a>
 			</div>
 
 		<script>
 
 			var final_statistic = {};
 			final_statistic.pooperCount = 0;
+			final_statistic.totalVisit = 0;
 			final_statistic.totalPoop = 0;
+			final_statistic.totalHeart = 0;
+			final_statistic.youPoop = 0;
 			final_statistic.meToOthers = {};
 			final_statistic.othersToMe = {};
+			var poopHeartFromMeCount = 0;
 
 			var loadingImg = byId("loadingImg");
 			var startLink = byId("startLink");
@@ -148,7 +152,8 @@
 
 			var whoIamInLife = -1, initEnvironment = false;
 			var meInWorld = -1;
-			var totalPplInWorldsCount = 0;
+			var totalPplInWorldsCount = 0, totalVisitCount = 0;
+			var fullhouse = false, showAniPpl = false, doPplAni = false;
 
 			var currentPplAmount = 0;
 
@@ -203,10 +208,16 @@
 							}
 
 							// update people counting of this world & total worlds
-							UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data.totalCount );
+							UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data.totalCount, data.totalVisit );
 							totalPplInWorldsCount = data.totalCount;
+							totalVisitCount = data.totalVisit;
 
 							final_statistic.pooperCount ++;
+							final_statistic.totalVisit = totalVisitCount;
+
+							//
+							showAniPpl = (Object.keys(dailyLifePlayerDict).length>5) ? true : false;
+							fullhouse = (Object.keys(dailyLifePlayerDict).length==18) ? true : false;
 						}
 					}
 
@@ -219,8 +230,10 @@
 
 							whoIamInLife = data.index;
 							meInWorld = data.worldId;
+							totalVisitCount = data.totalVisit;
+							final_statistic.totalVisit = totalVisitCount;
 
-							console.log("I am #" + whoIamInLife + " in the #" + meInWorld + " Daily Life world");
+							console.log("I am #" + whoIamInLife + " in the #" + meInWorld + " Daily Life world, with total visit: " + totalVisitCount);
 
 							// init();
 							superInit();
@@ -251,6 +264,7 @@
 							// if it's aim at someone, create poop heart
 							if(data.toWhom != -1){								
 								createHeart( data.index, data.toWhom );
+								final_statistic.totalHeart ++;
 
 								// if the heart is to ME, display the message
 								if(data.toWhom == whoIamInLife){
@@ -285,8 +299,11 @@
 							console.log('removePlayer #' + data.removeID);
 						}
 						console.log("removed; total: " + Object.keys(dailyLifePlayerDict).length);
-						UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data.totalCount );
+						UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data.totalCount, data.totalVisit );
 						totalPplInWorldsCount = data.totalCount;
+
+						showAniPpl = (Object.keys(dailyLifePlayerDict).length>5) ? true : false;
+						fullhouse = (Object.keys(dailyLifePlayerDict).length==18) ? true : false;
 					}
 
 					// ADD_HISTORY_PLAYERS
@@ -314,12 +331,17 @@
 								console.log("create history players #" + data[i].id + ", in world #" + data[i].worldId);								
 							}
 							
-							UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data[i].totalCount );
-							totalPplInWorldsCount = data[i].totalCount;							
+							UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data[i].totalCount, data.totalVisit );
+							totalPplInWorldsCount = data[i].totalCount;
+							totalVisitCount = data[i].totalVisit;
 						}
 						final_statistic.pooperCount = totalPplInWorldsCount;
+						final_statistic.totalVisit = totalVisitCount;
 
 						updatePreviousPlayer = true;
+						//
+						showAniPpl = (Object.keys(dailyLifePlayerDict).length>5) ? true : false;
+						fullhouse = (Object.keys(dailyLifePlayerDict).length==18) ? true : false;
 					}
 				}
 				socketOpened = true;

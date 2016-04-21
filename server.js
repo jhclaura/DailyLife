@@ -25,6 +25,7 @@ var allPlayers = [];
 var allSockets = [], allSocketIDs = [];
 
 var totalCount = 0;	// first one will be 1
+var totalVisit = 0;
 
 var lifeIndex = {};
 lifeIndex.type = "index";
@@ -47,6 +48,7 @@ wss.on('connection', function(ws){
 
 	// TRACK TOTAL # OF PPL
 	totalCount++;
+	totalVisit++;
 
 	// GET_THE_SEAT_INDEX
 
@@ -85,7 +87,7 @@ wss.on('connection', function(ws){
 
 		lifeIndex.index = occuIndex;
 		lifeIndex.worldId = Math.floor(occuIndex/18);
-
+		lifeIndex.totalVisit = totalVisit;
 		mySocket.send( JSON.stringify(lifeIndex) );
 	}
 
@@ -161,6 +163,7 @@ var socketHandlers = function(socket,msg){
 					//
 					msg.worldId = socket.worldId;
 					msg.totalCount = totalCount;
+					msg.totalVisit = totalVisit;
 
 					allPlayers.push(msg);	// restoring all the players
 				}

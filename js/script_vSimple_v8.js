@@ -150,8 +150,7 @@ var keyIsPressed;
 	var dailyLifePlayerDict = {};
 
 	var person, personGeo, personMat, toiletTex, toiletMat;
-	var persons = [], personIsWalking = [], personCircle, personAmount = 3;
-	var personWalkTimeoutID, personAniInterval, personAniIntervalCounter=0, personAniSequence = [1,3,5,6];
+	var persons = [], personCircle, personAmount = 3;
 	var poop, poopGeo, poopTex, poopMat, poopHat, poopHeartTex;
 	var poopM, poopMGeo, poopMTex, poopMMat, poopHeartGeo, poopHeartMat, poopHeart;
 	var personBody, personHead, personToilet;
@@ -177,7 +176,6 @@ var keyIsPressed;
 	var poopIsTalking = false, lookAtMiniPoop = false, poopTalkCount = 0;
 	var poopCount = 0;
 	var flushHandler, lookAtFlush = false, exitTexture, flushColorChanged = false;
-	var poster, posterMat;
 
 // WEB_AUDIO_API!
 	var usingWebAudio = true, bufferLoader, convolver, mixer;
@@ -341,7 +339,6 @@ function superInit(){
 			volume: 3,
 			onend: function() {
 				console.log("End of the opening!");
-				sound_bathroom.fadeIn(1,1000);
 				EnterSceneTwo_v2();
 			}
 		});
@@ -366,13 +363,11 @@ function superInit(){
 
 		sound_poop = new Howl({
 			urls: ['../audios/Mr.Sandman.mp3'],
-			// loop: true,
-			volume: 1,
+			loop: true,
+			volume: 0,
 			onend: function() {
 				// end of poop (celebration) -> end
 				sound_bathroom.play().fadeIn(1, 2000);
-
-				EnterSceneEnd();
 			}
 		});
 
@@ -497,9 +492,6 @@ function superInit(){
 		intestineTex = textureLoader.load( "images/intestines.png" );
 		intestineAnimator = new TextureAnimator( intestineTex, 3, 1, 4, 60, [0,1,2,1] );
 		intestineMat = new THREE.MeshBasicMaterial({map: intestineTex});
-
-		var posterTex = textureLoader.load( "images/poster_texture.jpg" );
-		posterMat = new THREE.MeshLambertMaterial({map: posterTex});
 
 		// v.2
 		// intestineTex = textureLoader.load( "images/intestine_1.png" );
@@ -1269,12 +1261,10 @@ function init()
 
 	// AniPerson
 		personCircle = new THREE.Object3D();
-		personCircle.visible = false;
 		personMat = new THREE.MeshBasicMaterial( { map: personTex, morphTargets: true } );
 
 		if(!isMobile) personAmount = 5;
 
-		/* v.1
 		for(var i=0; i<personAmount; i++){
 			//toiletCenters[meInSGroup] 
 			var pppos = new THREE.Vector3( toiletCenters[0].x+Math.sin(Math.PI*2/personAmount*i)*28, toiletCenters[0].y+7, toiletCenters[0].z+Math.cos(Math.PI*2/personAmount*i)*28 );
@@ -1290,47 +1280,7 @@ function init()
 			if(i==(personAmount-1))
 				scene.add(personCircle);
 		}
-		personCircle.visible = false;
-		*/
-
-		// v.2
-		for(var i=0; i<personAmount; i++){
-			//toiletCenters[meInSGroup] 
-			var pppos = new THREE.Vector3( toiletCenters[0].x+Math.sin(Math.PI*2/personAmount*i)*21, toiletCenters[0].y+8.5, toiletCenters[0].z+Math.cos(Math.PI*2/personAmount*i)*21 );
-			person = new AniPersonBeAdded( 0.4, personKeyframeSet, personAniOffsetSet, personGeo, personMat, pppos, 1 );
-			person.body.rotation.y = Math.PI*2/personAmount*i + Math.PI;
-
-			persons.push(person);
-			personIsWalking.push(false);
-			person.body.scale.set(2,2,2);
-
-			// look forward
-			// person.body.rotation.y = (360/personAmount*i+90)*(Math.PI/180);
-
-			scene.add(person.body);
-		}
-
-		personAniInterval = setInterval(function(){
-			/*
-			//1 --> walk
-			person.changeAni( 0 );
-			//2 --> sit down
-			person.changeAni( 1 );
-			//3 --> push
-			person.changeAni( 3 );
-			//4 --> release
-			person.changeAni( 5 );
-			//5 --> stand up
-			person.changeAni( 6 );
-			*/
-
-			// console.log('do animation' + personAniIntervalCounter%5);
-			for (var i = 0; i < persons.length; i++) {
-				persons[i].changeAni( personAniSequence[personAniIntervalCounter%5] );
-			};
-
-			personAniIntervalCounter++;
-		}, 2000);
+		// personCircle.visible = false;
 
 	
 	// CONTROLS
@@ -1386,10 +1336,10 @@ function myKeyPressed( event ){
 				createPoop( controls.position(), controls.getDirection() );
 			}
 			
-			// if(poopCount == 3){
-			// 	// enter celebration period
-			// 	sound_poop.play();
-			// }
+			if(poopCount == 3){
+				// enter celebration period
+				sound_poop.play();
+			}
 
 			// Send POSITION + DIRECTION to server!!
 				var msg = {
@@ -1516,8 +1466,7 @@ function loadSitModelPlayer( _head, _body, _toilet ){
 							  "models/bathroom/b_smallWhite.js",
 							  "models/bathroom/paper_bottom.js",
 							  "models/bathroom/paper_top.js",
-							  "models/bathroom2.js",
-							  "models/poster.js" );
+							  "models/bathroom2.js" );
 	});
 }
 
@@ -1622,7 +1571,7 @@ function loadModelBathrooms( _w, _g, _y, _t ){
 	});
 }
 
-function loadModelBathroomsV2( _door, _side, _floor, _s, s_white, p_b, p_t, _t, _pst ){
+function loadModelBathroomsV2( _door, _side, _floor, _s, s_white, p_b, p_t, _t ){
 	loader = new THREE.JSONLoader();
 	bathroom = new THREE.Object3D();
 	bathroom_stuff = new THREE.Object3D();
@@ -1726,14 +1675,9 @@ function loadModelBathroomsV2( _door, _side, _floor, _s, s_white, p_b, p_t, _t, 
 
 								bathroom.add(bathroomLight);
 
-							loader.load( _pst, function( geometry6 ){
-								var poster = new THREE.Mesh( geometry6, posterMat );
-								bathroom.add(poster);
+							scene.add(bathroom);
 
-								scene.add(bathroom);
-
-								loadingCount();
-							});
+							loadingCount();
 						});
 					});
 				});
@@ -1913,46 +1857,16 @@ function update()
 		// 	person.switchAni();
 		// }
 
-		// if player > 5, visible = true
-		// if player > 5 + poopheart > 5, walk
-		// if player fullhouse, animation
-
 		// if(personCircle.visible){
-			if(persons.length==5){
-				for(var i=0; i<persons.length; i++){
-					persons[i].update(null);
-					persons[i].switchAni();
-				}
-				// RandomWalking();
-			}
+		// 	if(persons.length==5){
+		// 		for(var i=0; i<persons.length; i++){
+		// 			persons[i].update(null);
+		// 			persons[i].switchAni();
+		// 		}
+		// 	}
 		// 	personCircle.rotation.y += 0.003;
 		// }
 
-		// if( xxx ){
-		// 	personAniInterval(function(){
-				
-		// 		// //1 --> walk
-		// 		// person.changeAni( 0 );
-		// 		// //2 --> sit down
-		// 		// person.changeAni( 1 );
-		// 		// //3 --> push
-		// 		// person.changeAni( 3 );
-		// 		// //4 --> release
-		// 		// person.changeAni( 5 );
-		// 		// //5 --> stand up
-		// 		// person.changeAni( 6 );
-				
-		// 		for (var i = 0; i < persons.length; i++) {
-		// 			persons[i].changeAni( personAniSequence[personAniIntervalCounter%5] );
-		// 		};
-
-		// 		personAniIntervalCounter++;
-		// 	}, 2000);
-		// }
-
-	if( final_statistic.totalPoop>50 && final_statistic.totalHeart>30 ){
-		EnterSceneCelebrate();
-	}
 
 	if(waterwave.body.morphTargetInfluences.length>0){
 		waterwave.update(null);
@@ -1966,7 +1880,6 @@ function update()
 	// windowAnimator.updateLaura( 300*dt );
 	intestineAnimator.updateLaura( 300*dt );
 	// intestinesAnimator.updateLaura( 300*dt );
-
 
 	// POOP_TALK
 	// v.1
@@ -2289,15 +2202,10 @@ function EnterSceneTwo() {
 
 function EnterSceneCelebrate() {
 	if(inScCelebration) return;
-	inScCelebration = true;
-
-	sound_meditation.fadeOut(0,2000);
-	sound_poop.play();
 
 	var hackIndex=0;
 	var hackIndex2=0;
-
-	// PORTALS animation
+	// PORTALS
 	for(var i=0; i<portals.length; i++){
 		portals[i].visible = true;
 		portalLights[i].visible = true;
@@ -2349,6 +2257,8 @@ function EnterSceneCelebrate() {
 
 	InitParticles();
 
+	inScCelebration = true;
+
 	// miniPoop out!
 		firstGuy.player.children[0].children[0].rotation.x = Math.PI/8;
 		firstGuy.player.children[0].children[0].children[0].rotation.z = -0.5;
@@ -2396,48 +2306,6 @@ function doPortalAni( index ){
 		.start();
 }
 
-var ppWalking = false;
-
-function RandomWalking() {
-
-	for(var i=0; i<persons.length; i++){
-
-		if( !personIsWalking[i] ){
-
-			var randomDestination = new THREE.Vector3(Math.random()*70-35, Math.random()*10+toiletCenters[0].y+5, -5+Math.random()*70-35);
-			var oldPos = persons[i].body.position;
-			var tDist = oldPos.distanceTo(randomDestination);
-
-			// rotation!
-				var cc = new THREE.Vector2( randomDestination.x - oldPos.x, randomDestination.z - oldPos.z );
-				var dd = new THREE.Vector2( 0, 1 );
-
-				var angleDesToMe = Math.acos( cc.dot(dd)/cc.length() ) * 180 / Math.PI;
-				if(cc.x<0){
-					angleDesToMe *= -1;
-					angleDesToMe += 360;
-				}
-
-			new TWEEN.Tween(persons[i].body.position).to({x: randomDestination.x, z: randomDestination.z}, tDist*80).start();
-			new TWEEN.Tween(persons[i].body.rotation).to({y: angleDesToMe*Math.PI/180}, 400).easing( TWEEN.Easing.Back.In).start();
-
-			personIsWalking[i] = true;
-
-			ResetWalkingStatus( i, tDist*160+2500+2000 );
-		}
-	}		
-	// ppWalking = true;
-
-	// personWalkTimeoutID = setTimeout(function(){
-	// 	ppWalking = false;
-	// }, tDist*80+2500+2000);
-}
-
-function ResetWalkingStatus(index, time) {
-	setTimeout(function(){
-		personIsWalking[index] = false;
-	}, time);
-}
 
 function EnterSceneEnd() {
 
@@ -2466,9 +2334,7 @@ function EnterSceneEnd() {
 		//
 		firstGuy.player.children[0].visible = false;
 
-		// if haven't mute the meditation yet in Celebration Scene
-		if(!inScCelebration)
-			sound_meditation.fadeOut(0,2000);
+		sound_meditation.fadeOut(0,2000);
 
 		setTimeout(function(){
 
@@ -2562,8 +2428,7 @@ function createFinalStatistic() {
 	finalStat.innerHTML += "You have been in Daily Life Bathroom for " + " seconds long,<br>";
 	finalStat.innerHTML += "pooping with " + final_statistic.pooperCount + " people,<br>";
 	finalStat.innerHTML += "in a public bathroom which has been visited by " + final_statistic.totalVisit + " people.<br><br>";
-	finalStat.innerHTML += "There are totally " + final_statistic.totalPoop + " poop were generated,<br>";
-	finalStat.innerHTML += "In which you contributed " + final_statistic.youPoop + " poop.<br>";
+	finalStat.innerHTML += "You shot out totally " + final_statistic.totalPoop + " poop.<br>";
 
 	if(Object.keys(final_statistic.meToOthers).length>0){
 		finalStat.innerHTML += "And shot out PoopHeart to:<br>";
@@ -2594,11 +2459,6 @@ function createFinalStatistic() {
 	document.body.removeEventListener('touchmove', noScrolling, false);
 	// scrollable
 	document.body.style.overflow = "auto";
-	// remove pointerlock (if existed)
-	if(blockerDiv){
-		instructions.removeEventListener( 'click', funToCall, false );
-		blocker.style.display = 'none';
-	}
 }
 
 function UpdatePplCount( thisWorldCount, totalCount, totalVisit ) {
