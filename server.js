@@ -119,7 +119,8 @@ wss.on('connection', function(ws){
 					'type': 'removePlayer',
 					'removeID': ws.id,
 					'worldId': ws.worldId,
-					'totalCount': totalCount
+					'totalCount': totalCount,
+					'totalVisit': totalVisit
 				};
 
 				// console.log("player #%d disconnected.", ws.id);		// allSocketIDs[i]
