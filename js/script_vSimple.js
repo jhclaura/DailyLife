@@ -158,8 +158,8 @@ var keyIsPressed;
 	var keyframe, lastKeyframe, currentKeyframe;
 	var animOffset = 1, keyduration = 28;
 	var aniStep = 0, aniTime = 0, slowAni = 0.4;
-	var personKeyframeSet =   [ 28, 15,  1,  8,  1, 12, 10 ];
-	var personAniOffsetSet = [  1, 30, 48, 50, 58, 60, 72 ];	//2: sit freeze; 4: push freeze
+	var personKeyframeSet =   [ 28, 15,  1,  8,  1, 12, 10, 1 ];
+	var personAniOffsetSet = [  1, 30, 48, 50, 58, 60, 72, 82 ];	//2: sit freeze; 4: push freeze; 7: stand freeze
 	var personFreeze = false;
 
 // TOILET_RELATED
@@ -900,6 +900,7 @@ function superInit(){
 		// PEOPLE_COUNT
 			pplCountTex = new THREEx.DynamicTexture(1024,1024);
 			pplCountTex.context.font = "bolder 150px StupidFont";
+			pplCountTex.clear();
 			// pplCountTex.clear().drawText("Pooper", undefined, 100, 'white');
 			// pplCountTex.drawText("Count", undefined, 250, 'white');
 			// pplCountTex.drawText("this world: 0", undefined, 500, 'white');
@@ -1326,7 +1327,7 @@ function init()
 
 			// console.log('do animation' + personAniIntervalCounter%5);
 			for (var i = 0; i < persons.length; i++) {
-				persons[i].changeAni( personAniSequence[personAniIntervalCounter%5] );
+				persons[i].changeAni( personAniSequence[personAniIntervalCounter%4] );
 			};
 
 			personAniIntervalCounter++;
@@ -1950,9 +1951,16 @@ function update()
 		// 	}, 2000);
 		// }
 
-	if( final_statistic.totalPoop>50 && final_statistic.totalHeart>30 ){
-		EnterSceneCelebrate();
+	if(strictToCele){
+		if( final_statistic.totalPoop>50 && final_statistic.totalHeart>30 ){
+			EnterSceneCelebrate();
+		}
+	} else {
+		if( final_statistic.totalPoop>30 ){
+			EnterSceneCelebrate();
+		}
 	}
+	
 
 	if(waterwave.body.morphTargetInfluences.length>0){
 		waterwave.update(null);

@@ -1,4 +1,3 @@
-
 // THE ANI PERSON OBJECT
 function AniObject( _speed, _keyframeSet, _aniOffsetSet, _geo, _mat, _pos, _scale ) {
 
@@ -37,7 +36,6 @@ AniObject.prototype.update = function( _newPosition ) {
 }
 
 AniObject.prototype.changeAni = function( aniIndex ){
-
 	this.aniOffset = this.aniOffsetSet[ aniIndex ];
 	this.keyframe = this.aniOffsetSet[ aniIndex ];
 	this.currentKeyframe = this.keyframe;
@@ -50,6 +48,7 @@ AniObject.prototype.changeAni = function( aniIndex ){
 function AniPerson(_speed, _keyframeSet, _aniOffsetSet, _geo, _mat, _pos, _scale){
 	AniObject.call(this, _speed, _keyframeSet, _aniOffsetSet, _geo, _mat, _pos, _scale);
 }
+
 AniPerson.prototype = Object.create(AniObject.prototype);
 AniPerson.prototype.constructor = AniPerson;
 

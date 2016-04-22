@@ -154,6 +154,7 @@
 			var meInWorld = -1;
 			var totalPplInWorldsCount = 0, totalVisitCount = 0;
 			var fullhouse = false, showAniPpl = false, doPplAni = false;
+			var strictToCelePplNumber = 3, strictToCele = false;
 
 			var currentPplAmount = 0;
 
@@ -218,6 +219,7 @@
 							//
 							showAniPpl = (Object.keys(dailyLifePlayerDict).length>5) ? true : false;
 							fullhouse = (Object.keys(dailyLifePlayerDict).length==18) ? true : false;
+							strictToCele = (Object.keys(dailyLifePlayerDict).length>=strictToCelePplNumber) ? true : false;
 						}
 					}
 
@@ -304,6 +306,7 @@
 
 						showAniPpl = (Object.keys(dailyLifePlayerDict).length>5) ? true : false;
 						fullhouse = (Object.keys(dailyLifePlayerDict).length==18) ? true : false;
+						strictToCele = (Object.keys(dailyLifePlayerDict).length>=strictToCelePplNumber) ? true : false;
 					}
 
 					// ADD_HISTORY_PLAYERS
@@ -342,6 +345,7 @@
 						//
 						showAniPpl = (Object.keys(dailyLifePlayerDict).length>5) ? true : false;
 						fullhouse = (Object.keys(dailyLifePlayerDict).length==18) ? true : false;
+						strictToCele = (Object.keys(dailyLifePlayerDict).length>=strictToCelePplNumber) ? true : false;
 					}
 				}
 				socketOpened = true;
