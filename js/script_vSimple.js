@@ -945,7 +945,7 @@ function superInit(){
 			var poopTower = new THREE.Object3D();
 
 			for(var i=0; i<portals.length; i++){
-				var alienPoop = new THREE.Mesh( poopGeo, poopMaterial );
+				var alienPoop = new THREE.Mesh( poopGeo.clone(), poopMaterial );
 				alienPoop.scale.set(9.5,9.5,9.5);
 				alienPoop.position.set( portals[i].position.x, 0, portals[i].position.z);
 				alienPoop.lookAt( new THREE.Vector3(myPosition.x, 0, myPosition.z) );
@@ -960,8 +960,8 @@ function superInit(){
 			poopTower.scale.y=0.1;
 			// poopTower.visible = false;
 
-			scene.add(poopTower);
 			poopTowers.push( poopTower );
+			scene.add(poopTower);
 		}
 		
 		// Init Portal Poop animation
@@ -987,7 +987,7 @@ function superInit(){
 		// 	}
 		// }, 2000);
 
-	},1000);
+	},2000);
 
 	// InitParticles();
 
