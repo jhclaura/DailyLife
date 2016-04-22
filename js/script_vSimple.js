@@ -957,7 +957,7 @@ function superInit(){
 
 			// v.2
 			poopTower.position.y = portals[0].position.y;
-			poopTower.scale.y=0;
+			poopTower.scale.y=0.01;
 			poopTower.visible = false;
 
 			scene.add(poopTower);
@@ -1175,7 +1175,7 @@ function createHeart( fromIndex, toIndex ) {
 				.easing( TWEEN.Easing.Quadratic.InOut );
 
 	var mHGone = new TWEEN.Tween(poopH.scale)
-				.to( {x: 0, y: 0, z: 0}, 1000 )
+				.to( {x: 0.01, y: 0.01, z: 0.01}, 1000 )
 				.easing( TWEEN.Easing.Elastic.In )
 				// .delay( 1000 )
 				.onComplete(function(){
