@@ -957,7 +957,7 @@ function superInit(){
 
 			// v.2
 			poopTower.position.y = portals[0].position.y;
-			poopTower.scale.y=0.1;
+			// poopTower.scale.y=0.1;
 			poopTower.visible = false;
 
 			scene.add(poopTower);
