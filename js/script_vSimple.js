@@ -2384,7 +2384,7 @@ function EnterSceneCelebrate() {
 							});
 		
 		var miniShrinkTween = new TWEEN.Tween(firstGuy.player.children[0].children[0].scale)
-							.to({x:0,y:0,z:0}, 1000)
+							.to({x:0.01,y:0.01,z:0.01}, 1000)
 							.delay(5000)
 							.easing( TWEEN.Easing.Elastic.InOut )
 							.onComplete(function(){
@@ -2566,15 +2566,15 @@ function createFinalStatistic() {
 	// Print out final statistic!
 	finalStat.innerHTML = "Congrats, ";
 	finalStat.innerHTML += final_statistic.playerName + ", for getting out your poop!<br>";
-	finalStat.innerHTML += "All the poop here thank you for releasing them to the world.<br><br>";
+	finalStat.innerHTML += "All the poop here thank you for your efforts to release them to the world.<br><br>";
 	finalStat.innerHTML += "You have been in Daily Life Bathroom for " + " seconds long,<br>";
 	finalStat.innerHTML += "pooping with " + final_statistic.pooperCount + " people,<br>";
 	finalStat.innerHTML += "in a public bathroom which has been visited by " + final_statistic.totalVisit + " people.<br><br>";
-	finalStat.innerHTML += "There are totally " + final_statistic.totalPoop + " poop were generated,<br>";
-	finalStat.innerHTML += "In which you contributed " + final_statistic.youPoop + " poop.<br>";
+	finalStat.innerHTML += "There are totally " + final_statistic.totalPoop + " poop were generated when you were in the bathroom,<br>";
+	finalStat.innerHTML += "and you contributed " + final_statistic.youPoop + " poop.<br><br>";
 
 	if(Object.keys(final_statistic.meToOthers).length>0){
-		finalStat.innerHTML += "And shot out PoopHeart to:<br>";
+		finalStat.innerHTML += "You shot out PoopHeart to:<br>";
 		for(var key in final_statistic.meToOthers){
 			// skip loop if the property is from prototype
 	   		if (!final_statistic.meToOthers.hasOwnProperty(key)) continue;
@@ -2591,12 +2591,12 @@ function createFinalStatistic() {
 
 			finalStat.innerHTML += "       " + key + " * " + final_statistic.othersToMe[key] + ".<br>";
 		}
-		finalStat.innerHTML += "So sweet!<br>";
+		finalStat.innerHTML += "<br>How sweet!<br>";
 	}
 
-	finalStat.innerHTML += "<br>Hope you enjoy the pooping experience.<br>";
+	finalStat.innerHTML += "<br>Hope you enjoy the pooping experience in Daily Life Bathroom.<br>";
 	finalStat.innerHTML += "Feel free to poop again, and sign up for update of coming Daily Life VR chapters.<br><br>";
-	finalStat.innerHTML += "Yours truly,<br><a href='http://www.jhclaura.com' target='_blank'>Laura Chen</a> and <a href='http://uselesspress.org/' target='_blank'>Useless Press</a>.<br><br>";
+	finalStat.innerHTML += "Yours truly,<br><a href='http://www.jhclaura.com' target='_blank'>Laura Chen</a> and <a href='http://uselesspress.org/' target='_blank'>Useless Press</a>.<br><br><br>";
 
 	// bring back scrolling function
 	document.body.removeEventListener('touchmove', noScrolling, false);
