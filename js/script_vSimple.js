@@ -957,8 +957,8 @@ function superInit(){
 
 			// v.2
 			poopTower.position.y = portals[0].position.y;
-			// poopTower.scale.y=0.1;
-			poopTower.visible = false;
+			poopTower.scale.y=0.1;
+			// poopTower.visible = false;
 
 			scene.add(poopTower);
 			poopTowers.push( poopTower );
@@ -2258,6 +2258,11 @@ function EnterSceneTwo() {
 		new TWEEN.Tween( hemiLight )
 		.to( {intensity: 1}, 1000 )
 		.start();
+
+		// disappear pooptowers
+		for (var i = 0; i < poopTowers.length; i++) {
+			poopTowers[i].visible = false;
+		};
 
 		setTimeout(function(){	
 
