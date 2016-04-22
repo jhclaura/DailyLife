@@ -2339,7 +2339,7 @@ function EnterSceneCelebrate() {
 
 			if(poopTowers[i].position.y < -125){
 				poopTowers[i].position.y = 100;
-				poopTowers[i].scale.y=0;
+				poopTowers[i].scale.y=0.01;
 
 				new TWEEN.Tween(poopTowers[i].scale)
 					.to({y:1}, 1000)
