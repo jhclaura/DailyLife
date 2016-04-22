@@ -338,10 +338,10 @@ function superInit(){
 
 		sound_opening = new Howl({
 			urls: ['../audios/opening_2.mp3'],
-			volume: 3,
+			volume: 1,
 			onend: function() {
 				console.log("End of the opening!");
-				sound_bathroom.fadeIn(1,1000);
+				sound_bathroom.fadeIn(0.9, 2000);
 				EnterSceneTwo_v2();
 			}
 		});
