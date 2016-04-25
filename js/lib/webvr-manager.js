@@ -97,15 +97,21 @@ ButtonManager.prototype.setMode = function(mode, isVRCompatible) {
       this.fsButton.style.display = 'block';
       this.fsButton.src = this.ICONS.fullscreen;
       this.vrButton.style.display = (isVRCompatible ? 'block' : 'none');
+      //
+      uselesspress.style.display = 'block';
       break;
     case Modes.MAGIC_WINDOW:
       this.fsButton.style.display = 'block';
       this.fsButton.src = this.ICONS.exitFullscreen;
       this.vrButton.style.display = (isVRCompatible ? 'block' : 'none');
+      //
+      uselesspress.style.display = 'block';
       break;
     case Modes.VR:
       this.fsButton.style.display = 'none';
       this.vrButton.style.display = 'none';
+      //
+      uselesspress.style.display = 'none';
       break;
   }
 
