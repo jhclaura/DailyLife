@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Daily Life VR - Bathroom</title>
+		<title>Daily Life VR - Poop</title>
 		<meta charset="utf-8">
 		<!-- <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"> -->
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no">
@@ -77,16 +77,19 @@
 
 			<div id="splashPage" style="display:block; position:absolute;">
 				<h1>Daily Life VR</h1>
-				<h2>Chapter. Pooping</h1>
+				<h2>Chapter 1: Poop</h1>
 				<!-- <img src="images/poopPoster.gif" style="height:50%; margin: 10px auto; display:block;"> -->
-				<textarea id="playerName" placeholder="Who's this lucky one sitting on the toilet?"></textarea>
+				<!-- <textarea id="playerName" placeholder="Who's this lucky one sitting on the toilet?"></textarea> -->
+				<input type="text" id="playerName" placeholder="Who's this lucky one sitting on the toilet?" style="width:25em;height:2em"></input>
 				<img id="loadingImg" src="images/loadingbox.gif" width="60" height="60" style="margin:0 auto; display:block;">
+				<div id="loadingTxt" style="color:yellow">loading</div>
 				<!-- <img id="finalBG" src="images/chalkboard.jpg" height="80%" style="margin:0 auto; display:none;"> -->
 				<div id="finalBG">
 					<div id="finalStat"></div>
 					<a onclick="reloadPage();">I want to poop again!</a>
 				</div>
-				<a id="startLink" style="display:none;" onclick="getNameToStart();">Start</a>
+				<p></p>
+				<a id="startLink" style="display:none;cursor:pointer" onclick="getNameToStart();">Start</a>
 			</div>
 
 		<script>
@@ -102,15 +105,17 @@
 			var poopHeartFromMeCount = 0;
 
 			var loadingImg = byId("loadingImg");
+			var loadingTxt = byId("loadingTxt");
 			var startLink = byId("startLink");
 			var playerNameInput = byId("playerName");
-			playerNameInput.style.height = playerNameInput.scrollHeight + "px";
+			// playerNameInput.style.height = playerNameInput.scrollHeight + "px";
 
 			var splashPage = byId("splashPage");
 			var finalBG = byId("finalBG");
 			var finalStat = byId("finalStat");
 
 			var playerNName = "";
+			var readyToStart = false;
 
 			var getNameToStart = function(){
 				
@@ -135,6 +140,20 @@
 				// document.querySelector('*').style.MozUserSelect = "none";
 				init();
 			}
+
+			window.addEventListener('keydown', myFakeEnter, false);
+
+			function myFakeEnter( event ){
+				if(!readyToStart) return;
+
+				switch ( event.keyCode ) {
+					case 13: //enter
+						getNameToStart();
+						window.removeEventListener('keydown', myFakeEnter, false);
+						break;
+				}
+			}
+
 		</script>
 
 		<!-- Peer.js & WebSocket -->
@@ -403,6 +422,18 @@
 		<script type="text/javascript" src="js/AniObject.js"></script>
 		<script type="text/javascript" src="js/script_functions.js"></script>
 		<script type="text/javascript" src="js/script_vSimple.js"></script>
+
+		<div id="useless-widget" data-author="Laura JuoHsin Chen" data-href="http://uselesspress.org/things/dailylife-poop/"></div>
+		<script type="text/javascript" src="http://uselesspress.org/widget/widget.js" async></script>
+		<script>
+		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+		  ga('create', 'UA-65359720-7', 'auto');
+		  ga('send', 'pageview');
+		</script>
 
 	</body>
 </html>

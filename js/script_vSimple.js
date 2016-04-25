@@ -896,7 +896,6 @@ function superInit(){
 		*/
 
 	setTimeout(function(){
-
 		// PEOPLE_COUNT
 			pplCountTex = new THREEx.DynamicTexture(1024,1024);
 			pplCountTex.context.font = "bolder 150px StupidFont";
@@ -913,80 +912,6 @@ function superInit(){
 			pplCount.scale.set(0.04,0.04,0.04);
 			pplCount.position.y = 80;
 			scene.add( pplCount );
-
-		var poopMaterial = new THREE.MeshLambertMaterial({map: poopTex});
-
-		// v.1
-		// for(var i=0; i<portals.length; i++){
-
-		// 	var poopTower = new THREE.Object3D();
-		// 	for(var j=0; j<10; j++){
-		// 		var alienPoop = new THREE.Mesh( poopGeo, poopMaterial );
-		// 		alienPoop.scale.set(10,10,10);
-		// 		alienPoop.position.set( portals[i].position.x, portals[i].position.y-25*j, portals[i].position.z);
-		// 		// scene.add(alienPoop);
-		// 		poopTower.add(alienPoop);
-		// 	}
-		// 	scene.add(poopTower);
-		// 	poopTowers.push( poopTower );
-
-		// 	// new TWEEN.Tween(poopTower.position)
-		// 	// .to({y:"-25"}, 1000)
-		// 	// .easing( TWEEN.Easing.Elastic.InOut )
-		// 	// .repeat(5)
-		// 	// .start();
-		// }
-
-		// v.2
-		var poopRingIndex = 0;
-		for(var j=0; j<10; j++){
-
-			// poop RING!
-			var poopTower = new THREE.Object3D();
-
-			for(var i=0; i<portals.length; i++){
-				var alienPoop = new THREE.Mesh( poopGeo.clone(), poopMaterial );
-				alienPoop.scale.set(9.5,9.5,9.5);
-				alienPoop.position.set( portals[i].position.x, 0, portals[i].position.z);
-				alienPoop.lookAt( new THREE.Vector3(myPosition.x, 0, myPosition.z) );
-
-				poopTower.add(alienPoop);
-			}
-			// v.1
-			// poopTower.position.y = portals[0].position.y-25*j;
-
-			// v.2
-			poopTower.position.y = portals[0].position.y;
-			poopTower.scale.y=0.1;
-			// poopTower.visible = false;
-
-			poopTowers.push( poopTower );
-			scene.add(poopTower);
-		}
-		
-		// Init Portal Poop animation
-		// portalPoopAnimation = setInterval(function(){
-		// 	// portals height: 100
-		// 	for(var i=0; i<poopTowers.length; i++){
-
-		// 		if(poopTowers[i].position.y < -125){
-		// 			poopTowers[i].position.y = 100;
-		// 			poopTowers[i].scale.y=0;
-
-		// 			new TWEEN.Tween(poopTowers[i].scale)
-		// 				.to({y:1}, 1000)
-		// 				.start();
-		// 		}
-
-		// 		new TWEEN.Tween(poopTowers[i].position)
-		// 			.to({x: poopTowers[i].position.x,
-		// 				 y: poopTowers[i].position.y-25,
-		// 				 z: poopTowers[i].position.z}, 1000)
-		// 			.easing( TWEEN.Easing.Elastic.InOut )
-		// 			.start();
-		// 	}
-		// }, 2000);
-
 	},2000);
 
 	// InitParticles();
@@ -1018,6 +943,81 @@ function superInit(){
 	// window.addEventListener('click', startSpeech, false);
 	window.addEventListener('keydown', myKeyPressed, false);
 	window.addEventListener('keyup', myKeyUp, false);
+}
+
+function CreatePoopRing() {
+	var poopMaterial = new THREE.MeshLambertMaterial({map: poopTex});
+
+	// v.1
+	// for(var i=0; i<portals.length; i++){
+
+	// 	var poopTower = new THREE.Object3D();
+	// 	for(var j=0; j<10; j++){
+	// 		var alienPoop = new THREE.Mesh( poopGeo, poopMaterial );
+	// 		alienPoop.scale.set(10,10,10);
+	// 		alienPoop.position.set( portals[i].position.x, portals[i].position.y-25*j, portals[i].position.z);
+	// 		// scene.add(alienPoop);
+	// 		poopTower.add(alienPoop);
+	// 	}
+	// 	scene.add(poopTower);
+	// 	poopTowers.push( poopTower );
+
+	// 	// new TWEEN.Tween(poopTower.position)
+	// 	// .to({y:"-25"}, 1000)
+	// 	// .easing( TWEEN.Easing.Elastic.InOut )
+	// 	// .repeat(5)
+	// 	// .start();
+	// }
+
+	// v.2
+	var poopRingIndex = 0;
+	for(var j=0; j<10; j++){
+
+		// poop RING!
+		var poopTower = new THREE.Object3D();
+
+		for(var i=0; i<portals.length; i++){
+			var alienPoop = new THREE.Mesh( poopGeo.clone(), poopMaterial );
+			alienPoop.scale.set(9.5,9.5,9.5);
+			alienPoop.position.set( portals[i].position.x, 0, portals[i].position.z);
+			alienPoop.lookAt( new THREE.Vector3(myPosition.x, 0, myPosition.z) );
+
+			poopTower.add(alienPoop);
+		}
+		// v.1
+		// poopTower.position.y = portals[0].position.y-25*j;
+
+		// v.2
+		poopTower.position.y = portals[0].position.y;
+		poopTower.scale.y=0.1;
+		// poopTower.visible = false;
+
+		poopTowers.push( poopTower );
+		scene.add(poopTower);
+	}
+	
+	// Init Portal Poop animation
+	// portalPoopAnimation = setInterval(function(){
+	// 	// portals height: 100
+	// 	for(var i=0; i<poopTowers.length; i++){
+
+	// 		if(poopTowers[i].position.y < -125){
+	// 			poopTowers[i].position.y = 100;
+	// 			poopTowers[i].scale.y=0;
+
+	// 			new TWEEN.Tween(poopTowers[i].scale)
+	// 				.to({y:1}, 1000)
+	// 				.start();
+	// 		}
+
+	// 		new TWEEN.Tween(poopTowers[i].position)
+	// 			.to({x: poopTowers[i].position.x,
+	// 				 y: poopTowers[i].position.y-25,
+	// 				 z: poopTowers[i].position.z}, 1000)
+	// 			.easing( TWEEN.Easing.Elastic.InOut )
+	// 			.start();
+	// 	}
+	// }, 2000);
 }
 
 function InitParticles() {
@@ -1781,6 +1781,8 @@ function loadModelPoop( _poop ){
 
 		// createBox();
 		loadingCount();
+
+		CreatePoopRing();
 	});
 }
 
@@ -2639,7 +2641,9 @@ function loadingCount() {
 
 	if(loadedCount>=8) {
 		// hide the loading gif and display start link
-		startLink.style.display = "block";
+		startLink.style.display = "";
 		loadingImg.style.display = "none";
+		loadingTxt.style.display = "none";
+		readyToStart = true;
 	}
 }
