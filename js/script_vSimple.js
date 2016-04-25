@@ -10,7 +10,8 @@ WebVRConfig = {
 	BUFFER_SCALE: 0.5, // Default: 1.0.
 	PREVENT_DISTORTION: true,
 	// Polyfill optimizations
-	DIRTY_SUBMIT_FRAME_BINDINGS: true
+	DIRTY_SUBMIT_FRAME_BINDINGS: true,
+	isUndistorted: false
 };
 
 // PointerLockControls
