@@ -11,6 +11,8 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<!-- <link rel="manifest" href="/manifest.json"> -->
 		<link rel="stylesheet" type="text/css" href="css/style.css">
+
+		<script src='js/lib/firebase.js'></script>
 	</head>
 	<body>		
 		<div id="render-canvas"></div>
@@ -22,6 +24,8 @@
 		<script type="text/javascript" src="http://uselesspress.org/widget/widget.js" async></script>
 
 		<script type="text/javascript">
+			var myDataRef = new Firebase('https://dailylifevr-poop.firebaseio.com/');
+			// myDataRef.push({name: 'laura', text: 'hi'});
 
 			//device detection
 			//source: http://stackoverflow.com/questions/3514784/what-is-the-best-way-to-detect-a-mobile-device-in-jquery
@@ -90,7 +94,7 @@
 				<!-- <img id="finalBG" src="images/chalkboard.jpg" height="80%" style="margin:0 auto; display:none;"> -->
 				<div id="finalBG">
 					<div id="finalStat"></div>
-					<a onclick="reloadPage();">I want to poop again!</a>
+					<a onclick="reloadPage();" style="cursor:pointer">I want to poop again!</a>
 				</div>
 				<p></p>
 				<a id="startLink" style="display:none;cursor:pointer" onclick="getNameToStart();">Start</a>

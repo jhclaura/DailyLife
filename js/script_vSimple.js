@@ -368,7 +368,7 @@ function superInit(){
 		});
 
 		sound_poop = new Howl({
-			urls: ['../audios/Mr.Sandman.mp3'],
+			urls: ['../audios/poopsong.mp3'],
 			// loop: true,
 			volume: 1,
 			onend: function() {
@@ -387,7 +387,7 @@ function superInit(){
 
 	time = Date.now();
 	clock = new THREE.Clock();
-	clock.start();
+	// clock.start();
 
 	// THREE.JS -------------------------------------------
 	// RENDERER
@@ -1226,6 +1226,7 @@ function moveMacaPoop( fromIndex, toIndex ) {
 function init() 
 {	
 	console.log("init!");
+	clock.start();
 
 	// emitter.start();
 
@@ -2573,18 +2574,22 @@ function createFinalStatistic() {
 	if(isMobile)
 		finalBG.style.width = "90%";
 
+	var stayTime = Math.floor(clock.elapsedTime);
+	var stayTimeMin = Math.floor(stayTime/60);
+	var stayTimeSec = Math.floor(stayTime%60);
+
 	// Print out final statistic!
 	finalStat.innerHTML = "Congrats, ";
 	finalStat.innerHTML += final_statistic.playerName + ", for getting out your poop!<br>";
-	finalStat.innerHTML += "All the poop here thank you for your efforts to release them to the world.<br><br>";
-	finalStat.innerHTML += "You have been in Daily Life Bathroom for " + " seconds long,<br>";
+	finalStat.innerHTML += "All the poops here thank you for your efforts to release them into the world.<br><br>";
+	finalStat.innerHTML += "You have been in Daily Life Bathroom for " + stayTimeMin + " minutes and " + stayTimeSec + " seconds long,<br>";
 	finalStat.innerHTML += "pooping with " + final_statistic.pooperCount + " people,<br>";
-	finalStat.innerHTML += "in a public bathroom which has been visited by " + final_statistic.totalVisit + " people.<br><br>";
-	finalStat.innerHTML += "There are totally " + final_statistic.totalPoop + " poop were generated when you were in the bathroom,<br>";
-	finalStat.innerHTML += "and you contributed " + final_statistic.youPoop + " poop.<br><br>";
+	finalStat.innerHTML += "in a communal bathroom which has been visited by " + final_statistic.totalVisit + " people.<br><br>";
+	finalStat.innerHTML += "There were a total of " + final_statistic.totalPoop + " poops were generated while you were in the bathroom,<br>";
+	finalStat.innerHTML += "and you contributed " + final_statistic.youPoop + " of them.<br><br>";
 
 	if(Object.keys(final_statistic.meToOthers).length>0){
-		finalStat.innerHTML += "You shot out PoopHeart to:<br>";
+		finalStat.innerHTML += "You shot out Poop Heart to:<br>";
 		for(var key in final_statistic.meToOthers){
 			// skip loop if the property is from prototype
 	   		if (!final_statistic.meToOthers.hasOwnProperty(key)) continue;
@@ -2594,18 +2599,18 @@ function createFinalStatistic() {
 	}
 
 	if(Object.keys(final_statistic.othersToMe).length>0){
-		finalStat.innerHTML += "<br>You also received PoopHeart from:<br>";
+		finalStat.innerHTML += "<br>You also received Poop Heart from:<br>";
 		for(var key in final_statistic.othersToMe){
 			// skip loop if the property is from prototype
 	   		if (!final_statistic.othersToMe.hasOwnProperty(key)) continue;
 
 			finalStat.innerHTML += "       " + key + " * " + final_statistic.othersToMe[key] + ".<br>";
 		}
-		finalStat.innerHTML += "<br>How sweet!<br>";
+		finalStat.innerHTML += "<br>How sweet!<br><br>";
 	}
 
-	finalStat.innerHTML += "<br>Hope you enjoy the pooping experience in Daily Life Bathroom.<br>";
-	finalStat.innerHTML += "Feel free to poop again, and sign up for update of coming Daily Life VR chapters.<br><br>";
+	finalStat.innerHTML += "Hope you enjoy the pooping experience in Daily Life Bathroom.<br>";
+	finalStat.innerHTML += "Feel free to poop again, and sign up for updates about forthcoming chapters of Daily Life VR.<br><br>";
 	finalStat.innerHTML += "Yours truly,<br><a href='http://www.jhclaura.com' target='_blank'>Laura Chen</a> and <a href='http://uselesspress.org/' target='_blank'>Useless Press</a>.<br><br><br>";
 
 	// bring back scrolling function
@@ -2617,6 +2622,9 @@ function createFinalStatistic() {
 		instructions.removeEventListener( 'click', funToCall, false );
 		blocker.style.display = 'none';
 	}
+
+	//
+	myDataRef.push(final_statistic);
 }
 
 function UpdatePplCount( thisWorldCount, totalCount, totalVisit ) {
