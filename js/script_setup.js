@@ -9,8 +9,7 @@ WebVRConfig = {
 	MOUSE_KEYBOARD_CONTROLS_DISABLED: true, // Default: false.
 	BUFFER_SCALE: 0.5, // Default: 1.0.
 	PREVENT_DISTORTION: true,
-	// Polyfill optimizations
-	DIRTY_SUBMIT_FRAME_BINDINGS: true,
+	DIRTY_SUBMIT_FRAME_BINDINGS: true, // Polyfill optimizations
 	isUndistorted: false
 };
 

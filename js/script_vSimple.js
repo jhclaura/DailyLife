@@ -372,12 +372,15 @@ function superInit(){
 		// });
 
 		function poop_TLM(txt){
+			console.log();
+			poopTex = txt;
 			poopMat = new THREE.MeshLambertMaterial({map: txt});
 			loadModelPoop( "models/poop.js" );
 		};
 		poopTex = textureLoader.load('images/poop.png', poop_TLM);
 
 		function poopHeart_TLM(txt){
+			poopHeartTex = txt;
 			poopHeartMat = new THREE.MeshLambertMaterial({map: txt});
 			loadModelPoopHeart( "models/poopHeart.js" );
 		};
@@ -449,24 +452,25 @@ function superInit(){
 							
 		setTimeout(function(){
 			// fucking model loading time
-			loader.load( "models/bigToilet_v5_2.js", function( geometry ) {
-				var tubeGeo = geometry;
+			loadModelBigToilet();
+			// loader.load( "models/bigToilet_v5_2.js", function( geometry ) {
+			// 	var tubeGeo = geometry;
 
-				bigToiletTubeNorm = new THREE.Mesh( tubeGeo.clone(), bigToiletMat );
-				bigToiletTubeNorm.scale.set(1.5, 1.5, 1.5);
-				bigToiletTubeNorm.position.copy( toiletCenters[0]);
-				scene.add( bigToiletTubeNorm );
+			// 	bigToiletTubeNorm = new THREE.Mesh( tubeGeo.clone(), bigToiletMat );
+			// 	bigToiletTubeNorm.scale.set(1.5, 1.5, 1.5);
+			// 	bigToiletTubeNorm.position.copy( toiletCenters[0]);
+			// 	scene.add( bigToiletTubeNorm );
 
-				bigToiletTubeAni = new THREE.Mesh( tubeGeo.clone(), bigToiletAniMat );
-				bigToiletTubeAni.scale.set(1.5, 1.5, 1.5);
-				bigToiletTubeAni.position.copy( toiletCenters[0]);
-				bigToiletTubeAni.visible = false;
-				scene.add( bigToiletTubeAni );
+			// 	bigToiletTubeAni = new THREE.Mesh( tubeGeo.clone(), bigToiletAniMat );
+			// 	bigToiletTubeAni.scale.set(1.5, 1.5, 1.5);
+			// 	bigToiletTubeAni.position.copy( toiletCenters[0]);
+			// 	bigToiletTubeAni.visible = false;
+			// 	scene.add( bigToiletTubeAni );
 
-				// loadingCount();
-				loadingCountText( "big toilet" );
-				ReadyToLoadModelPlayer();
-			});
+			// 	// loadingCount();
+			// 	loadingCountText( "big toilet" );
+			// 	ReadyToLoadModelPlayer();
+			// });
 		}, 2000);
 
 		// v.2
@@ -562,20 +566,23 @@ function superInit(){
 	// wave
 		// waterwaveTex = textureLoader.load('images/wave.png');
 		function waterwave_TLM(txt){
-			loader = new THREE.JSONLoader();
-			loader.load( "models/waterwave.js", function( geometry ) {
+			waterwaveTex = txt;
+			console.log("water wave tex loaded!");
+			var loader = new THREE.JSONLoader();
+			loader.load( "models/water_wave_onesided.js", function( geometry ) {
 				var waterPos = 	new THREE.Vector3(0,-7,3);
 				waterPos.add( toiletCenters[0] );
 
 				waterwave = new AniObject( 0.3, waterKeyframeSet, waterAniOffsetSet, geometry,
-										   new THREE.MeshBasicMaterial({ map: waterwaveTex, morphTargets: true, transparent: true, opacity: 0.5 }),
+										   new THREE.MeshBasicMaterial({ map: waterwaveTex, morphTargets: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide }),
 										   new THREE.Vector3(0,-12,3), 1.7 );
 
 				// loadingCount();
 				loadingCountText("water wave");
 			});
 		};
-		waterwaveTex = textureLoader.load('images/wave.png', waterwave_TLM);
+		var ttl = new THREE.TextureLoader();
+		waterwaveTex = ttl.load('images/wave2.png', waterwave_TLM);
 
 	/*
 	// TREE
@@ -656,17 +663,18 @@ function superInit(){
 		// });
 
 	// PERSON
-		loader.load( "models/person3.js", function( geometry ) {
-			personGeo = geometry;
+		loadModelAniGuy();
+		// loader.load( "models/person3.js", function( geometry ) {
+		// 	personGeo = geometry;
 
-			// loadingCount();
-			loadingCountText("ani guy");
-		});
+		// 	// loadingCount();
+		// 	loadingCountText("ani guy");
+		// });
 
 	// STAR
 	for(var i=0; i<starFiles.length; i++){
 		// glowTexture = new THREE.ImageUtils.loadTexture( starFiles[i] );
-		textureLoader = new THREE.TextureLoader();
+		var textureLoader = new THREE.TextureLoader();
 		glowTexture = textureLoader.load( starFiles[i], function(texture){
 			glowTexture = texture;
 			glowTextures.push(glowTexture);
@@ -870,11 +878,44 @@ function superInit(){
 }
 
 function ReadyToLoadModelPlayer() {
+	textureLoader = new THREE.TextureLoader();
 	skinTexture = textureLoader.load('images/guyW.png', function(texture){
 		skinTexture = texture;
 		loadModelPlayer( "models/Guy2/GuyB.js", "models/Guy2/GuyLA.js", "models/Guy2/GuyRA.js", "models/Guy2/GuyH.js" );
 		//
 		loadSitModelPlayer( "models/personHead.js", "models/personBody.js", "models/toilet.js" );
+	});
+}
+
+function loadModelBigToilet() {
+	var loader = new THREE.JSONLoader();
+	loader.load( "models/bigToilet_v5_2.js", function( geometry ) {
+		var tubeGeo = geometry;
+
+		bigToiletTubeNorm = new THREE.Mesh( tubeGeo.clone(), bigToiletMat );
+		bigToiletTubeNorm.scale.set(1.5, 1.5, 1.5);
+		bigToiletTubeNorm.position.copy( toiletCenters[0]);
+		scene.add( bigToiletTubeNorm );
+
+		bigToiletTubeAni = new THREE.Mesh( tubeGeo.clone(), bigToiletAniMat );
+		bigToiletTubeAni.scale.set(1.5, 1.5, 1.5);
+		bigToiletTubeAni.position.copy( toiletCenters[0]);
+		bigToiletTubeAni.visible = false;
+		scene.add( bigToiletTubeAni );
+
+		// loadingCount();
+		loadingCountText( "big toilet" );
+		ReadyToLoadModelPlayer();
+	});
+}
+
+function loadModelAniGuy() {
+	var loader = new THREE.JSONLoader();
+	loader.load( "models/person3.js", function( geometry ) {
+		personGeo = geometry;
+
+		// loadingCount();
+		loadingCountText("ani guy");
 	});
 }
 
@@ -1974,10 +2015,12 @@ function update()
 		}
 	}
 	
-
-	if(waterwave.body.morphTargetInfluences.length>0){
+	if(waterwave.body){
 		waterwave.update(null);
 	}
+	// if(waterwave.body.morphTargetInfluences.length>0){
+	// 	waterwave.update(null);
+	// }
 
 	// STAR
 	for(var i=0; i<starAnimators.length; i++){
