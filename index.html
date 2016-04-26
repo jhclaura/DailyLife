@@ -11,7 +11,6 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<!-- <link rel="manifest" href="/manifest.json"> -->
 		<link rel="stylesheet" type="text/css" href="css/style.css">
-
 		<script src='js/lib/firebase.js'></script>
 	</head>
 	<body>		
@@ -100,6 +99,25 @@
 				<a id="startLink" style="display:none;cursor:pointer" onclick="getNameToStart();">Start</a>
 			</div>
 
+			<div id="aboutPage" style="display:block; position:absolute;">
+				<a id="aboutPageTitle" style="cursor:pointer; text-decoration: underline; color:#fc81a6" onclick="ToggleAbout();">About (↑)</a>
+				<a id="instructionTitle" style="cursor:pointer; text-decoration: underline; color:#0ecbf9" onclick="ToggleInstruction();">Instruction (↑)</a>
+				<div id="aboutPageDetail" style="display:none;">
+					<p>Daily Life VR is a WebVR series of “We ___ together”, about some of life’s most basic and essential activities: eating, pooping, sleeping, etcetera. Virtual mini-worlds allow people to do these usually-solitary, mundane activities companionably together. Read more here.</p>
+					<li>Creators: <a href="http://www.jhclaura.com/" target='_blank'>Laura Juo-Hsin Chen</a>, <a href="http://uselesspress.org/" target='_blank'>Useless Press</a></li>
+					<li>Cinematographer: <a href="http://portfolio.ziv.bz/" target='_blank'>Ziv Schneider</a></li>
+					<li>Actors: Alix Rule, <a href="http://andysigler.com/" target='_blank'>Andy Sigler</a>, Gladys Chan, <a href="http://www.jhclaura.com/" target='_blank'>Laura Chen</a>, Rachel, <a href="http://portfolio.ziv.bz/" target='_blank'>Ziv Schneider</a></li>
+					<li>Composer: <a href="http://andysigler.com/" target='_blank'>Andy Sigler</a>, Mingus Murray</li>
+					<li>Thank <a href="https://twitter.com/tojiro" target='_blank'>Brandon Jones</a> and <a href="https://twitter.com/vvuk" target='_blank'>Vladimir Vukicevic</a> for WebVR spec. <a href="http://smus.com/" target='_blank'>Boris Smus</a> for WebVR polyfill and boilerplate. <a href="https://twitter.com/mrdoob" target='_blank'>Ricardo Cabello</a> for THREE.js.</li>
+				</div>
+				<div id="instructionDetail" style="display:none;">
+					<img class="insImg" src="images/instructions/toVR.jpg">
+					<img class="insImg" src="images/instructions/toPoop.jpg">
+					<img class="insImg" src="images/instructions/toWalk.jpg">
+					<img class="insImg" src="images/instructions/toAim.jpg">
+				</div>
+			</div>
+
 		<script>
 
 			var final_statistic = {};
@@ -141,6 +159,11 @@
 				
 				splashPage.style.display = "none";
 
+				aboutPage.style.display = "none";
+				aboutDetail.style.display = "none";
+				aboutTitle.innerText = "About (↑)";
+				showAbout = false;
+
 				// superInit();
 				// connectSocket();
 
@@ -148,6 +171,39 @@
 				// document.querySelector('*').style.webkitUserSelect = "none";
 				// document.querySelector('*').style.MozUserSelect = "none";
 				init();
+			}
+
+			var showAbout = false, showInstruction = false;
+			var aboutDetail = byId("aboutPageDetail");
+			var aboutTitle = byId("aboutPageTitle");
+			var instructDetail = byId("instructionDetail");
+			var instructTitle = byId("instructionTitle");
+			// → ← ↑ ↓
+			var ToggleAbout = function() {
+				showAbout = !showAbout;
+
+				if(showAbout){
+					if(showInstruction) ToggleInstruction();
+					aboutDetail.style.display = "block";
+					aboutTitle.innerText = "About (↓)";
+				} else {
+					aboutDetail.style.display = "none";
+					aboutTitle.innerText = "About (↑)";
+				}
+			}
+
+			var ToggleInstruction = function() {
+				showInstruction = !showInstruction;
+
+				if(showInstruction){
+					if(showAbout) ToggleAbout();
+
+					instructDetail.style.display = "block";
+					instructTitle.innerText = "Instruction (↓)";
+				} else {
+					instructDetail.style.display = "none";
+					instructTitle.innerText = "Instruction (↑)";
+				}
 			}
 
 			window.addEventListener('keydown', myFakeEnter, false);

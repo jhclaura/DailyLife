@@ -227,7 +227,8 @@ function superInit(){
 		event.preventDefault();
 	};
 
-	document.body.addEventListener('touchmove', noScrolling, false);
+	// move after init(), just and scroll the instruction images
+	// document.body.addEventListener('touchmove', noScrolling, false);
 
 	// activate after landing
 	// window.addEventListener('mousedown', myMouseDown, false);
@@ -392,6 +393,10 @@ function superInit(){
 		// 	poopMMat = new THREE.MeshBasicMaterial({map: poopMTex});
 		// 	loadModelPoopMacaron( "models/poopMacaron2.js" );
 		// });
+
+	// wave
+		// waterwaveTex = textureLoader.load('images/wave.png');
+		waterwaveTex = textureLoader.load('images/wave2.png', loadModelWave);
 
 	// BATHROOM
 		//v1
@@ -563,27 +568,6 @@ function superInit(){
 				});
 			});
 		});
-
-	// wave
-		// waterwaveTex = textureLoader.load('images/wave.png');
-		function waterwave_TLM(txt){
-			waterwaveTex = txt;
-			console.log("water wave tex loaded!");
-			var loader = new THREE.JSONLoader();
-			loader.load( "models/water_wave_onesided.js", function( geometry ) {
-				var waterPos = 	new THREE.Vector3(0,-7,3);
-				waterPos.add( toiletCenters[0] );
-
-				waterwave = new AniObject( 0.3, waterKeyframeSet, waterAniOffsetSet, geometry,
-										   new THREE.MeshBasicMaterial({ map: waterwaveTex, morphTargets: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide }),
-										   new THREE.Vector3(0,-12,3), 1.7 );
-
-				// loadingCount();
-				loadingCountText("water wave");
-			});
-		};
-		var ttl = new THREE.TextureLoader();
-		waterwaveTex = ttl.load('images/wave2.png', waterwave_TLM);
 
 	/*
 	// TREE
@@ -851,21 +835,21 @@ function superInit(){
 
 	///////////////////////////////////////////////////////
 
-	stats = new Stats();
-	stats.domElement.style.position = 'absolute';
-	stats.domElement.style.bottom = '5px';
-	stats.domElement.style.zIndex = 100;
-	stats.domElement.children[ 0 ].style.background = "transparent";
-	stats.domElement.children[ 0 ].children[1].style.display = "none";
-	container.appendChild( stats.domElement );
+	// stats = new Stats();
+	// stats.domElement.style.position = 'absolute';
+	// stats.domElement.style.bottom = '5px';
+	// stats.domElement.style.zIndex = 100;
+	// stats.domElement.children[ 0 ].style.background = "transparent";
+	// stats.domElement.children[ 0 ].children[1].style.display = "none";
+	// container.appendChild( stats.domElement );
 
-	physics_stats = new Stats();
-	physics_stats.domElement.style.position = 'absolute';
-	physics_stats.domElement.style.bottom = '55px';
-	physics_stats.domElement.style.zIndex = 100;
-	physics_stats.domElement.children[ 0 ].style.background = "transparent";
-	physics_stats.domElement.children[ 0 ].children[1].style.display = "none";
-	container.appendChild( physics_stats.domElement );
+	// physics_stats = new Stats();
+	// physics_stats.domElement.style.position = 'absolute';
+	// physics_stats.domElement.style.bottom = '55px';
+	// physics_stats.domElement.style.zIndex = 100;
+	// physics_stats.domElement.children[ 0 ].style.background = "transparent";
+	// physics_stats.domElement.children[ 0 ].children[1].style.display = "none";
+	// container.appendChild( physics_stats.domElement );
 
 	//////////////////////////////////////////////////////
 	
@@ -887,6 +871,23 @@ function ReadyToLoadModelPlayer() {
 		loadSitModelPlayer( "models/personHead.js", "models/personBody.js", "models/toilet.js" );
 	});
 }
+
+function loadModelWave(txt){
+	waterwaveTex = txt;
+	console.log("water wave tex loaded!");
+	var loader = new THREE.JSONLoader();
+	loader.load( "models/water_wave_onesided.js", function( geometry ) {
+		var waterPos = 	new THREE.Vector3(0,-7,3);
+		waterPos.add( toiletCenters[0] );
+
+		waterwave = new AniObject( 0.3, waterKeyframeSet, waterAniOffsetSet, geometry,
+								   new THREE.MeshBasicMaterial({ map: waterwaveTex, morphTargets: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide }),
+								   new THREE.Vector3(0,-12,3), 1.7 );
+
+		// loadingCount();
+		loadingCountText("water wave");
+	});
+};
 
 function loadModelBigToilet() {
 	var loader = new THREE.JSONLoader();
@@ -1239,6 +1240,7 @@ function moveMacaPoop( fromIndex, toIndex ) {
 function init() 
 {	
 	console.log("init!");
+	document.body.addEventListener('touchmove', noScrolling, false);
 	clock.start();
 
 	// create stars
@@ -1939,7 +1941,7 @@ function animate(timestamp) {
 		
 		// Render the scene through the manager.
 		vrmanager.render(scene, camera, timestamp);
-		stats.update();
+		// stats.update();
 	}
 
 	requestAnimationFrame(animate);
@@ -1955,13 +1957,13 @@ function update()
 	controls.update( Date.now() - time );
 	var dt = clock.getDelta();
 
-	if(particleGroup)
+	if(particleGroup && !inScCelebration)
 		particleGroup.tick( dt );
 
 	// scene.simulate();
 	scene.simulate( undefined, 2 );
 
-	physics_stats.update();
+	// physics_stats.update();
 
 	// TRIS!!!
 		/*
@@ -2002,9 +2004,14 @@ function update()
 		
 		// if player fullhouse, walk!!
 		if(fullhouse && personsAnied){
-			for (var i = 0; i < persons.length; i++) {
-				persons[i].changeAni(0);
-			};
+
+			if(!personsWalked){
+				for (var i = 0; i < persons.length; i++) {
+					persons[i].changeAni(0);
+				};
+				clearInterval( personAniInterval );
+				personsWalked = true;
+			}
 			RandomWalking();
 		}
 
@@ -2163,7 +2170,7 @@ function update()
 function render() 
 {	
 	effect.render(scene, camera);
-	stats.update();
+	// stats.update();
 }
 
 function changeAni ( aniIndex ) {
@@ -2689,6 +2696,7 @@ function createFinalStatistic() {
 		instructions.removeEventListener( 'click', funToCall, false );
 		blocker.style.display = 'none';
 	}
+	aboutPage.style.display = "block";
 
 	//
 	myDataRef.push(final_statistic);
