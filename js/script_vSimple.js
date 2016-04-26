@@ -1377,7 +1377,7 @@ function init()
 
 			personAniInterval = setInterval(function(){
 				for (var i = 0; i < persons.length; i++) {
-					persons[i].changeAni( personAniSequence[personAniIntervalCounter%(personAmount-1)] );
+					persons[i].changeAni( personAniSequence[personAniIntervalCounter%4] );
 				};
 				personAniIntervalCounter++;
 			}, 2000);
