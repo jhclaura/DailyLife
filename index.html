@@ -182,6 +182,7 @@
 			var meInWorld = -1;
 			var totalPplInWorldsCount = 0, totalVisitCount = 0;
 			var fullhouse = false, showAniPpl = false, doPplAni = false;
+			var fullHouseDef = 10;
 			var strictToCelePplNumber = 3, strictToCele = false;
 
 			var currentPplAmount = 0;
@@ -246,7 +247,7 @@
 
 							//
 							showAniPpl = (Object.keys(dailyLifePlayerDict).length>5) ? true : false;
-							fullhouse = (Object.keys(dailyLifePlayerDict).length==18) ? true : false;
+							fullhouse = (Object.keys(dailyLifePlayerDict).length==fullHouseDef) ? true : false;
 							strictToCele = (Object.keys(dailyLifePlayerDict).length>=strictToCelePplNumber) ? true : false;
 						}
 					}
@@ -333,7 +334,7 @@
 						totalPplInWorldsCount = data.totalCount;
 
 						showAniPpl = (Object.keys(dailyLifePlayerDict).length>5) ? true : false;
-						fullhouse = (Object.keys(dailyLifePlayerDict).length==18) ? true : false;
+						fullhouse = (Object.keys(dailyLifePlayerDict).length==fullHouseDef) ? true : false;
 						strictToCele = (Object.keys(dailyLifePlayerDict).length>=strictToCelePplNumber) ? true : false;
 					}
 
@@ -372,7 +373,7 @@
 						updatePreviousPlayer = true;
 						//
 						showAniPpl = (Object.keys(dailyLifePlayerDict).length>5) ? true : false;
-						fullhouse = (Object.keys(dailyLifePlayerDict).length==18) ? true : false;
+						fullhouse = (Object.keys(dailyLifePlayerDict).length==fullHouseDef) ? true : false;
 						strictToCele = (Object.keys(dailyLifePlayerDict).length>=strictToCelePplNumber) ? true : false;
 					}
 				}

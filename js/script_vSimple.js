@@ -60,6 +60,7 @@ var keyIsPressed;
 
 	var person, personGeo, personMat, toiletTex, toiletMat;
 	var persons = [], personIsWalking = [], personCircle, personAmount = 3;
+	var personsAppeared = false, personsAnied = false, personsWalked = false;
 	var personWalkTimeoutID, personAniInterval, personAniIntervalCounter=0, personAniSequence = [1,3,5,6];
 	var poop, poopGeo, poopTex, poopMat, poopHat, poopHeartTex;
 	var poopM, poopMGeo, poopMTex, poopMMat, poopHeartGeo, poopHeartMat, poopHeart;
@@ -1375,13 +1376,19 @@ function init()
 				scene.add(person.body);
 			}
 
-			personAniInterval = setInterval(function(){
-				for (var i = 0; i < persons.length; i++) {
-					persons[i].changeAni( personAniSequence[personAniIntervalCounter%4] );
-				};
-				personAniIntervalCounter++;
-			}, 2000);
+			// personAniInterval = setInterval(function(){
+			// 	for (var i = 0; i < persons.length; i++) {
+			// 		persons[i].changeAni( personAniSequence[personAniIntervalCounter%4] );
+			// 	};
+			// 	personAniIntervalCounter++;
+			// }, 2000);
+
+			// hide all person
+			for(var i=0; i<persons.length; i++){
+				persons[i].body.visible = false;
+			}
 		});
+		
 
 	// CONTROLS
 	// controls = new THREE.OrbitControls( camera, renderer.domElement );
@@ -1969,47 +1976,48 @@ function update()
 		// }
 
 		// if player > 5, visible = true
-		// if player > 5 + poopheart > 5, walk
-		// if player fullhouse, animation
-
-		// if(personCircle.visible){
-			if(persons.length>=3){
-				for(var i=0; i<persons.length; i++){
-					persons[i].update(null);
-					persons[i].switchAni();
-				}
-				// RandomWalking();
+		if( !personsAppeared && showAniPpl){
+			for(var i=0; i<persons.length; i++){
+				persons[i].body.visible = true;
 			}
-		// 	personCircle.rotation.y += 0.003;
-		// }
+			personsAppeared = true;
+		}
 
-		// if( xxx ){
-		// 	personAniInterval(function(){
-				
-		// 		// //1 --> walk
-		// 		// person.changeAni( 0 );
-		// 		// //2 --> sit down
-		// 		// person.changeAni( 1 );
-		// 		// //3 --> push
-		// 		// person.changeAni( 3 );
-		// 		// //4 --> release
-		// 		// person.changeAni( 5 );
-		// 		// //5 --> stand up
-		// 		// person.changeAni( 6 );
-				
-		// 		for (var i = 0; i < persons.length; i++) {
-		// 			persons[i].changeAni( personAniSequence[personAniIntervalCounter%5] );
-		// 		};
+		// if player > 5 + poopheart > 5, animation
+		if( personsAppeared && poopHeartFromMeCount>5 && !personsAnied ){
+			personAniInterval = setInterval(function(){
+				for (var i = 0; i < persons.length; i++) {
+					persons[i].changeAni( personAniSequence[personAniIntervalCounter%4] );
+				};
+				personAniIntervalCounter++;
+			}, 2000);
 
-		// 		personAniIntervalCounter++;
-		// 	}, 2000);
-		// }
+			personsAnied = true;
+		}
+		
+		// if player fullhouse, walk!!
+		if(fullhouse && personsAnied){
+			for (var i = 0; i < persons.length; i++) {
+				persons[i].changeAni(0);
+			};
+			RandomWalking();
+		}
 
+		if(personsAnied && persons.length>=3){
+			for(var i=0; i<persons.length; i++){
+				persons[i].update(null);
+				persons[i].switchAni();
+			}
+		}
+
+	// if player>=3, poop>50 + heart>30 to celebrate
 	if(strictToCele){
 		if( final_statistic.totalPoop>50 && final_statistic.totalHeart>30 ){
 			EnterSceneCelebrate();
 		}
-	} else {
+	}
+	// if player<3, poop>30 to celebrate
+	else {
 		if( final_statistic.totalPoop>30 ){
 			EnterSceneCelebrate();
 		}
