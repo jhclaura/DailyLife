@@ -964,11 +964,11 @@ function CreatePoopRing() {
 
 		// v.2
 		poopTower.position.y = portals[0].position.y;
-		poopTower.scale.y=0.1;
-		// poopTower.visible = false;
+		poopTower.scale.y=0.01;
 
 		poopTowers.push( poopTower );
 		scene.add(poopTower);
+		// poopTower.visible = false;
 	}
 	
 	// Init Portal Poop animation
@@ -1250,6 +1250,11 @@ function init()
 		st.scale.set(7,7,7);
 		scene.add(st);
 		stars.push(st);
+	}
+
+	// hide poop ring
+	for(var i=0; i<poopTowers.length; i++){
+		poopTowers[i].visible = false;
 	}
 
 	// emitter.start();
