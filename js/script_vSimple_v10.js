@@ -356,16 +356,37 @@ function superInit(){
 
 
 	loadingManger = new THREE.LoadingManager();
-	textureLoader = new THREE.TextureLoader();
+	textureLoader = new THREE.TextureLoader( loadingManger );
+	textureLoader.onLoad = function() { console.log('textures all loaded!'); }
 	loader = new THREE.JSONLoader();
 
 	// PLAYERS
 		toiletMat = new THREE.MeshLambertMaterial({color: 0xffffff});
 		eyeGeo = new THREE.PlaneGeometry(2, 1.5, 1, 1);
+		// skinTexture = THREE.ImageUtils.loadTexture('images/guyW.png');
 
-		LoadTexModelPoop( 'images/poop.png', 'models/poop.js' );
+		// v.1
+		// textureLoader.load('images/guyW.png', function(texture){
+		// 	skinTexture = texture;
+		// 	loadModelPlayer( "models/Guy2/GuyB.js", "models/Guy2/GuyLA.js", "models/Guy2/GuyRA.js", "models/Guy2/GuyH.js" );
+		// 	//
+		// 	loadSitModelPlayer( "models/personHead.js", "models/personBody.js", "models/toilet.js" );
+		// });
 
-		LoadTexModelPoopHeart( 'images/poopHeart.png', 'models/poopHeart.js' );
+		function poop_TLM(txt){
+			console.log();
+			poopTex = txt;
+			poopMat = new THREE.MeshLambertMaterial({map: txt});
+			loadModelPoop( "models/poop.js" );
+		};
+		poopTex = textureLoader.load('images/poop.png', poop_TLM);
+
+		function poopHeart_TLM(txt){
+			poopHeartTex = txt;
+			poopHeartMat = new THREE.MeshLambertMaterial({map: txt});
+			loadModelPoopHeart( "models/poopHeart.js" );
+		};
+		poopHeartTex = textureLoader.load('images/poopHeart.png', poopHeart_TLM);
 
 		// textureLoader.load('images/poopMocaronS.png', function(texture){
 		// 	poopMTex = texture;
@@ -374,8 +395,8 @@ function superInit(){
 		// });
 
 	// wave
-		// waterwaveTex = textureLoader.load('images/wave2.png', loadModelWave);
-		LoadTexModelWave( 'images/wave2.png', 'models/water_wave_onesided.js' );
+		// waterwaveTex = textureLoader.load('images/wave.png');
+		waterwaveTex = textureLoader.load('images/wave2.png', loadModelWave);
 
 	// BATHROOM
 		//v1
@@ -392,8 +413,8 @@ function superInit(){
 		// big toilet
 		// toiletMat --> basic white
 		bigToiletMat = new THREE.MeshLambertMaterial( { color: 0xffffff, side: THREE.DoubleSide } );
-		var toiletLoader = new THREE.JSONLoader();
-		toiletLoader.load( "models/bigToilet_v5_1.js", function( geometry ) {
+		
+		loader.load( "models/bigToilet_v5_1.js", function( geometry ) {
 			bigToiletGeo = geometry;
 			bigToilet = new THREE.Mesh( bigToiletGeo.clone(), toiletMat );
 			bigToilet.scale.set(1.5, 1.5, 1.5);
@@ -402,36 +423,61 @@ function superInit(){
 
 			// loadingCount();
 			loadingCountText( "white toilet" );
+
+			// var dupToilet = new THREE.Mesh( bigToiletGeo.clone(), bigToiletMat );
+			// dupToilet.scale.set(1.5, 1.5, 1.5);
+			// dupToilet.position.copy( toiletCenters[1]);
+			// scene.add( dupToilet );
+
+			// var dupToilet = new THREE.Mesh( bigToiletGeo.clone(), bigToiletMat );
+			// dupToilet.scale.set(1.5, 1.5, 1.5);
+			// dupToilet.position.copy( toiletCenters[2]);
+			// scene.add( dupToilet );
 		} );
 
-		// // textures loading hope will work!!
-		// 	function graffiti_TLM (txt){
-		// 		txt.wrapS = txt.wrapT = THREE.RepeatWrapping;
-		// 		txt.repeat.set( 4, 4 );
-		// 	};
-		// 	graffitiTex = textureLoader.load('images/graffitiS.png', graffiti_TLM);
-		// 	floorTex = textureLoader.load('images/floor.jpg', graffiti_TLM);
-		// 	doorTex = textureLoader.load('images/door.png');
+		function graffiti_TLM (txt){
+			txt.wrapS = txt.wrapT = THREE.RepeatWrapping;
+			txt.repeat.set( 4, 4 );
+		};
+		graffitiTex = textureLoader.load('images/graffitiS.png', graffiti_TLM);
+		floorTex = textureLoader.load('images/floor.jpg', graffiti_TLM);
 
-		// function intestine_TLM (txt){
-		// 	intestineAnimator = new TextureAnimator( txt, 3, 1, 4, 60, [0,1,2,1] );
-		// 	intestineMat = new THREE.MeshBasicMaterial({map: txt});
-		// 	bigToiletAniMat = new THREE.MeshBasicMaterial({ map: txt, transparent: true, opacity: 0.0, side: THREE.DoubleSide });
-		// };
-		// intestineTex = textureLoader.load( "images/intestines.png", intestine_TLM);
+		doorTex = textureLoader.load('images/door.png');
 
-		// function poster_TLM (txt){
-		// 	posterMat = new THREE.MeshLambertMaterial({map: txt});
-		// };
-		// posterTex = textureLoader.load( "images/poster_texture.jpg", poster_TLM);
-		
-		LoadTexBathroom( "images/intestines.png", "images/poster_texture.jpg" );
+		function intestine_TLM (txt){
+			intestineAnimator = new TextureAnimator( txt, 3, 1, 4, 60, [0,1,2,1] );
+			intestineMat = new THREE.MeshBasicMaterial({map: txt});
+			bigToiletAniMat = new THREE.MeshBasicMaterial({ map: txt, transparent: true, opacity: 0.0, side: THREE.DoubleSide });
+		};
+		intestineTex = textureLoader.load( "images/intestines.png", intestine_TLM);
 
-		// setTimeout(function(){
-		// 	// fucking model loading time
-		// 	loadModelBigToilet();
+		function poster_TLM (txt){
+			posterMat = new THREE.MeshLambertMaterial({map: txt});
+		};
+		posterTex = textureLoader.load( "images/poster_texture.jpg", poster_TLM);
+							
+		setTimeout(function(){
+			// fucking model loading time
+			loadModelBigToilet();
+			// loader.load( "models/bigToilet_v5_2.js", function( geometry ) {
+			// 	var tubeGeo = geometry;
 
-		// }, 2000);
+			// 	bigToiletTubeNorm = new THREE.Mesh( tubeGeo.clone(), bigToiletMat );
+			// 	bigToiletTubeNorm.scale.set(1.5, 1.5, 1.5);
+			// 	bigToiletTubeNorm.position.copy( toiletCenters[0]);
+			// 	scene.add( bigToiletTubeNorm );
+
+			// 	bigToiletTubeAni = new THREE.Mesh( tubeGeo.clone(), bigToiletAniMat );
+			// 	bigToiletTubeAni.scale.set(1.5, 1.5, 1.5);
+			// 	bigToiletTubeAni.position.copy( toiletCenters[0]);
+			// 	bigToiletTubeAni.visible = false;
+			// 	scene.add( bigToiletTubeAni );
+
+			// 	// loadingCount();
+			// 	loadingCountText( "big toilet" );
+			// 	ReadyToLoadModelPlayer();
+			// });
+		}, 2000);
 
 		// v.2
 		// intestineTex = textureLoader.load( "images/intestine_1.png" );
@@ -523,6 +569,84 @@ function superInit(){
 			});
 		});
 
+	/*
+	// TREE
+		treeTexture = THREE.ImageUtils.loadTexture('images/tree.png');
+		treeMat = new THREE.MeshLambertMaterial({map: treeTexture});
+		
+		loader.load( "models/tree.js", function( geometry ){
+			treeGeo = geometry.clone();
+			var tree;
+			for(var i=0; i<50; i++){
+				tree = new THREE.Mesh( treeGeo, treeMat );
+				tree.position.x = ( Math.random() - 0.5) * 300;
+				tree.position.y = ( Math.random() - 0.5) * 300;
+				tree.position.z = ( Math.random() - 0.5) * 300;
+				// tree.scale.set(7,7,7);
+
+				// // TWEEN
+				// new TWEEN.Tween( tree.position )
+				// .to( {y: tree.position.y+300}, 700 )
+				// .repeat( Infinity )
+				// .yoyo (true)
+				// .easing( TWEEN.Easing.Cubic.InOut )
+				// .start();
+
+				// // TWEEN
+				// new TWEEN.Tween( tree.rotation )
+				// .to( {x: Math.PI*2}, 700 )
+				// .repeat( Infinity )
+				// .yoyo (true)
+				// .easing( TWEEN.Easing.Cubic.InOut )
+				// .start();
+
+				scene.add(tree);
+				trees.push(tree);
+			}
+			var treeCenterMat = new THREE.MeshLambertMaterial({color: 0xffffff});
+			tree = new THREE.Mesh( treeGeo, treeCenterMat );
+			tree.scale.set(10,10,10);
+			scene.add(tree);
+		});
+	*/
+
+	// WINDOW
+		// windowTex = THREE.ImageUtils.loadTexture('images/windowSS.png');
+		// windowAnimator = new TextureAnimator( windowTex, 3, 3, 30, 60, [6,6,7,8,3,4,5,0,5,0,5,4,5,4,5,4,5,4,5,4,8,7,6,6,6,6,6,6,6,6] );
+		// var windowMat = new THREE.MeshBasicMaterial({map: windowTex});
+
+		// loader.load( "models/windowRing.js", function( geometry ) {
+		// 	windowRing = new THREE.Mesh(geometry, windowMat);
+
+		// 	loader.load( "models/window.js", function( geometry ) {
+		// 		windowScreen = new THREE.Mesh(geometry, windowMat);
+		// 		windowRing.add(windowScreen);
+		// 		scene.add(windowRing);
+		// 	});
+		// });
+
+	// TRI
+		// triTex = THREE.ImageUtils.loadTexture('images/tri.png');
+		// var triMat = new THREE.MeshBasicMaterial({map: triTex, side: THREE.DoubleSide, transparent: true, opacity: 0.5});
+		// loader.load( "models/tri.js", function( geometry ) {
+
+		// 	for(var i=0; i<3; i++){
+	 //    		for(var j=0; j<3; j++){
+	 //    			for(var k=0; k<3; k++){
+	 //    				var tSize = Math.random()*-0.5 + 1;
+		// 	    		tri = new THREE.Mesh(geometry, triMat);
+		// 	    		tri.position.set(myPosition.x + Math.random()*10-5, myPosition.y + Math.random()*4-2, myPosition.z + Math.random()*10-5);
+		// 	    		tri.scale.set(tSize,tSize,tSize);
+
+		// 	    		tri.tanWIndex = getRandomInt(0,6);
+
+		// 	    		tris.push(tri);
+		// 	    		scene.add(tri);
+		// 	    	}
+		//     	}
+	 //    	}
+		// });
+
 	// PERSON
 		loadModelAniGuy();
 		// loader.load( "models/person3.js", function( geometry ) {
@@ -535,16 +659,28 @@ function superInit(){
 	// STAR
 	for(var i=0; i<starFiles.length; i++){
 		// glowTexture = new THREE.ImageUtils.loadTexture( starFiles[i] );
-		// var textureLoader = new THREE.TextureLoader();
-		// glowTexture = textureLoader.load( starFiles[i], function(texture){
-		// 	glowTexture = texture;
-		// 	glowTextures.push(glowTexture);
-		// 	starAnimator = new TextureAnimator( glowTexture, 4, 1, 8, 60, [0,1,2,3,2,1,3,2] );
-		// 	starAnimators.push(starAnimator);
-		// } );
+		var textureLoader = new THREE.TextureLoader();
+		glowTexture = textureLoader.load( starFiles[i], function(texture){
+			glowTexture = texture;
+			glowTextures.push(glowTexture);
+			starAnimator = new TextureAnimator( glowTexture, 4, 1, 8, 60, [0,1,2,3,2,1,3,2] );
+			starAnimators.push(starAnimator);
+		} );
 
-		LoadStarTexture( starFiles[i] );
+		// glowTextures.push(glowTexture);
+		// starAnimator = new TextureAnimator( glowTexture, 4, 1, 8, 60, [0,1,2,3,2,1,3,2] );
+		// starAnimators.push(starAnimator);
 	}
+
+	// for(var i=0; i<50; i++){
+	// 	mat = new THREE.SpriteMaterial({map: glowTextures[i%4], color: 0xffef3b, transparent: false, blending: THREE.AdditiveBlending});
+	// 	var st = new THREE.Sprite(mat);
+	// 	st.position.set( Math.random()*(myStartX+400)-(myStartX+200), Math.random()*-100+400, Math.random()*(myStartZ+400)-(myStartZ+200) );
+	// 	st.rotation.y = Math.random()*Math.PI;
+	// 	st.scale.set(7,7,7);
+	// 	scene.add(st);
+	// 	stars.push(st);
+	// }
 
 	// RAYCASTER!
 		eyerayCaster = new THREE.Raycaster();
@@ -583,6 +719,7 @@ function superInit(){
 			.8, // high friction
 			.3 // low restitution
 		);
+		
 		ground = new Physijs.BoxMesh(
 			new THREE.BoxGeometry(50, 1, 50),
 			ground_material,
@@ -1162,7 +1299,7 @@ function init()
 		pplCount.rotation.y = controls.rotY();
 		flushHandler.rotation.y = controls.rotY();
 
-	},1000);
+	},500);
 
 		/* v.1
 		for(var i=0; i<personAmount; i++){
