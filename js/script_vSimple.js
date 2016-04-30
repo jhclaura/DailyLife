@@ -692,7 +692,7 @@ function superInit(){
 			pplCount.scale.set(0.04,0.04,0.04);
 			pplCount.position.y = 80;
 			scene.add( pplCount );
-	},2000);
+	},1000);
 
 	// InitParticles();
 
@@ -859,11 +859,13 @@ function CreatePoopRing() {
 	// }, 2000);
 }
 
-function InitParticles( p_tex ) {
-	textureLoader = new THREE.TextureLoader();
+function InitParticles() {
+	var p_tex_loader = new THREE.TextureLoader();
+	// particleTex = p_tex_loader.load('images/blue_particle.jpg');
+
 	particleGroup = new SPE.Group({
 		texture: {
-			value: p_tex
+			value: p_tex_loader.load('images/blue_particle.jpg')
 		},
 		depthTest: false
 	});
@@ -2302,11 +2304,7 @@ function EnterSceneCelebrate() {
 		}
 	}, 2000);
 
-	particletex = textureLoader.load('images/blue_particle.jpg', function(texture){
-		particletex = texture;
-		InitParticles( particletex );
-	})
-	
+	InitParticles();	
 
 	// miniPoop out!
 		firstGuy.player.children[0].children[0].rotation.x = Math.PI/8;
@@ -2511,6 +2509,7 @@ function createFinalStatistic() {
 	playerNameInput.style.display = "none";
 	startLink.style.display = "none";
 	finalBG.style.display = "block";
+
 	if(isMobile)
 		finalBG.style.width = "90%";
 
@@ -2557,10 +2556,19 @@ function createFinalStatistic() {
 	document.body.removeEventListener('touchmove', noScrolling, false);
 	// scrollable
 	document.body.style.overflow = "auto";
+
 	// remove pointerlock (if existed)
 	if(blockerDiv){
 		instructions.removeEventListener( 'click', funToCall, false );
 		blocker.style.display = 'none';
+
+		document.removeEventListener( 'pointerlockchange', pointerlockchange, false );
+		document.removeEventListener( 'mozpointerlockchange', pointerlockchange, false );
+		document.removeEventListener( 'webkitpointerlockchange', pointerlockchange, false );
+
+		document.removeEventListener( 'pointerlockerror', pointerlockerror, false );
+		document.removeEventListener( 'mozpointerlockerror', pointerlockerror, false );
+		document.removeEventListener( 'webkitpointerlockerror', pointerlockerror, false );
 	}
 	aboutPage.style.display = "block";
 
