@@ -647,7 +647,11 @@ function superInit(){
 		portalLight.visible = false;
 		scene.add(portalLight);
 		portalLights.push(portalLight);
-	}	
+	}
+	var p_tex_loader = new THREE.TextureLoader();
+	particleTex = p_tex_loader.load('images/blue_particle.jpg', function(){
+		console.log("loaded particle tex");
+	});
 
 	// WORLD_BUBBLE
 	// - to create other-world feeling
@@ -694,7 +698,7 @@ function superInit(){
 			scene.add( pplCount );
 	},1000);
 
-	// InitParticles();
+	InitParticles();
 
 	///////////////////////////////////////////////////////
 
@@ -860,12 +864,10 @@ function CreatePoopRing() {
 }
 
 function InitParticles() {
-	var p_tex_loader = new THREE.TextureLoader();
-	// particleTex = p_tex_loader.load('images/blue_particle.jpg');
 
 	particleGroup = new SPE.Group({
 		texture: {
-			value: p_tex_loader.load('images/blue_particle.jpg')
+			value: particleTex
 		},
 		depthTest: false
 	});
@@ -1822,7 +1824,7 @@ function update()
 	controls.update( Date.now() - time );
 	var dt = clock.getDelta();
 
-	if(particleGroup && !inScCelebration)
+	if(particleGroup && inScCelebration)
 		particleGroup.tick( dt );
 
 	// scene.simulate();
@@ -2304,7 +2306,7 @@ function EnterSceneCelebrate() {
 		}
 	}, 2000);
 
-	InitParticles();	
+	// InitParticles();	
 
 	// miniPoop out!
 		firstGuy.player.children[0].children[0].rotation.x = Math.PI/8;
