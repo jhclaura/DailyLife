@@ -258,7 +258,10 @@
 				}
 
 				ws.onmessage = function(msg){
+
 					var data = JSON.parse(msg.data);
+
+					if (data.type!="index" && !trulyFullyStart) return;
 
 					if(data.type == 'addNewPlayer'){
 
@@ -386,6 +389,7 @@
 					// ADD_HISTORY_PLAYERS
 					// ONE_TIME_EVENT_IN_THE_BEGINNING
 					if(data.length>0 && !updatePreviousPlayer){
+
 						for(var i=0; i<data.length; i++){
 							console.log("whoIamInLife: " + whoIamInLife + ", data id: " + data[i].id + ", data worldId: " + data[i].worldId );
 
@@ -393,15 +397,20 @@
 							// this is a history player I want to create!!!
 							if(whoIamInLife != data[i].id && data[i].worldId == meInWorld){
 
-								var oldPlayerStartPos = new THREE.Vector3(data[i].playerStartX, data[i].playerStartY, data[i].playerStartZ);
-								var oldPlayerStartRotY = data[i].playerStartRotY;
-								var oldHex = data[i].myHex;
-								var oldPlayerID = data[i].id;
-								var oldPlayerName = data[i].nname;
+								// if(dailyLifePlayerDict[ data[i].id ]){
+								// 	console.log("already exit, so not create history players #" + data[i].id + ", in world #" + data[i].worldId);
+								// } else {
+									var oldPlayerStartPos = new THREE.Vector3(data[i].playerStartX, data[i].playerStartY, data[i].playerStartZ);
+									var oldPlayerStartRotY = data[i].playerStartRotY;
+									var oldHex = data[i].myHex;
+									var oldPlayerID = data[i].id;
+									var oldPlayerName = data[i].nname;
 
-								var oldPlayer = new Person( oldPlayerStartPos, oldHex, oldPlayerID, oldPlayerName );
-								dailyLifePlayerDict[ oldPlayerID ] = oldPlayer;
-								console.log("create history players #" + data[i].id + ", in world #" + data[i].worldId);								
+									var oldPlayer = new Person( oldPlayerStartPos, oldHex, oldPlayerID, oldPlayerName );
+									dailyLifePlayerDict[ oldPlayerID ] = oldPlayer;
+									console.log("create history players #" + data[i].id + ", in world #" + data[i].worldId);	
+								// }
+															
 							}
 							
 							UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data[i].totalCount, data.totalVisit );
@@ -474,7 +483,7 @@
 		<script type="text/javascript" src="js/AniObject.js"></script>
 		<script type="text/javascript" src="js/script_functions.js"></script>
 		<script type="text/javascript" src="js/script_setup.js"></script>
-		<script type="text/javascript" src="js/script_loader.js"></script>
+		<script type="text/javascript" src="js/script_loader_v2.js"></script>
 		<script type="text/javascript" src="js/script_vSimple.js"></script>
 
 		<script>

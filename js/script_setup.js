@@ -25,7 +25,7 @@ WebVRConfig = {
 			var pointerlockchange = function ( event ) {
 
 				if ( document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element ) {
-					console.log("enable pointerControls");
+					// console.log("enable pointerControls");
 
 					controls.enabled = true;
 					// console.log("controls.enabled = true");

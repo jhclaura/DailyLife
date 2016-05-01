@@ -84,7 +84,6 @@ wss.on('connection', function(ws){
 
 	// SEND BACK INDEX INFO!
 	if(mySocket){
-
 		lifeIndex.index = occuIndex;
 		lifeIndex.worldId = Math.floor(occuIndex/18);
 		lifeIndex.totalVisit = totalVisit;
@@ -128,8 +127,18 @@ wss.on('connection', function(ws){
 
 				// update & splice the sockets array
 				allSockets.splice(i,1);
+
 				// update & splice the players array
-				allPlayers.splice(i,1);
+				// allPlayers.splice(i,1);
+					// but the order of the allPlayers is not the same as allSockets O_O
+					// FUCK!
+					for(var j=0; j<allPlayers.length; j++){
+						if(allPlayers[j].id == ws.id){
+							// delete the allPlayers[j]
+							allPlayers.splice(j,1);
+							break;
+						}
+					}
 
 				//
 				socketHandlers(ws, msg);
@@ -150,10 +159,9 @@ var socketHandlers = function(socket,msg){
 	//GENERAL_SENDING_DATA
 	for(var i=0; i<allSockets.length; i++){
 		try{
+			// FOR_GENERATING_HISTORY_PLAYERS
+			// ONLY_HAPPENS_ONCE
 			if(msg.type=='addNewPlayer'){
-
-				// FOR_GENERATING_HISTORY_PLAYERS
-				// ONLY_HAPPENS_ONCE
 				if(msg.camID==0){
 					msg.id = socket.id;
 					// console.log('newPlayer Peer ID -->' + msg.peerid);

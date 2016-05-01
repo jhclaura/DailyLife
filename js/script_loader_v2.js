@@ -1,5 +1,5 @@
 function loadModelPlayer( _body, _left_arm, _right_arm, _head ){
-	var loader = new THREE.JSONLoader();
+	var loader = new THREE.JSONLoader( loadingManger );
 
 	// BODY
 	loader.load( _body, function( geometry ){
@@ -33,7 +33,7 @@ function loadModelPlayer( _body, _left_arm, _right_arm, _head ){
 }
 
 function loadSitModelPlayer( _head, _body, _toilet ){
-	var sp_loader = new THREE.JSONLoader( br_mat_loadingManager );
+	var sp_loader = new THREE.JSONLoader( loadingManger );
 
 	// BODY
 	sp_loader.load( _body, function( geometry ){
@@ -172,7 +172,15 @@ function loadModelBathroomsV2( _door, _side, _floor, _s, s_white, p_b, p_t, _t, 
 								scene.add(bathroom);
 
 								// loadingCount();
-								loadingCountText("bathroomsss");
+								// loadingCountText("bathroomsss");
+
+								// Loaded the latest one!!
+								console.log("ALL LOADED!");
+								startLink.style.display = "";
+								loadingImg.style.display = "none";
+								loadingTxt.style.display = "none";
+								readyToStart = true;
+								
 							});
 						});
 					});
@@ -183,7 +191,7 @@ function loadModelBathroomsV2( _door, _side, _floor, _s, s_white, p_b, p_t, _t, 
 }
 
 function loadModelPoop( _poop ){
-	var loader = new THREE.JSONLoader();
+	var loader = new THREE.JSONLoader( loadingManger );
 	var poopStickGeo = new THREE.BoxGeometry(0.1,1,0.1);
 	transY(poopStickGeo, 0.5);
 	var poopStick = new THREE.Mesh( poopStickGeo, new THREE.MeshBasicMaterial({color: 0x000000}) );
@@ -226,22 +234,8 @@ function loadModelPoop( _poop ){
 	});
 }
 
-function loadModelPoopMacaron( _poop ){
-	var loader = new THREE.JSONLoader();
-	
-	loader.load( _poop, function( geometry ){
-		poopMGeo = geometry.clone();
-		poopMGeo.computeBoundingSphere();
-
-		poopM = new THREE.Mesh(poopMGeo, poopMMat);
-
-		// loadingCount();
-		loadingCountText("poop macaron");
-	});
-}
-
 function loadModelPoopHeart( _poopH ){
-	var loader = new THREE.JSONLoader();
+	var loader = new THREE.JSONLoader( loadingManger );
 	
 	loader.load( _poopH, function( geometry ){
 		poopHeartGeo = geometry.clone();
@@ -289,7 +283,7 @@ function LoadTexBathroom( intestine, poster ) {
 		txt.wrapS = txt.wrapT = THREE.RepeatWrapping;
 		txt.repeat.set( 4, 4 );
 	};
-	var textureLoader = new THREE.TextureLoader( br_mat_loadingManager );
+	var textureLoader = new THREE.TextureLoader( loadingManger );
 	graffitiTex = textureLoader.load('images/graffitiS.png', graffiti_TLM);
 	floorTex = textureLoader.load('images/floor.jpg', graffiti_TLM);
 	doorTex = textureLoader.load('images/door.png');

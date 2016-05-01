@@ -401,17 +401,7 @@ function superInit(){
 		};
 
 		loadingManger.onLoad = function () {
-		    console.log( "first step all loaded!" );
-		    CreateStars();
-		    loadModelBathroomsV2( "models/bathroom/b_door.js",
-								  "models/bathroom/b_sides.js",
-								  "models/bathroom/b_floor.js",
-								  "models/bathroom/b_smallStuff.js",
-								  "models/bathroom/b_smallWhite.js",
-								  "models/bathroom/paper_bottom.js",
-								  "models/bathroom/paper_top.js",
-								  "models/bathroom2.js",
-								  "models/poster.js" );
+		    console.log( "ALL LOADED!" );
 		};
 
 	br_mat_loadingManager = new THREE.LoadingManager();
@@ -430,10 +420,10 @@ function superInit(){
 								  "models/poster.js" );
 		};
 
-	// starLoadingManager = new THREE.LoadingManager();
-	// 	starLoadingManager.onLoad = function () {
-	// 	    CreateStars();
-	// 	};
+	starLoadingManager = new THREE.LoadingManager();
+		starLoadingManager.onLoad = function () {
+		    CreateStars();
+		};
 
 	// PERSON
 		toiletMat = new THREE.MeshLambertMaterial({color: 0xffffff});
@@ -464,7 +454,7 @@ function superInit(){
 		toilet_paper = new THREE.Object3D();
 		var tPaper_handle_Mat = new THREE.MeshLambertMaterial({color: 0x03b8a0});
 		var tPaper_paper_Mat = new THREE.MeshLambertMaterial({color: 0xffffff});
-		var paperLoader = new THREE.JSONLoader( loadingManger );	// bathroom needs it
+		var paperLoader = new THREE.JSONLoader( br_mat_loadingManager );
 		paperLoader.load( "models/t_paper0.js", function(geometry){
 			t_paper0 = new THREE.Mesh(geometry, tPaper_handle_Mat);
 			toilet_paper.add(t_paper0);
@@ -545,7 +535,7 @@ function superInit(){
 function loadModelWave(txt){
 	waterwaveTex = txt;
 	console.log("water wave tex loaded!");
-	var loader = new THREE.JSONLoader( loadingManger );
+	var loader = new THREE.JSONLoader();
 	loader.load( "models/water_wave_onesided.js", function( geometry ) {
 		var waterPos = 	new THREE.Vector3(0,-7,3);
 		waterPos.add( toiletCenters[0] );
@@ -585,7 +575,7 @@ function loadModelAniGuy() {
 	loader.load( "models/person3.js", function( geometry ) {
 		personGeo = geometry;
 
-		var aniP_tex_loader = new THREE.TextureLoader( loadingManger );
+		var aniP_tex_loader = new THREE.TextureLoader();
 		aniP_tex_loader.load('images/galleryGuyTex.png', function(texture){
 			personTex = texture;
 			personCircle = new THREE.Object3D();
@@ -700,6 +690,46 @@ function InitParticles() {
 	particleGroup = new SPE.Group({
 		texture: {
 			value: particleTex
+		},
+		depthTest: false
+	});
+
+	for(var i=0; i<portals.length; i++){
+		emitter = new SPE.Emitter({
+			maxAge: {
+				value: 1
+			},
+			position: {
+				value: portals[i].position.clone(),
+				spread: new THREE.Vector3(12,12,12)
+			},
+			// acceleration: {
+			// 	value: new THREE.Vector3(0,-10,0),
+			// 	spread: new THREE.Vector3(10,0,10)
+			// },
+			velocity: {
+				value: new THREE.Vector3(1,1,1),
+				distribution: SPE.distributions.SPHERE
+			},
+			color: {
+				value: new THREE.Color( 0xAA4488 )
+			},
+			size: {
+				value: [80,0]
+				// spread: [1,3]
+			},
+			particleCount: 50
+		});
+		particleGroup.addEmitter( emitter );
+	}
+	scene.add( particleGroup.mesh );
+}
+
+function InitParticles_v0() {
+	textureLoader = new THREE.TextureLoader();
+	particleGroup = new SPE.Group({
+		texture: {
+			value: textureLoader.load('images/blue_particle.jpg')
 		},
 		depthTest: false
 	});
