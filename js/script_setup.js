@@ -1,9 +1,3 @@
-/*
- * Made by @jhclaura (Laura Chen, jhclaura.com)
- * reference:
- * vrchromeexperiments
- * @borismus: webvr-boilerplate
- */
 
 WebVRConfig = {
 	MOUSE_KEYBOARD_CONTROLS_DISABLED: true, // Default: false.
@@ -34,11 +28,12 @@ WebVRConfig = {
 					console.log("enable pointerControls");
 
 					controls.enabled = true;
+					// console.log("controls.enabled = true");
 					blocker.style.display = 'none';
 
 				} else {
-
 					controls.enabled = false;
+					// console.log("controls.enabled = false");
 					blocker.style.display = '-webkit-box';
 					blocker.style.display = '-moz-box';
 					blocker.style.display = 'box';

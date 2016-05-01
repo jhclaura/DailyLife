@@ -204,6 +204,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	//////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////
 	// WEBSOCKET
+	// if( !addNewPlayerYet && trulyFullyStart ){
 	if( !addNewPlayerYet ){
 		var msg = {
 			'type': 'addNewPlayer',
@@ -477,6 +478,8 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			}
 			
 			// Send POSITION + DIRECTION to server!!
+			// DO IT AFTER LATE_INIT!
+			if(trulyFullyStart){
 				var msg = {
 					'type': 'shootPoop',
 					'index': whoIamInLife,
@@ -489,6 +492,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 				if(ws){
 					sendMessage( JSON.stringify(msg) );
 				}
+			}
 		}
 	}
 	
@@ -639,18 +643,21 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 				final_statistic.totalPoop ++;
 			}
 
-			var msg = {
-				'type': 'shootPoop',
-				'index': whoIamInLife,
-				'toWhom': lookingAtSomeone,
-				'playerPos': yawObject.position,
-				'playerDir': scope.getDirection(),
-				'worldId': meInWorld
-			};
+			if(trulyFullyStart){
+				var msg = {
+					'type': 'shootPoop',
+					'index': whoIamInLife,
+					'toWhom': lookingAtSomeone,
+					'playerPos': yawObject.position,
+					'playerDir': scope.getDirection(),
+					'worldId': meInWorld
+				};
 
-			if(ws){
-				sendMessage( JSON.stringify(msg) );
+				if(ws){
+					sendMessage( JSON.stringify(msg) );
+				}
 			}
+			
 		}
 
 		//
@@ -1073,6 +1080,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////
 		//WEB_SOCKET
+		if(trulyFullyStart){
 			var msg = {
 				'type': 'updatePlayer',
 				'index': whoIamInLife,
@@ -1090,13 +1098,16 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 				sendMessage( JSON.stringify(msg) );
 				// console.log('A msg sent by DeviceControls when updating.');
 			}
+		}
 		////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////
 
 		
 	};
 
+	console.log("fuck");
 	if(!updatedBathroom && !thisIsTouchDevice && bathroom){
+		console.log("fuckkkk");
 		bathroom.rotation.y = yawObject.rotation.y;
 		updatedBathroom = true;
 		console.log("update bathroom!");

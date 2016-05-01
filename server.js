@@ -150,7 +150,6 @@ var socketHandlers = function(socket,msg){
 	//GENERAL_SENDING_DATA
 	for(var i=0; i<allSockets.length; i++){
 		try{
-
 			if(msg.type=='addNewPlayer'){
 
 				// FOR_GENERATING_HISTORY_PLAYERS
@@ -183,8 +182,6 @@ var socketHandlers = function(socket,msg){
 			console.log('error of socketHandlers: ' + error);
 		}
 	}
-
-	// HOW TO USE WS's BROADCAST FUNCTION???
 };
 
 ///////////////////////////////////////////////////////////

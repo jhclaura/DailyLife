@@ -172,10 +172,10 @@ var keyIsPressed;
 
 ////////////////////////////////////////////////////////////
 
-// init();				// Init after CONNECTION
-superInit();			// init automatically
+// init();		// Init after CONNECTION
+superInit();	// init automatically
 
-// connectSocket();		// Init after superInit
+// connectSocket();
 
 ///////////////////////////////////////////////////////////
 // FUNCTIONS 
@@ -289,7 +289,11 @@ function superInit(){
 
 	// SCENE
 		// scene = new THREE.Scene();
-		scene = new Physijs.Scene();
+		// if(isMobile)
+		// 	scene = new Physijs.Scene({fixedTimeStep: 1 / 40});
+		// else
+			scene = new Physijs.Scene();
+
 		scene.setGravity(new THREE.Vector3( 0, -30, 0 ));
 
 	// LIGHT
@@ -373,10 +377,15 @@ function superInit(){
 			portalLights.push(portalLight);
 		}
 
-	// PEOPLE_COUNT
+	// setTimeout(function(){
+		// PEOPLE_COUNT
 		pplCountTex = new THREEx.DynamicTexture(1024,1024);
 		pplCountTex.context.font = "bolder 150px StupidFont";
 		pplCountTex.clear();
+		// pplCountTex.clear().drawText("Pooper", undefined, 100, 'white');
+		// pplCountTex.drawText("Count", undefined, 250, 'white');
+		// pplCountTex.drawText("this world: 0", undefined, 500, 'white');
+		// pplCountTex.drawText("total: 0", undefined, 650, 'white');
 		pplCountMat = new THREE.MeshBasicMaterial({map: pplCountTex.texture, side: THREE.DoubleSide, transparent: true});
 		var pCountMesh = new THREE.Mesh(new THREE.PlaneGeometry( pplCountTex.canvas.width, pplCountTex.canvas.height), pplCountMat );
 		pCountMesh.rotation.x = Math.PI/2;
@@ -385,14 +394,20 @@ function superInit(){
 		pplCount.scale.set(0.04,0.04,0.04);
 		pplCount.position.y = 80;
 		scene.add( pplCount );
-
+	// },1000);
 	
 	//////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////
 	/*
-		START LOADING	                                                          
+	  _    ___   _   ___ ___ _  _  ___   _ 
+	 | |  / _ \ /_\ |   \_ _| \| |/ __| | |
+	 | |_| (_) / _ \| |) | || .` | (_ | |_|
+	 |____\___/_/ \_\___/___|_|\_|\___| (_)
+	                                                          
 	*/
+	//////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////
 
 	loadingManger = new THREE.LoadingManager();
@@ -405,10 +420,9 @@ function superInit(){
 		};
 
 	br_mat_loadingManager = new THREE.LoadingManager();
-		// after loading all the textures for BATHROOM, create bathroom
 		br_mat_loadingManager.onLoad = function () {
 		    console.log( "Ready to load BATHROOM!" );
-
+		    // after loading all the textures for BATHROOM, create bathroom
 			loadModelBathroomsV2( "models/bathroom/b_door.js",
 								  "models/bathroom/b_sides.js",
 								  "models/bathroom/b_floor.js",
@@ -469,6 +483,7 @@ function superInit(){
 					toilet_paper.add(t_paper2);
 
 					// toilet paper circle!!!
+
 					for(var i=0; i<20; i++){
 						var tp = toilet_paper.clone();
 						tp.position.set( Math.sin(Math.PI*2/20*i)*21, 0, Math.cos(Math.PI*2/20*i)*21 );
@@ -491,7 +506,9 @@ function superInit(){
 		LoadTexBathroom( "images/intestines.png", "images/poster_texture.jpg" );
 
 	// STAR
+	// for(var i=0; i<starFiles.length; i++){
 		LoadStarTexture();
+	// }
 
 	// Particles
 	var p_tex_loader = new THREE.TextureLoader( loadingManger );
@@ -500,13 +517,50 @@ function superInit(){
 		InitParticles();
 	});
 
+	// // AniPerson
+	// 	var aniP_tex_loader = new THREE.TextureLoader();
+	// 	aniP_tex_loader.load('images/galleryGuyTex.png', function(texture){
+	// 		personTex = texture;
+	// 		personCircle = new THREE.Object3D();
+	// 		personCircle.visible = false;
+	// 		personMat = new THREE.MeshBasicMaterial( { map: personTex, morphTargets: true } );
+
+	// 		for(var i=0; i<personAmount; i++){
+	// 			//toiletCenters[meInSGroup] 
+	// 			var pppos = new THREE.Vector3( toiletCenters[0].x+Math.sin(Math.PI*2/personAmount*i)*21, toiletCenters[0].y+8.5, toiletCenters[0].z+Math.cos(Math.PI*2/personAmount*i)*21 );
+	// 			person = new AniPersonBeAdded( 0.4, personKeyframeSet, personAniOffsetSet, personGeo, personMat, pppos, 1 );
+	// 			person.body.rotation.y = Math.PI*2/personAmount*i + Math.PI;
+
+	// 			persons.push(person);
+
+	// 			personIsWalking.push(false);
+	// 			person.body.scale.set(2,2,2);
+
+	// 			// look forward
+	// 			// person.body.rotation.y = (360/personAmount*i+90)*(Math.PI/180);
+
+	// 			scene.add(person.body);
+	// 		}
+
+	// 		// personAniInterval = setInterval(function(){
+	// 		// 	for (var i = 0; i < persons.length; i++) {
+	// 		// 		persons[i].changeAni( personAniSequence[personAniIntervalCounter%4] );
+	// 		// 	};
+	// 		// 	personAniIntervalCounter++;
+	// 		// }, 2000);
+
+	// 		// hide all person
+	// 		for(var i=0; i<persons.length; i++){
+	// 			persons[i].body.visible = false;
+	// 		}
+	// 	});
+
 	//////////////////////////////////////////////////////////////////////////////////////////
-	/*
-		END OF LOADING	                                                          
-	*/
 	//////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////
+
+
+	///////////////////////////////////////////////////////
 
 	// stats = new Stats();
 	// stats.domElement.style.position = 'absolute';
@@ -523,6 +577,8 @@ function superInit(){
 	// physics_stats.domElement.children[ 0 ].style.background = "transparent";
 	// physics_stats.domElement.children[ 0 ].children[1].style.display = "none";
 	// container.appendChild( physics_stats.domElement );
+
+	//////////////////////////////////////////////////////
 	
 	// EVENTS
 	window.addEventListener('resize', onWindowResize, false);
@@ -530,6 +586,16 @@ function superInit(){
 	// After trigger the loading functions
 	// Connect to WebSocket!
 	connectSocket();
+}
+
+function ReadyToLoadModelPlayer() {
+	textureLoader = new THREE.TextureLoader();
+	skinTexture = textureLoader.load('images/guyW.png', function(texture){
+		skinTexture = texture;
+		// loadModelPlayer( "models/Guy2/GuyB.js", "models/Guy2/GuyLA.js", "models/Guy2/GuyRA.js", "models/Guy2/GuyH.js" );
+		//
+		loadSitModelPlayer( "models/personHead.js", "models/personBody.js", "models/toilet.js" );
+	});
 }
 
 function loadModelWave(txt){
@@ -567,6 +633,7 @@ function loadModelToiletTube() {
 
 		// loadingCount();
 		loadingCountText( "toilet tube" );
+		// ReadyToLoadModelPlayer();
 	});
 }
 
@@ -833,11 +900,8 @@ function createPoop( _pos, _dir ) {
 	//
 	allThePoops.push( poopPhy );
 
-	///////////////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////////////
-	/* 
-		Optimizing performance!!
-	*/
+
+	// Optimizing performance!!
 	///////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////
 
@@ -952,8 +1016,8 @@ function lateInit()
 {	
 	console.log("late init!");
 	document.body.addEventListener('touchmove', noScrolling, false);
-	// window.addEventListener('keydown', myKeyPressed, false);
-	// window.addEventListener('keyup', myKeyUp, false);
+	window.addEventListener('keydown', myKeyPressed, false);
+	window.addEventListener('keyup', myKeyUp, false);
 
 	clock.start();
 
@@ -962,13 +1026,13 @@ function lateInit()
 	dailyLifePlayerDict[ whoIamInLife ] = firstGuy;
 	console.log("Me built!");
 
-	// create controls
+	// // create controls
 	controls = new THREE.DeviceControls(camera, myWorldCenter, true);
 	scene.add( controls.getObject() );
 
 	// update info displays rotations
-		pplCount.rotation.y = controls.rotY();
-		flushHandler.rotation.y = controls.rotY();
+	pplCount.rotation.y = controls.rotY();
+	flushHandler.rotation.y = controls.rotY();
 
 	// update positions
 		// stars around user
@@ -980,13 +1044,488 @@ function lateInit()
 		// update bathroom position to be around user
 		bathroom.position.copy( myPosition );
 
+	// hide poop ring
+	// for(var i=0; i<poopTowers.length; i++){
+	// 	poopTowers[i].visible = false;
+	// }
+
 	// start to animate()!
 	animate(performance ? performance.now() : Date.now());
 
-	trulyFullyStart = true;
+	afterLateInit = true;
 }
 
-// function myMouseDown(event): moved to DeviceControls
+function myKeyPressed( event ){
+	if(keyIsPressed)	return;
+	keyIsPressed = true;
+
+	switch ( event.keyCode ) {
+
+		case 49: //1 --> walk
+			person.changeAni( 0 );
+			break;
+
+		case 50: //2 --> sit down
+			person.changeAni( 1 );
+			break;
+
+		case 51: //3 --> push
+			person.changeAni( 3 );
+			break;
+
+		case 52: //4 --> release
+			person.changeAni( 5 );
+			break;
+
+		case 53: //5 --> stand up
+			person.changeAni( 6 );
+			break;
+
+		case 48: //0 --> shoot poop
+			if(yogaOver){	// bring back after developing
+				// createPoop( controls.position(), controls.getDirection() );
+				poopCount ++;
+			}
+
+			if(lookingAtSomeone != -1){
+
+				// v1 - removed. saved in old script
+
+				// v2
+				// moveMacaPoop( whoIamInLife, lookingAtSomeone );
+
+				// v3
+				createHeart( whoIamInLife, lookingAtSomeone );
+
+			} else {
+				createPoop( controls.position(), controls.getDirection() );
+			}
+			
+			// if(poopCount == 3){
+			// 	// enter celebration period
+			// 	sound_poop.play();
+			// }
+
+			// Send POSITION + DIRECTION to server!!
+				var msg = {
+					'type': 'shootPoop',
+					'index': whoIamInLife,
+					'toWhom': lookingAtSomeone,
+					'playerPos': controls.position(),
+					'playerDir': controls.getDirection(),
+					'worldId': meInWorld
+				};
+
+				if(ws){
+					sendMessage( JSON.stringify(msg) );
+				}
+			break;
+
+		case 56: //8
+			EnterSceneCelebrate();
+			break;
+
+		case 57: //9
+			// to center of the toilet, then go down the tube
+			// v.1 - removed. saved in old script
+
+			// v.2
+			EnterSceneEnd();
+			break;
+	}
+}
+
+function myKeyUp(event){
+	keyIsPressed = false;
+}
+
+// moved to DeviceControls
+/*
+function myMouseDown(event) {
+	if(yogaOver){	// bring back after developing
+		poopCount ++;
+	}
+
+	if(lookingAtSomeone != -1){
+		createHeart( whoIamInLife, lookingAtSomeone );
+	} else {
+		createPoop( controls.position(), controls.getDirection() );
+	}
+	
+	if(poopCount == 3){
+		// enter celebration period
+		sound_poop.play();
+	}
+
+	// Send POSITION + DIRECTION to server!!
+		var msg = {
+			'type': 'shootPoop',
+			'index': whoIamInLife,
+			'toWhom': lookingAtSomeone,
+			'playerPos': controls.position(),
+			'playerDir': controls.getDirection(),
+			'worldId': meInWorld
+		};
+
+		if(ws){
+			sendMessage( JSON.stringify(msg) );
+		}
+}
+*/
+
+function loadModelPlayer( _body, _left_arm, _right_arm, _head ){
+	var loader = new THREE.JSONLoader();
+
+	// BODY
+	loader.load( _body, function( geometry ){
+		guyBodyGeo = geometry.clone();
+	});
+
+	// LEFT_ARM
+	loader.load( _left_arm, function( geometry2 ){
+		var tmpLA = geometry2.clone();
+		transY(tmpLA, -0.2);
+		transZ(tmpLA, -0.1);
+		guyLAGeo = tmpLA;
+	});
+
+	// RIGHT_ARM
+	loader.load( _right_arm, function(geometry3){
+		var tmpRA = geometry3.clone();
+		transY(tmpRA, -0.2);
+		transZ(tmpRA, -0.1);
+		guyRAGeo = tmpRA;
+	});
+
+	// HEAD
+	loader.load( _head, function(geometry4){
+		geometry4.center();
+		guyHeadGeo = geometry4.clone();
+
+		// loadingCount();
+		loadingCountText("head");
+	});
+}
+
+function loadSitModelPlayer( _head, _body, _toilet ){
+	var sp_loader = new THREE.JSONLoader( br_mat_loadingManager );
+
+	// BODY
+	sp_loader.load( _body, function( geometry ){
+		personBody = geometry.clone();
+	});
+
+	// HEAD
+	sp_loader.load( _head, function( geometry2 ){
+		geometry2.center();
+		personHead = geometry2.clone();
+	});
+
+	// TOILET
+	sp_loader.load( _toilet, function( geometry3 ){
+		personToilet = geometry3.clone();
+
+		// loadModelBathroomsV2( "models/bathroom/b_door.js",
+		// 					  "models/bathroom/b_sides.js",
+		// 					  "models/bathroom/b_floor.js",
+		// 					  "models/bathroom/b_smallStuff.js",
+		// 					  "models/bathroom/b_smallWhite.js",
+		// 					  "models/bathroom/paper_bottom.js",
+		// 					  "models/bathroom/paper_top.js",
+		// 					  "models/bathroom2.js",
+		// 					  "models/poster.js" );
+	});
+}
+
+function loadModelBathroom( _geo ){
+	loader = new THREE.JSONLoader();
+
+	loader.load( _geo, function( geometry ){
+		bathroomGeo = geometry.clone();
+		bathroom = new THREE.Mesh(bathroomGeo, bathroomMat);
+		bathroom.scale.set(1.5,1.5,1.5);
+		bathroom.rotation.y += Math.PI;
+	});
+}
+
+function loadModelBathrooms( _w, _g, _y, _t ){
+	loader = new THREE.JSONLoader();
+	bathroom = new THREE.Object3D();
+	var br;
+
+	loader.load( _w, function( geometry1 ){
+		// br = new THREE.Mesh(geometry1, new THREE.MeshLambertMaterial({color: 0xcccccc}));
+		br = new THREE.Mesh(geometry1, bathroomMat);
+
+		bathroom.add(br);
+		// br = new THREE.Mesh(new THREE.PlaneGeometry(14,10,1,1), new THREE.MeshLambertMaterial({color: 0xcccccc}));
+		br = new THREE.Mesh(new THREE.PlaneGeometry(14,10,1,1), bathroomMat);
+		br.rotation.y = Math.PI;
+		br.position.z += 3.3;
+		bathroom.add(br);
+
+		loader.load( _g, function( geometry2 ){
+			// br = new THREE.Mesh(geometry2, new THREE.MeshLambertMaterial({color: 0xfffac4}));
+			br = new THREE.Mesh(geometry2, bathroomMat);
+			bathroom.add(br);
+
+			loader.load( _y, function( geometry3 ){
+				// br = new THREE.Mesh(geometry3, new THREE.MeshLambertMaterial({color: 0xffea00}));
+				br = new THREE.Mesh(geometry3, bathroomMat);
+				bathroom.add(br);
+
+				var tp = toilet_paper.clone();
+				tp.scale.set(0.5,0.5,0.5);
+				tp.rotation.y = -Math.PI/2;
+				//3.3,-1,0
+				var tp2 = tp.clone();
+				tp.position.set(3.1,-1.5,-3.5);
+				//3.3,-1,1.5
+				tp2.position.set(3.1,-1.5,-2);
+				bathroom.add(tp);
+				bathroom.add(tp2);
+
+				// intestine
+				loader.load( _t, function( geometry4 ){
+					// 0xf7c0c1
+					// br = new THREE.Mesh(geometry4, new THREE.MeshLambertMaterial({color: 0xff265d, side: THREE.DoubleSide}));
+					// br = new THREE.Mesh(geometry4, new THREE.MeshLambertMaterial({map: bathroomTex, side: THREE.DoubleSide}));
+
+					// geometry4.faceVertexUvs[ 1 ] = geometry4.faceVertexUvs[ 0 ];
+
+					br = new THREE.Mesh(geometry4, intestineMat);
+
+					bathroom.add(br);
+					bathroom.scale.set(1.5,1.5,1.5);
+
+					// LIGHT!
+						bathroomLight = new THREE.Object3D();
+
+						geo = new THREE.TetrahedronGeometry(1.5);
+						mat = new THREE.MeshLambertMaterial({color: 0xfffac4});
+						var meshTemp = new THREE.Mesh( geo, mat );
+						meshTemp.rotation.x = -35 * Math.PI/180;
+						meshTemp.rotation.z = 30 * Math.PI/180;
+						meshTemp.position.y = -29.;
+						bathroomLight.add(meshTemp);
+
+						geo = new THREE.BoxGeometry(0.2,30,0.2);
+						transY(geo, -14);	// -14.5
+						meshTemp = new THREE.Mesh(geo, mat);
+						bathroomLight.add(meshTemp);
+
+						light = new THREE.PointLight(0xffff00, 1, 50);
+						textureLoader = new THREE.TextureLoader();
+						glowTexture = textureLoader.load( "images/glow_edit.png" );
+						mat = new THREE.SpriteMaterial({map: glowTexture, color: 0xffef3b, transparent: false, blending: THREE.AdditiveBlending});
+						meshTemp = new THREE.Sprite(mat);
+						meshTemp.scale.set(2,2,2);	//big
+						light.add(meshTemp);
+						light.position.y = -30;
+						bathroomLight.add(light);
+
+						bathroomLight.position.set(0,35,-5);
+
+						bathroom.add(bathroomLight);
+
+					scene.add(bathroom);
+				});
+			});
+		});	
+	});
+}
+
+// need to clone toilet_paper and person_toilet
+function loadModelBathroomsV2( _door, _side, _floor, _s, s_white, p_b, p_t, _t, _pst ){
+	var loader = new THREE.JSONLoader();
+	bathroom = new THREE.Object3D();
+	bathroom_stuff = new THREE.Object3D();
+
+	var br;
+	var whiteMat = new THREE.MeshLambertMaterial({color: 0xcccccc});
+
+	// loader.load( s_white, function( geometry1 ){
+	// 	br = new THREE.Mesh(geometry1, whiteMat);
+	// 	bathroom_stuff.add(br);
+
+		// back panel
+		br = new THREE.Mesh(new THREE.PlaneGeometry(14,10,1,1), whiteMat);
+		br.rotation.y = Math.PI;
+		br.position.z += 3.3;
+		bathroom_stuff.add(br);
+
+		loader.load( _door, function( geometry2 ){
+			br = new THREE.Mesh(geometry2, new THREE.MeshLambertMaterial({map: doorTex}));
+			// br = new THREE.Mesh(geometry2, bathroomMat);
+			bathroom_stuff.add(br);
+
+			loader.load( _side, function( geometry4 ){
+				br = new THREE.Mesh(geometry4, new THREE.MeshLambertMaterial({map: graffitiTex}));	//0xfffac4
+				// br = new THREE.Mesh(geometry4, bathroomMat);
+				bathroom_stuff.add(br);
+
+				loader.load( _floor, function( geometry5 ){
+					br = new THREE.Mesh(geometry5, new THREE.MeshLambertMaterial({map: floorTex}));	//0xfffac4
+					// br = new THREE.Mesh(geometry4, bathroomMat);
+					bathroom_stuff.add(br);
+
+					// small stuff
+					loader.load( _s, function( geometry3 ){
+						br = new THREE.Mesh(geometry3, new THREE.MeshLambertMaterial({color: 0xffea00}));
+						// br = new THREE.Mesh(geometry3, bathroomMat);
+						bathroom_stuff.add(br);
+
+						var tp = toilet_paper.clone();
+						tp.scale.set(0.5,0.5,0.5);
+						tp.rotation.y = -Math.PI/2;
+						//3.3,-1,0
+						var tp2 = tp.clone();
+						tp.position.set(3.1,-1.5,-3.5);
+						//3.3,-1,1.5
+						tp2.position.set(3.1,-1.5,-2);
+						bathroom_stuff.add(tp);
+						bathroom_stuff.add(tp2);
+
+						var fakeT = new THREE.Mesh( personToilet, toiletMat );
+						fakeT.scale.set(3,3,3);
+						fakeT.rotation.y = Math.PI;
+						var ft = fakeT.clone();
+						ft.position.set(6.5,0,0);
+						bathroom_stuff.add(ft);
+						ft = fakeT.clone();
+						ft.position.set(-6.5,0,0);
+						bathroom_stuff.add(ft);
+
+						// intestine
+						loader.load( _t, function( geometry4 ){
+
+							// geometry4.faceVertexUvs[ 1 ] = geometry4.faceVertexUvs[ 0 ];
+
+							br = new THREE.Mesh(geometry4, intestineMat);
+
+							bathroom_stuff.add(br);
+
+							bathroom.add(bathroom_stuff);
+							bathroom.scale.set(1.5,1.5,1.5);
+
+							// LIGHT!
+								bathroomLight = new THREE.Object3D();
+
+								geo = new THREE.TetrahedronGeometry(1.5);
+								mat = new THREE.MeshLambertMaterial({color: 0xfffac4});
+								var meshTemp = new THREE.Mesh( geo, mat );
+								meshTemp.rotation.x = -35 * Math.PI/180;
+								meshTemp.rotation.z = 30 * Math.PI/180;
+								meshTemp.position.y = -29.;
+								bathroomLight.add(meshTemp);
+
+								geo = new THREE.BoxGeometry(0.2,30,0.2);
+								transY(geo, -14);	// -14.5
+								meshTemp = new THREE.Mesh(geo, mat);
+								bathroomLight.add(meshTemp);
+
+								light = new THREE.PointLight(0xffff00, 1, 50);
+								textureLoader = new THREE.TextureLoader();
+								glowTexture = textureLoader.load( "images/glow_edit.png" );
+								mat = new THREE.SpriteMaterial({map: glowTexture, color: 0xffef3b, transparent: false, blending: THREE.AdditiveBlending});
+								meshTemp = new THREE.Sprite(mat);
+								meshTemp.scale.set(2,2,2);	//big
+								light.add(meshTemp);
+								light.position.y = -30;
+								bathroomLight.add(light);
+
+								bathroomLight.position.set(0,35,-5);
+
+								bathroom.add(bathroomLight);
+
+							loader.load( _pst, function( geometry6 ){
+								var poster = new THREE.Mesh( geometry6, posterMat );
+								bathroom.add(poster);
+
+								scene.add(bathroom);
+
+								// loadingCount();
+								loadingCountText("bathroomsss");
+							});
+						});
+					});
+				});
+			});
+		});	
+	// });
+}
+
+function loadModelPoop( _poop ){
+	loader = new THREE.JSONLoader();
+	var poopStickGeo = new THREE.BoxGeometry(0.1,1,0.1);
+	transY(poopStickGeo, 0.5);
+	var poopStick = new THREE.Mesh( poopStickGeo, new THREE.MeshBasicMaterial({color: 0x000000}) );
+	
+	// BODY
+	loader.load( _poop, function( geometry ){
+		poopGeo = geometry.clone();
+		// poopGeo.computeBoundingBox();
+		poopGeo.computeBoundingSphere();
+
+		poop = new THREE.Mesh(poopGeo, poopMat);
+		poopHat = poop.clone();
+		// poop.rotation.y += Math.PI;
+		// poop.position.y += 0.3;
+
+		var ps_RA = poopStick.clone();
+		ps_RA.name = "right arm";
+		ps_RA.position.set(0.6,0.3,0);
+		ps_RA.rotation.z += Math.PI;
+		poop.add(ps_RA);
+
+		var ps_LA = poopStick.clone();
+		ps_LA.name = "left arm";
+		ps_LA.position.set(-0.6,0.3,0);
+		poop.add(ps_LA);
+
+		var ps_RL = poopStick.clone();
+		ps_RL.position.set(0.3,-1,0);
+		poop.add(ps_RL);
+
+		var ps_LL = poopStick.clone();
+		ps_LL.position.set(-0.3,-1,0);
+		poop.add(ps_LL);
+
+		// createBox();
+		// loadingCount();
+		loadingCountText("poop");
+
+		CreatePoopRing();
+	});
+}
+
+function loadModelPoopMacaron( _poop ){
+	loader = new THREE.JSONLoader();
+	
+	loader.load( _poop, function( geometry ){
+		poopMGeo = geometry.clone();
+		poopMGeo.computeBoundingSphere();
+
+		poopM = new THREE.Mesh(poopMGeo, poopMMat);
+
+		// loadingCount();
+		loadingCountText("poop macaron");
+	});
+}
+
+function loadModelPoopHeart( _poopH ){
+	loader = new THREE.JSONLoader();
+	
+	loader.load( _poopH, function( geometry ){
+		poopHeartGeo = geometry.clone();
+		poopHeartGeo.computeBoundingSphere();
+
+		poopHeart = new THREE.Mesh(poopHeartGeo, poopHeartMat);
+
+		// loadingCount();
+		loadingCountText("poop heart");
+	});
+}
 
 var pBody, pLA, pRA, pHead, pScreen, pMat, pColor, pToilet;
 
@@ -1005,6 +1544,30 @@ var pBody, pLA, pRA, pHead, pScreen, pMat, pColor, pToilet;
 // ...
 // }
 
+// web audio api
+function finishedLoading(bufferList){
+
+	for(var i=0; i<bufferList.length; i++){
+		var s = audioContext.createBufferSource();
+		audioSources.push(s);
+
+		var g = audioContext.createGain();
+		gainNodes.push(g);
+
+		audioSources[i].buffer = bufferList[i];
+		audioSources[i].loop = true;
+		audioSources[i].connect(gainNodes[i]);
+		gainNodes[i].connect(audioContext.destination);
+		
+		audioSources[i].start(0);
+	}
+	gainNodes[0].gain.value = .5;
+	gainNodes[1].gain.value = 0.2;
+	gainNodes[2].gain.value = 0;	// stomach
+	gainNodes[3].gain.value = 1;	// soothing
+
+	audioAllLoaded = true;
+}
 
 // v.1
 // function animate() 
@@ -1050,9 +1613,24 @@ function update()
 
 	// physics_stats.update();
 
+	// TRIS!!!
+		/*
+		for(var i=0; i<tanWaves.length; i++){
+			tanWRun[i] = 0.03 * tanWaves[i].run();
+		}
+		for(var i=0; i<tris.length; i++){
+			tris[i].rotation.y = tanWRun[ tris[i].tanWIndex ] + Math.PI/3;
+			tris[i].rotation.z = tanWRun[ tris[i].tanWIndex ];
+		}
+		*/
 
 	// PERSON_ANIMATION
-		// if player > 5 && visible = true
+		// if(person){
+		// 	person.update(null);
+		// 	person.switchAni();
+		// }
+
+		// if player > 5, visible = true
 		if( !personsAppeared && showAniPpl){
 			for(var i=0; i<persons.length; i++){
 				persons[i].body.visible = true;
@@ -1074,6 +1652,7 @@ function update()
 		
 		// if player fullhouse, walk!!
 		if(fullhouse && personsAnied){
+
 			if(!personsWalked){
 				for (var i = 0; i < persons.length; i++) {
 					persons[i].changeAni(0);
@@ -1118,11 +1697,31 @@ function update()
 		}
 	}
 	
+	// windowAnimator.updateLaura( 300*dt );
 	if(intestineAnimator)
 		intestineAnimator.updateLaura( 300*dt );
+	// intestinesAnimator.updateLaura( 300*dt );
 
 
 	// POOP_TALK
+	// v.1
+	/*
+	if ( (controls.neckAngle.x<1.58 && controls.neckAngle.x>0) && !poopIsTalking) {
+		sample.trigger(0,1);
+		new TWEEN.Tween(firstGuy.player.children[0].children[0].children[1].rotation)
+			.to({z: 1}, 100)
+			.repeat(3)
+			.yoyo(true)
+			.start();
+
+		setTimeout(function(){
+			poopIsTalking = false;
+
+		}, 6000);
+
+		poopIsTalking = true;
+	};
+	*/
 	// v.2
 	if ( lookAtMiniPoop && !poopIsTalking) {
 		sample.trigger(poopTalkCount%4,1);
@@ -1257,6 +1856,19 @@ function removePlayer(playerID){
 	}
 }
 
+function startSpeech(event) {
+	if(recognizing){
+		// console.log("final_script: " + final_script);
+		recognition.stop();
+		console.log("recognition stops");
+		return;
+	}
+
+	// start / restart
+		recognition.start();
+		console.log("recognition starts");
+}
+
 function fullscreen() {
 	if (container.requestFullscreen) {
 		container.requestFullscreen();
@@ -1339,6 +1951,81 @@ function EnterSceneTwo_v2() {
 		}, 11000);
 
 	}, 8500);
+}
+
+function EnterSceneTwo() {
+	if(inScMeditation) return;
+
+	if(!initSound){
+
+		/////////////////////////////
+		//    OFFICIAL START!!!    //
+		/////////////////////////////
+		sound_bathroom.play();
+		sound_fire.play();
+		sound_forest.play();
+
+		initSound = true;		
+	}
+
+	setTimeout(function(){
+		// v2_move tube
+		new TWEEN.Tween( bathroom.position )
+		.to( controls.getOutBathroomPosition, 7500 )
+		.easing( TWEEN.Easing.Cubic.InOut )
+		.delay( 2000 )
+		.start();
+		//
+		// firstGuy.wordTexture.clear();
+
+		// Light exchanges!
+		new TWEEN.Tween( bathroom.children[1].children[2] )
+		.to( {intensity: 0}, 1000 )
+		.start();
+
+		new TWEEN.Tween( hemiLight )
+		.to( {intensity: 1}, 1000 )
+		.start();
+
+		// disappear pooptowers
+		for (var i = 0; i < poopTowers.length; i++) {
+			poopTowers[i].visible = false;
+		};
+
+		setTimeout(function(){	
+
+			controls.setMovYAnimation( -181.8, 11000 );
+			//
+			firstGuy.player.children[0].visible = false;
+
+			switchSound_1 = true;
+			sound_stomach.fadeIn(1,6000);
+			sound_bathroom.fadeOut(0,8000);
+
+			//
+			for(var i=0; i<stars.length; i++){
+				stars[i].position.y -= 200;
+			}
+
+			// disappear the bathroom
+			setTimeout(function(){
+				bathroom.visible = false;
+			}, 16000);
+
+			// bring the body back
+			setTimeout(function(){
+				firstGuy.player.children[0].visible = true;
+
+				// able to move around and shoot
+				controls.movingEnabled = true;
+				controls.clickingTouchingEnabled = true;
+			}, 11000);
+
+		}, 10500);
+
+	}, 6*1000);
+
+	inScMeditation = true;
 }
 
 function EnterSceneCelebrate() {
@@ -1503,6 +2190,7 @@ function EnterSceneEnd() {
 	// to-do
 	// remove particles
 	// remove all physijs poop
+
 
 	//
 	var waterPos = new THREE.Vector3();

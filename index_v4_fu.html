@@ -3,15 +3,18 @@
 	<head>
 		<title>Daily Life VR - Poop</title>
 		<meta charset="utf-8">
+		<!-- <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"> -->
+		<!-- <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no"> -->
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 		<meta name="mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<!-- <link rel="manifest" href="/manifest.json"> -->
 		<link rel="stylesheet" type="text/css" href="css/style.css">
 		<script src='js/lib/firebase.js'></script>
 	</head>
 	<body>		
-		<div id="render-canvas" style="display:none;"></div>
+		<div id="render-canvas"></div>
 
 		<script type="text/javascript" src="js/lib/three.js"></script>
 		<script type="text/javascript" src="js/lib/Detector.js"></script>
@@ -21,6 +24,7 @@
 
 		<script type="text/javascript">
 			var myDataRef = new Firebase('https://dailylifevr-poop.firebaseio.com/');
+			// myDataRef.push({name: 'laura', text: 'hi'});
 
 			//device detection
 			//source: http://stackoverflow.com/questions/3514784/what-is-the-best-way-to-detect-a-mobile-device-in-jquery
@@ -45,7 +49,7 @@
 			if( !isMobile ) {
 				var clickDiv = document.createElement('div');
 				clickDiv.id = "blocker";
-				clickDiv.style = "display: none;";
+				clickDiv.style = "display: -webkit-box;";
 				document.getElementsByTagName("body")[0].appendChild(clickDiv);
 
 				var fingerImg = document.createElement('img');
@@ -55,7 +59,6 @@
 				var ins = document.createElement('div');
 				ins.id = "instructions";
 				ins.appendChild(fingerImg);
-
 				clickDiv.appendChild(ins);
 			}
 
@@ -73,16 +76,21 @@
 
 			var renderCanvas = byId("render-canvas");
 			var blockerDiv = byId("blocker");
+
+			renderCanvas.style.display = "none";
+			if(blockerDiv) blockerDiv.style.display = "none";
+
 		</script>
 
 			<div id="splashPage" style="display:block; position:absolute;">
 				<h1>Daily Life VR</h1>
 				<h2>Chapter 1: Poop</h1>
-
+				<!-- <img src="images/poopPoster.gif" style="height:50%; margin: 10px auto; display:block;"> -->
+				<!-- <textarea id="playerName" placeholder="Who's this lucky one sitting on the toilet?"></textarea> -->
 				<input type="text" id="playerName" placeholder="Who's this lucky one sitting on the toilet?" style="width:20em;height:2em"></input>
 				<img id="loadingImg" src="images/loadingbox.gif" width="60" height="60" style="margin:0 auto; display:block;">
 				<div id="loadingTxt" style="color:yellow">loading</div>
-
+				<!-- <img id="finalBG" src="images/chalkboard.jpg" height="80%" style="margin:0 auto; display:none;"> -->
 				<div id="finalBG">
 					<div id="finalStat"></div>
 					<a onclick="reloadPage();" style="cursor:pointer">I want to poop again!</a>
@@ -107,10 +115,12 @@
 					<img class="insImg" src="images/instructions/toPoop.jpg">
 					<img class="insImg" src="images/instructions/toWalk.jpg">
 					<img class="insImg" src="images/instructions/toVR.jpg">
+					<!-- <img class="insImg" src="images/instructions/toAim.jpg"> -->
 				</div>
 			</div>
 
 		<script>
+
 			var final_statistic = {};
 			final_statistic.pooperCount = 0;
 			final_statistic.totalVisit = 0;
@@ -125,6 +135,7 @@
 			var loadingTxt = byId("loadingTxt");
 			var startLink = byId("startLink");
 			var playerNameInput = byId("playerName");
+			// playerNameInput.style.height = playerNameInput.scrollHeight + "px";
 
 			var splashPage = byId("splashPage");
 			var finalBG = byId("finalBG");
@@ -157,7 +168,11 @@
 				// superInit();
 				// connectSocket();
 
-				lateInit();
+				// document.querySelector('*').style.userSelect = "none";
+				// document.querySelector('*').style.webkitUserSelect = "none";
+				// document.querySelector('*').style.MozUserSelect = "none";
+
+				LateInit();
 			}
 
 			var showAbout = false, showInstruction = false;
@@ -171,7 +186,6 @@
 
 				if(showAbout){
 					if(showInstruction) ToggleInstruction();
-
 					aboutDetail.style.display = "block";
 					aboutTitle.innerText = "About (↓)";
 				} else {
@@ -209,7 +223,11 @@
 
 		</script>
 
+		<!-- Peer.js & WebSocket -->
 		<script type="text/javascript">
+			/* based on codes of Shawn Van Every */
+			/* source: http://itp.nyu.edu/~sve204/liveweb_fall2014/week5.html */
+
 			var socket = null;
 			var socketOpened = false;
 
@@ -228,7 +246,7 @@
 			var currentPplAmount = 0;
 
 			//
-			var trulyFullyStart = false;
+			var afterLateInit = false;
 
 			function connectSocket() {
 				currentPplAmount ++;
@@ -295,7 +313,7 @@
 						}
 					}
 
-					// Index of ME in the world (assigned by server)
+					// Assigned index of ME in the world
 					// Get to know whom I am
 					if(data.type=="index"){
 
@@ -310,6 +328,8 @@
 							console.log("I am #" + whoIamInLife + " in the #" + meInWorld + " Daily Life world, with total visit: " + totalVisitCount);
 
 							init();
+							// superInit();
+							// LateInit();
 
 							initEnvironment = true;
 						}
@@ -354,10 +374,7 @@
 										final_statistic.othersToMe[ h_f_n ] ++;
 									}
 								}
-							}
-							// if it's NOT aim at someone, create poop
-							else
-							{
+							} else {
 								var poopPos = new THREE.Vector3(data.playerPos.x, data.playerPos.y, data.playerPos.z);
 								var poopQ = new THREE.Vector3(data.playerDir.x, data.playerDir.y, data.playerDir.z);
 
@@ -387,7 +404,11 @@
 					// ONE_TIME_EVENT_IN_THE_BEGINNING
 					if(data.length>0 && !updatePreviousPlayer){
 						for(var i=0; i<data.length; i++){
+							// console.log('total data lenght: ' + data.length);
 							console.log("whoIamInLife: " + whoIamInLife + ", data id: " + data[i].id + ", data worldId: " + data[i].worldId );
+
+							// If I'm older than the coming
+							// if(whoIamInLife > data[i].id){
 
 							// if I'm not the coming player && we are in the same world
 							// this is a history player I want to create!!!
@@ -408,9 +429,8 @@
 							totalPplInWorldsCount = data[i].totalCount;
 							totalVisitCount = data[i].totalVisit;
 						}
-						// FEEL WRONG HERE...
-							final_statistic.pooperCount = totalPplInWorldsCount;
-							final_statistic.totalVisit = totalVisitCount;
+						final_statistic.pooperCount = totalPplInWorldsCount;
+						final_statistic.totalVisit = totalVisitCount;
 
 						updatePreviousPlayer = true;
 						//
@@ -461,7 +481,7 @@
 		<script src='js/lib/threex.dynamictexture.js'></script>
 		<script type="text/javascript" src="js/lib/howler.js"></script>
 		<script type="text/javascript" src="js/lib/SPE.min.js"></script>
-		<!-- <script type="text/javascript" src="js/lib/Sparks.js"></script> -->
+		<script type="text/javascript" src="js/lib/Sparks.js"></script>
 
 		<script type="text/javascript" src="js/lib/BufferLoader.js"></script>
 		<script type="text/javascript" src="js/lib/physi.js"></script>
