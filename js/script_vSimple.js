@@ -400,6 +400,10 @@ function superInit(){
 		    console.log( item, loaded, total );
 		};
 
+		loadingManger.onError = function(err) {
+			console.log(err)
+		}
+
 		loadingManger.onLoad = function () {
 		    console.log( "first step all loaded!" );
 		    CreateStars();
@@ -414,21 +418,21 @@ function superInit(){
 								  "models/poster.js" );
 		};
 
-	br_mat_loadingManager = new THREE.LoadingManager();
-		// after loading all the textures for BATHROOM, create bathroom
-		br_mat_loadingManager.onLoad = function () {
-		    console.log( "Ready to load BATHROOM!" );
+	// br_mat_loadingManager = new THREE.LoadingManager();
+	// 	// after loading all the textures for BATHROOM, create bathroom
+	// 	br_mat_loadingManager.onLoad = function () {
+	// 	    console.log( "Ready to load BATHROOM!" );
 
-			loadModelBathroomsV2( "models/bathroom/b_door.js",
-								  "models/bathroom/b_sides.js",
-								  "models/bathroom/b_floor.js",
-								  "models/bathroom/b_smallStuff.js",
-								  "models/bathroom/b_smallWhite.js",
-								  "models/bathroom/paper_bottom.js",
-								  "models/bathroom/paper_top.js",
-								  "models/bathroom2.js",
-								  "models/poster.js" );
-		};
+	// 		loadModelBathroomsV2( "models/bathroom/b_door.js",
+	// 							  "models/bathroom/b_sides.js",
+	// 							  "models/bathroom/b_floor.js",
+	// 							  "models/bathroom/b_smallStuff.js",
+	// 							  "models/bathroom/b_smallWhite.js",
+	// 							  "models/bathroom/paper_bottom.js",
+	// 							  "models/bathroom/paper_top.js",
+	// 							  "models/bathroom2.js",
+	// 							  "models/poster.js" );
+	// 	};
 
 	// starLoadingManager = new THREE.LoadingManager();
 	// 	starLoadingManager.onLoad = function () {
@@ -441,8 +445,8 @@ function superInit(){
 		loadSitModelPlayer( "models/personHead.js", "models/personBody.js", "models/toilet.js" );
 
 	// POOP
-		LoadTexModelPoop( 'images/poop.png', 'models/poop.js' );
-		LoadTexModelPoopHeart( 'images/poopHeart.png', 'models/poopHeart.js' );
+		LoadTexModelPoop( 'images/poop.jpg', 'models/poop.js' );
+		LoadTexModelPoopHeart( 'images/poopHeart.jpg', 'models/poopHeart.js' );
 
 	// wave
 		LoadTexModelWave( 'images/wave2.png', 'models/water_wave_onesided.js' );
@@ -498,7 +502,7 @@ function superInit(){
 		});
 
 	// BATHROOM
-		LoadTexBathroom( "images/intestines.png", "images/poster_texture.jpg" );
+		LoadTexBathroom( "images/intestines.jpg", "images/poster_texture.jpg" );
 
 	// STAR
 		LoadStarTexture();

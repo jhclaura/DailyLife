@@ -4,9 +4,11 @@ var app = express();
 var http = require('http');
 var server = http.createServer(app);
 var port = process.env.PORT || 7000;
-
+var compression = require('compression');
 //
 server.listen(port);
+
+app.use(compression())
 
 app.get('*', function(req, res){
 	res.sendFile(__dirname + req.url);

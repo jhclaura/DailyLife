@@ -9,6 +9,7 @@
   "author": "Laura Chen @jhclaura",
   "license": "ISC",
   "dependencies": {
+    "compression": "^1.6.1",
     "express": "^4.13.3",
     "serialport": "^2.0.5",
     "ws": "^0.8.1"

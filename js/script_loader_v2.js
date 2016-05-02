@@ -180,7 +180,7 @@ function loadModelBathroomsV2( _door, _side, _floor, _s, s_white, p_b, p_t, _t, 
 								loadingImg.style.display = "none";
 								loadingTxt.style.display = "none";
 								readyToStart = true;
-								
+
 							});
 						});
 					});
@@ -348,11 +348,12 @@ function LoadTexModelPoopHeart( tex, model ){
 	});
 }
 
+var poopStickGeo, poopStick;
 function LoadTexModelPoop( tex, model ){
 	
-	var poopStickGeo = new THREE.BoxGeometry(0.1,1,0.1);
+	poopStickGeo = new THREE.BoxGeometry(0.1,1,0.1);
 	transY(poopStickGeo, 0.5);
-	var poopStick = new THREE.Mesh( poopStickGeo, new THREE.MeshBasicMaterial({color: 0x000000}) );
+	poopStick = new THREE.Mesh( poopStickGeo, new THREE.MeshBasicMaterial({color: 0x000000}) );
 
 	// TEXTURE
 	var textureLoader = new THREE.TextureLoader( loadingManger );
