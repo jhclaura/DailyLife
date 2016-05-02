@@ -188,6 +188,7 @@ function loadModelBathroomsV2( _door, _side, _floor, _s, s_white, p_b, p_t, _t, 
 	// });
 }
 
+/*
 function loadModelPoop( _poop ){
 	var loader = new THREE.JSONLoader( loadingManger );
 	var poopStickGeo = new THREE.BoxGeometry(0.1,1,0.1);
@@ -242,6 +243,7 @@ function loadModelPoopHeart( _poopH ){
 		// loadingCountText("poop heart");
 	});
 }
+*/
 
 function LoadStarTexture() {
 	// var textureLoader = new THREE.TextureLoader( starLoadingManager );
@@ -322,8 +324,10 @@ function LoadTexModelWave( tex, model ){
 
 function LoadTexModelPoopHeart( _tex, _model ){
 	var h_texLoader = new THREE.TextureLoader( loadingManger );
-	h_texLoader.load(_tex, function(texture){
-		poopHeartTex = texture;
+	// h_texLoader.load(_tex, function(texture){
+		// poopHeartTex = texture;
+		// poopHeartMat = new THREE.MeshLambertMaterial({map: poopHeartTex});
+		poopHeartTex = h_texLoader.load(_tex);
 		poopHeartMat = new THREE.MeshLambertMaterial({map: poopHeartTex});
 		
 		// MODEL_BODY
@@ -338,7 +342,7 @@ function LoadTexModelPoopHeart( _tex, _model ){
 
 			// loadingCountText("poop heart");
 		});
-	});
+	// });
 }
 
 function LoadTexModelPoop( _tex, _model ){

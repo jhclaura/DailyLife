@@ -18193,6 +18193,7 @@ THREE.ImageLoader.prototype = {
 		scope.manager.itemStart( url );
 
 		image.src = url;
+		this.image = image;
 
 		return image;
 
