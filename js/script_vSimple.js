@@ -1607,7 +1607,7 @@ function createFinalStatistic() {
 			// skip loop if the property is from prototype
 	   		if (!final_statistic.meToOthers.hasOwnProperty(key)) continue;
 
-			finalStat.innerHTML += "       " + key + " <font color='#ff76a2'>*</font> " + final_statistic.meToOthers[key] + ".<br>";
+			finalStat.innerHTML += "       " + key + " <font color='#ff76a2'>*</font> " + final_statistic.meToOthers[key] + "<br>";
 		}
 	}
 
@@ -1617,7 +1617,7 @@ function createFinalStatistic() {
 			// skip loop if the property is from prototype
 	   		if (!final_statistic.othersToMe.hasOwnProperty(key)) continue;
 
-			finalStat.innerHTML += "       " + key + " <font color='#ff76a2'>*</font> " + final_statistic.othersToMe[key] + ".<br>";
+			finalStat.innerHTML += "       " + key + " <font color='#ff76a2'>*</font> " + final_statistic.othersToMe[key] + "<br>";
 		}
 		finalStat.innerHTML += "<br>How sweet!<br><br>";
 	}
