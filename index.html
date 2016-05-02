@@ -151,6 +151,7 @@
 
 				aboutPage.style.display = "none";
 				aboutDetail.style.display = "none";
+				aboutPage.style.height = '';
 				aboutTitle.innerText = "About (↑)";
 				showAbout = false;
 
@@ -173,9 +174,12 @@
 					if(showInstruction) ToggleInstruction();
 
 					aboutDetail.style.display = "block";
+					aboutPage.style.height = '100%';
 					aboutTitle.innerText = "About (↓)";
 				} else {
 					aboutDetail.style.display = "none";
+					aboutPage.style.height = '';
+
 					aboutTitle.innerText = "About (↑)";
 				}
 			}
