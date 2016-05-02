@@ -88,6 +88,7 @@ var keyIsPressed;
 	var poopCount = 0;
 	var flushHandler, lookAtFlush = false, exitTexture, flushColorChanged = false;
 	var poster, posterMat;
+	var poopStickGeo, poopStick;
 
 // WEB_AUDIO_API!
 	var usingWebAudio = true, bufferLoader, convolver, mixer;
@@ -398,11 +399,13 @@ function superInit(){
 	loadingManger = new THREE.LoadingManager();
 		loadingManger.onProgress = function ( item, loaded, total ) {
 		    console.log( item, loaded, total );
+		    var loadingPercentage = Math.floor(loaded/total*100);
+		    loadingTxt.innerHTML = "loading " + loadingPercentage +"%";
 		};
 
 		loadingManger.onError = function(err) {
-			console.log(err)
-		}
+			console.log(err);
+		};
 
 		loadingManger.onLoad = function () {
 		    console.log( "first step all loaded!" );
@@ -439,14 +442,17 @@ function superInit(){
 	// 	    CreateStars();
 	// 	};
 
+	// POOP
+		poopStickGeo = new THREE.BoxGeometry(0.1,1,0.1);
+		transY(poopStickGeo, 0.5);
+		poopStick = new THREE.Mesh( poopStickGeo, new THREE.MeshBasicMaterial({color: 0x000000}) );
+		LoadTexModelPoop( 'images/poop.jpg', 'models/poop.js' );
+		LoadTexModelPoopHeart( 'images/poopHeart.jpg', 'models/poopHeart.js' );
+
 	// PERSON
 		toiletMat = new THREE.MeshLambertMaterial({color: 0xffffff});
 		loadModelAniGuy();	// animated white dudes, hidden at first
 		loadSitModelPlayer( "models/personHead.js", "models/personBody.js", "models/toilet.js" );
-
-	// POOP
-		LoadTexModelPoop( 'images/poop.jpg', 'models/poop.js' );
-		LoadTexModelPoopHeart( 'images/poopHeart.jpg', 'models/poopHeart.js' );
 
 	// wave
 		LoadTexModelWave( 'images/wave2.png', 'models/water_wave_onesided.js' );
@@ -461,7 +467,7 @@ function superInit(){
 			bigToilet.position.copy( toiletCenters[0]);
 			scene.add( bigToilet );
 
-			loadingCountText( "white big toilet" );
+			// loadingCountText( "white big toilet" );
 		} );
 
 	// T_PAPER
@@ -558,8 +564,7 @@ function loadModelWave(txt){
 								   new THREE.MeshBasicMaterial({ map: waterwaveTex, morphTargets: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide }),
 								   new THREE.Vector3(0,-12,3), 1.7 );
 
-		// loadingCount();
-		loadingCountText("water wave");
+		// loadingCountText("water wave");
 	});
 };
 
@@ -579,8 +584,7 @@ function loadModelToiletTube() {
 		bigToiletTubeAni.visible = false;
 		scene.add( bigToiletTubeAni );
 
-		// loadingCount();
-		loadingCountText( "toilet tube" );
+		// loadingCountText( "toilet tube" );
 	});
 }
 
@@ -590,7 +594,7 @@ function loadModelAniGuy() {
 		personGeo = geometry;
 
 		var aniP_tex_loader = new THREE.TextureLoader( loadingManger );
-		aniP_tex_loader.load('images/galleryGuyTex.png', function(texture){
+		aniP_tex_loader.load('images/galleryGuyTex.jpg', function(texture){
 			personTex = texture;
 			personCircle = new THREE.Object3D();
 			personCircle.visible = false;
@@ -615,7 +619,7 @@ function loadModelAniGuy() {
 			}
 		});
 
-		loadingCountText("ani guy");
+		// loadingCountText("ani guy");
 	});
 }
 
@@ -1067,13 +1071,13 @@ function update()
 
 	// if player>=3, poop>50 + heart>30 to celebrate
 	if(strictToCele){
-		if( final_statistic.totalPoop>50 && final_statistic.totalHeart>30 ){
+		if( final_statistic.totalPoop>toCelebratePoop*2 && final_statistic.totalHeart>30 ){
 			EnterSceneCelebrate();
 		}
 	}
 	// if player<3, poop>30 to celebrate
 	else {
-		if( final_statistic.totalPoop>30 ){
+		if( final_statistic.totalPoop>toCelebratePoop ){
 			EnterSceneCelebrate();
 		}
 	}

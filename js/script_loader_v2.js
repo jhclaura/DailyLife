@@ -27,8 +27,7 @@ function loadModelPlayer( _body, _left_arm, _right_arm, _head ){
 		geometry4.center();
 		guyHeadGeo = geometry4.clone();
 
-		// loadingCount();
-		loadingCountText("head");
+		// loadingCountText("head");
 	});
 }
 
@@ -153,7 +152,7 @@ function loadModelBathroomsV2( _door, _side, _floor, _s, s_white, p_b, p_t, _t, 
 
 								light = new THREE.PointLight(0xffff00, 1, 50);
 								textureLoader = new THREE.TextureLoader();
-								glowTexture = textureLoader.load( "images/glow_edit.png" );
+								glowTexture = textureLoader.load( "images/glow_edit.jpg" );
 								mat = new THREE.SpriteMaterial({map: glowTexture, color: 0xffef3b, transparent: false, blending: THREE.AdditiveBlending});
 								meshTemp = new THREE.Sprite(mat);
 								meshTemp.scale.set(2,2,2);	//big
@@ -171,7 +170,6 @@ function loadModelBathroomsV2( _door, _side, _floor, _s, s_white, p_b, p_t, _t, 
 
 								scene.add(bathroom);
 
-								// loadingCount();
 								// loadingCountText("bathroomsss");
 
 								// Loaded the latest one!!
@@ -226,9 +224,7 @@ function loadModelPoop( _poop ){
 		ps_LL.position.set(-0.3,-1,0);
 		poop.add(ps_LL);
 
-		// createBox();
-		// loadingCount();
-		loadingCountText("poop");
+		// loadingCountText("poop");
 
 		CreatePoopRing();
 	});
@@ -243,8 +239,7 @@ function loadModelPoopHeart( _poopH ){
 
 		poopHeart = new THREE.Mesh(poopHeartGeo, poopHeartMat);
 
-		// loadingCount();
-		loadingCountText("poop heart");
+		// loadingCountText("poop heart");
 	});
 }
 
@@ -284,9 +279,9 @@ function LoadTexBathroom( intestine, poster ) {
 		txt.repeat.set( 4, 4 );
 	};
 	var textureLoader = new THREE.TextureLoader( loadingManger );
-	graffitiTex = textureLoader.load('images/graffitiS.png', graffiti_TLM);
+	graffitiTex = textureLoader.load('images/graffitiS.jpg', graffiti_TLM);
 	floorTex = textureLoader.load('images/floor.jpg', graffiti_TLM);
-	doorTex = textureLoader.load('images/door.png');
+	doorTex = textureLoader.load('images/door.jpg');
 
 	// var texLoader = new THREE.TextureLoader( br_mat_loadingManager );
 	textureLoader.load(intestine, function(texture){
@@ -320,21 +315,20 @@ function LoadTexModelWave( tex, model ){
 									   new THREE.MeshBasicMaterial({ map: waterwaveTex, morphTargets: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide }),
 									   new THREE.Vector3(0,-12,3), 1.7 );
 
-			// loadingCount();
-			loadingCountText("water wave");
+			// loadingCountText("water wave");
 		});
 	});
 }
 
-function LoadTexModelPoopHeart( tex, model ){
-	var textureLoader = new THREE.TextureLoader( loadingManger );
-	textureLoader.load(tex, function(texture){
+function LoadTexModelPoopHeart( _tex, _model ){
+	var h_texLoader = new THREE.TextureLoader( loadingManger );
+	h_texLoader.load(_tex, function(texture){
 		poopHeartTex = texture;
 		poopHeartMat = new THREE.MeshLambertMaterial({map: poopHeartTex});
 		
 		// MODEL_BODY
-		var loader = new THREE.JSONLoader( loadingManger );
-		loader.load( model, function( geometry ){
+		var h_loader = new THREE.JSONLoader( loadingManger );
+		h_loader.load( _model, function( geometry ){
 			poopHeartGeo = geometry.clone();
 			// poopHeartGeo.computeBoundingSphere();
 
@@ -342,28 +336,22 @@ function LoadTexModelPoopHeart( tex, model ){
 
 			// then create person!
 
-			// loadingCount();
-			loadingCountText("poop heart");
+			// loadingCountText("poop heart");
 		});
 	});
 }
 
-var poopStickGeo, poopStick;
-function LoadTexModelPoop( tex, model ){
-	
-	poopStickGeo = new THREE.BoxGeometry(0.1,1,0.1);
-	transY(poopStickGeo, 0.5);
-	poopStick = new THREE.Mesh( poopStickGeo, new THREE.MeshBasicMaterial({color: 0x000000}) );
+function LoadTexModelPoop( _tex, _model ){
 
 	// TEXTURE
-	var textureLoader = new THREE.TextureLoader( loadingManger );
-	textureLoader.load(tex, function(texture){
+	var poop_texLoader = new THREE.TextureLoader( loadingManger );
+	poop_texLoader.load( _tex, function( texture ){
 		poopTex = texture;
 		poopMat = new THREE.MeshLambertMaterial({map: poopTex});
 		
 		// MODEL_BODY
-		var loader = new THREE.JSONLoader( loadingManger );
-		loader.load( model, function( geometry ){
+		var poop_loader = new THREE.JSONLoader( loadingManger );
+		poop_loader.load( _model, function( geometry ){
 			poopGeo = geometry.clone();
 			poopGeo.computeBoundingBox();
 			// poopGeo.computeBoundingSphere();
@@ -392,9 +380,7 @@ function LoadTexModelPoop( tex, model ){
 			ps_LL.position.set(-0.3,-1,0);
 			poop.add(ps_LL);
 
-			// createBox();
-			// loadingCount();
-			loadingCountText("poop");
+			// loadingCountText("poop");
 
 			CreatePoopRing();
 		});
