@@ -925,7 +925,6 @@ function init() {
 function lateInit() 
 {	
 	console.log("late init!");
-	document.body.style.overflow = "hidden";
 	document.body.addEventListener('touchmove', noScrolling, false);
 	// window.addEventListener('keydown', myKeyPressed, false);
 	// window.addEventListener('keyup', myKeyUp, false);
