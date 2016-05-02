@@ -1105,12 +1105,10 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		
 	};
 
-	console.log("fuck");
 	if(!updatedBathroom && !thisIsTouchDevice && bathroom){
-		console.log("fuckkkk");
 		bathroom.rotation.y = yawObject.rotation.y;
 		updatedBathroom = true;
-		console.log("update bathroom!");
+		// console.log("update bathroom!");
 
 		// get position for getting out of the bathroom
 		var v1 = new THREE.Vector3();

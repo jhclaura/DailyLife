@@ -102,15 +102,14 @@ input {
 
 #aboutPage {
 	left:0; right:0; bottom:0; /*top:0; */
-	/*margin: auto;
-	padding: 5px;*/	
+	/*margin: auto;*/
+	padding: 5px;	
 	padding-left: 1em;
 	padding-right: 1em;
 	text-align: center;
 	font-size: 16pt;
 	background-color: #ffffff;
 	overflow: scroll;
-	
 }
 
 #aboutPageDetail {

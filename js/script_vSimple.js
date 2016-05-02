@@ -408,7 +408,7 @@ function superInit(){
 		};
 
 		loadingManger.onLoad = function () {
-		    console.log( "first step all loaded!" );
+		    // console.log( "first step all loaded!" );
 		    CreateStars();
 		    loadModelBathroomsV2( "models/bathroom/b_door.js",
 								  "models/bathroom/b_sides.js",
@@ -908,7 +908,7 @@ function moveMacaPoop( fromIndex, toIndex ) {
 }
 
 function init() {
-	console.log("whoIamInLife: " + whoIamInLife);
+	// console.log("whoIamInLife: " + whoIamInLife);
 
 	// Assign position
 	// meInWorld = Math.floor(whoIamInLife/18);			// which world
@@ -928,7 +928,7 @@ function init() {
 // lateInit() happens after click "Start"
 function lateInit() 
 {	
-	console.log("late init!");
+	// console.log("late init!");
 	document.body.addEventListener('touchmove', noScrolling, false);
 	// window.addEventListener('keydown', myKeyPressed, false);
 	// window.addEventListener('keyup', myKeyUp, false);
@@ -938,7 +938,7 @@ function lateInit()
 	// build me!
 	firstGuy = new Person( myPosition, myColor, whoIamInLife, playerNName );
 	dailyLifePlayerDict[ whoIamInLife ] = firstGuy;
-	console.log("Me built!");
+	// console.log("Me built!");
 
 	// create controls
 	controls = new THREE.DeviceControls(camera, myWorldCenter, true);
@@ -1593,37 +1593,37 @@ function createFinalStatistic() {
 
 	// Print out final statistic!
 	finalStat.innerHTML = "Congrats, ";
-	finalStat.innerHTML += final_statistic.playerName + ", for getting out your poop!<br>";
+	finalStat.innerHTML += "<font color='#ff76a2'>" + final_statistic.playerName + "</font>, for getting out your poop!<br>";
 	finalStat.innerHTML += "All the poops here thank you for your efforts to release them into the world.<br><br>";
-	finalStat.innerHTML += "You have been in Daily Life Bathroom for " + stayTimeMin + " minutes and " + stayTimeSec + " seconds long,<br>";
-	finalStat.innerHTML += "pooping with " + final_statistic.pooperCount + " people,<br>";
-	finalStat.innerHTML += "in a communal bathroom which has been visited by " + final_statistic.totalVisit + " people.<br><br>";
-	finalStat.innerHTML += "There were a total of " + final_statistic.totalPoop + " poops were generated while you were in the bathroom,<br>";
-	finalStat.innerHTML += "and you contributed " + final_statistic.youPoop + " of them.<br><br>";
+	finalStat.innerHTML += "You have been in Daily Life Bathroom for <font color='#ff76a2'>" + stayTimeMin + " minutes</font> and <font color='#ff76a2'>" + stayTimeSec + " seconds</font> long,<br>";
+	finalStat.innerHTML += "pooping with <font color='#ff76a2'>" + final_statistic.pooperCount + "</font> people,<br>";
+	finalStat.innerHTML += "in a communal bathroom which has been visited by <font color='#ff76a2'>" + final_statistic.totalVisit + "</font> people.<br><br>";
+	finalStat.innerHTML += "There were a total of <font color='#ff76a2'>" + final_statistic.totalPoop + " poops</font> were generated while you were in the bathroom,<br>";
+	finalStat.innerHTML += "and you contributed <font color='#ff76a2'>" + final_statistic.youPoop + "</font> of them.<br><br>";
 
 	if(Object.keys(final_statistic.meToOthers).length>0){
-		finalStat.innerHTML += "You shot out Poop Heart to:<br>";
+		finalStat.innerHTML += "You shot out <font color='#ff76a2'>Poop Heart</font> to:<br>";
 		for(var key in final_statistic.meToOthers){
 			// skip loop if the property is from prototype
 	   		if (!final_statistic.meToOthers.hasOwnProperty(key)) continue;
 
-			finalStat.innerHTML += "       " + key + " * " + final_statistic.meToOthers[key] + ".<br>";
+			finalStat.innerHTML += "       " + key + " <font color='#ff76a2'>*</font> " + final_statistic.meToOthers[key] + ".<br>";
 		}
 	}
 
 	if(Object.keys(final_statistic.othersToMe).length>0){
-		finalStat.innerHTML += "<br>You also received Poop Heart from:<br>";
+		finalStat.innerHTML += "<br>You also received <font color='#ff76a2'>Poop Heart</font> from:<br>";
 		for(var key in final_statistic.othersToMe){
 			// skip loop if the property is from prototype
 	   		if (!final_statistic.othersToMe.hasOwnProperty(key)) continue;
 
-			finalStat.innerHTML += "       " + key + " * " + final_statistic.othersToMe[key] + ".<br>";
+			finalStat.innerHTML += "       " + key + " <font color='#ff76a2'>*</font> " + final_statistic.othersToMe[key] + ".<br>";
 		}
 		finalStat.innerHTML += "<br>How sweet!<br><br>";
 	}
 
 	finalStat.innerHTML += "Hope you enjoy the pooping experience in Daily Life Bathroom.<br>";
-	finalStat.innerHTML += "Feel free to poop again, and sign up for updates about forthcoming chapters of Daily Life VR.<br><br>";
+	finalStat.innerHTML += "Feel free to drop again, and sign up for updates about forthcoming chapters of Daily Life VR.<br><br>";
 	finalStat.innerHTML += "Yours truly,<br><a href='http://www.jhclaura.com' target='_blank'>Laura Chen</a> and <a href='http://uselesspress.org/' target='_blank'>Useless Press</a>.<br><br><br>";
 
 	// bring back scrolling function
@@ -1644,7 +1644,7 @@ function createFinalStatistic() {
 		document.removeEventListener( 'mozpointerlockerror', pointerlockerror, false );
 		document.removeEventListener( 'webkitpointerlockerror', pointerlockerror, false );
 	}
-	aboutPage.style.display = "block";
+	// aboutPage.style.display = "block";
 
 	//
 	myDataRef.push(final_statistic);
