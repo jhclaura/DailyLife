@@ -23,9 +23,14 @@
 			var myDataRef = new Firebase('https://dailylifevr-poop.firebaseio.com/');
 			var visitDataRef = myDataRef.child("totalVisit");
 			var fireVisit = 0;
-			visitDataRef.on("value", function(snapshot) {
+
+			visitDataRef.once("value", function(snapshot) {
 				fireVisit = snapshot.val().visit_count;
-				console.log("firevisit: " + fireVisit);
+				console.log( fireVisit );
+				fireVisit++;
+				visitDataRef.set({
+					visit_count: fireVisit
+				});
 			});
 
 			//device detection
@@ -166,15 +171,6 @@
 				// connectSocket();
 
 				lateInit();
-
-				// FIREBASE_TOTAL_VISTI
-				visitDataRef.once("value", function(snapshot) {
-					fireVisit = snapshot.val().visit_count;
-					fireVisit++;
-					visitDataRef.set({
-						visit_count: fireVisit
-					});
-				});				
 			}
 
 			var showAbout = false, showInstruction = false;
@@ -307,9 +303,9 @@
 							}
 
 							// update people counting of this world & total worlds
-							UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data.totalCount, fireVisit );
+							UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data.totalCount, data.totalVisit );
 							totalPplInWorldsCount = data.totalCount;
-							totalVisitCount = fireVisit;
+							totalVisitCount = data.totalVisit;
 
 							final_statistic.pooperCount ++;
 							final_statistic.totalVisit = totalVisitCount;
@@ -330,7 +326,7 @@
 
 							whoIamInLife = data.index;
 							meInWorld = data.worldId;
-							totalVisitCount = fireVisit;
+							totalVisitCount = data.totalVisit;
 							final_statistic.totalVisit = totalVisitCount;
 
 							console.log("I am #" + whoIamInLife + " in the #" + meInWorld + " Daily Life world, with total visit: " + totalVisitCount);
@@ -401,7 +397,7 @@
 							console.log('removePlayer #' + data.removeID);
 						}
 						console.log("removed; total: " + Object.keys(dailyLifePlayerDict).length);
-						UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data.totalCount, fireVisit );
+						UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data.totalCount, data.totalVisit );
 						totalPplInWorldsCount = data.totalCount;
 
 						showAniPpl = (Object.keys(dailyLifePlayerDict).length>5) ? true : false;
@@ -436,13 +432,13 @@
 															
 							}
 							
-							UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data[i].totalCount, fireVisit );
+							UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data[i].totalCount, data.totalVisit );
 							totalPplInWorldsCount = data[i].totalCount;
+							totalVisitCount = data[i].totalVisit;
 						}
 						// FEEL WRONG HERE...
 							final_statistic.pooperCount = totalPplInWorldsCount;
-							totalVisitCount = fireVisit;
-							final_statistic.totalVisit = fireVisit;
+							final_statistic.totalVisit = totalVisitCount;
 
 						updatePreviousPlayer = true;
 						//
