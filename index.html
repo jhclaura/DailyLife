@@ -243,9 +243,9 @@
 			var whoIamInLife = -1, initEnvironment = false;
 			var meInWorld = -1;
 			var totalPplInWorldsCount = 0, totalVisitCount = 0;
-			var fullhouse = false, showAniPpl = false, doPplAni = false;
-			var fullHouseDef = 10;
-			var strictToCelePplNumber = 2, strictToCele = false;
+			var fullhouse = false, showAniPpl = false, showAniPplNumber = 4, doPplAni = false;
+			var fullHouseDef = 7;
+			var strictToCelePplNumber = 3, strictToCele = false;
 			var toCelebratePoop = 30;
 
 			var currentPplAmount = 0;
@@ -315,7 +315,7 @@
 							final_statistic.totalVisit = totalVisitCount;
 
 							//
-							showAniPpl = (Object.keys(dailyLifePlayerDict).length>5) ? true : false;
+							showAniPpl = (Object.keys(dailyLifePlayerDict).length>showAniPplNumber) ? true : false;
 							fullhouse = (Object.keys(dailyLifePlayerDict).length==fullHouseDef) ? true : false;
 							strictToCele = (Object.keys(dailyLifePlayerDict).length>=strictToCelePplNumber) ? true : false;
 						}
@@ -404,7 +404,7 @@
 						UpdatePplCount( Object.keys(dailyLifePlayerDict).length, data.totalCount, fireVisit );
 						totalPplInWorldsCount = data.totalCount;
 
-						showAniPpl = (Object.keys(dailyLifePlayerDict).length>5) ? true : false;
+						showAniPpl = (Object.keys(dailyLifePlayerDict).length>showAniPplNumber) ? true : false;
 						fullhouse = (Object.keys(dailyLifePlayerDict).length==fullHouseDef) ? true : false;
 						strictToCele = (Object.keys(dailyLifePlayerDict).length>=strictToCelePplNumber) ? true : false;
 					}
@@ -446,7 +446,7 @@
 
 						updatePreviousPlayer = true;
 						//
-						showAniPpl = (Object.keys(dailyLifePlayerDict).length>5) ? true : false;
+						showAniPpl = (Object.keys(dailyLifePlayerDict).length>showAniPplNumber) ? true : false;
 						fullhouse = (Object.keys(dailyLifePlayerDict).length==fullHouseDef) ? true : false;
 						strictToCele = (Object.keys(dailyLifePlayerDict).length>=strictToCelePplNumber) ? true : false;
 					}
