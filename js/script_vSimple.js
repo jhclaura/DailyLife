@@ -80,7 +80,7 @@ var keyIsPressed;
 	var aniStepW=0, aniTimeW=0, slowAniW=0.3, keydurationW = 17;
 	var keyframeW, animOffsetW=1, currentKeyframeW=0, lastKeyframeW=0;
 	var bathroom, bathroomGeo, bathroomTex, bathroomMat, bathroomLight, glowTexture;
-	var graffitiTex, floorTex, doorTex;
+	var graffitiTex, floorTex, doorTex, ins1Tex, ins2Tex, ins3Tex;
 	var intestineTex, intestineAnimator, intestineTexs = [], intestinesAnimator, intestineMat;
 	var toiletCenters = [], myWorldCenter;
 	var meInSGroup, meInBGroup;
@@ -415,8 +415,9 @@ function superInit(){
 								  "models/bathroom/b_floor.js",
 								  "models/bathroom/b_smallStuff.js",
 								  "models/bathroom/b_smallWhite.js",
-								  "models/bathroom/paper_bottom.js",
-								  "models/bathroom/paper_top.js",
+								  "models/bathroom/b_ins_1.js",
+								  "models/bathroom/b_ins_2.js",
+								  "models/bathroom/b_ins_3.js",
 								  "models/bathroom2.js",
 								  "models/poster.js" );
 		};
@@ -508,7 +509,9 @@ function superInit(){
 		});
 
 	// BATHROOM
-		LoadTexBathroom( "images/intestines.jpg", "images/poster_texture.jpg" );
+		// LoadTexBathroom( "images/intestines.jpg", "images/poster_texture.jpg" );
+		LoadTexBathroom( "images/intestines.jpg", "images/poop_poster.jpg" );
+
 
 	// STAR
 		LoadStarTexture();

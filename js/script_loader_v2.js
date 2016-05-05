@@ -62,7 +62,7 @@ function loadSitModelPlayer( _head, _body, _toilet ){
 }
 
 // need to clone toilet_paper and person_toilet
-function loadModelBathroomsV2( _door, _side, _floor, _s, s_white, p_b, p_t, _t, _pst ){
+function loadModelBathroomsV2( _door, _side, _floor, _s, s_white, ins1, ins2, ins3, _t, _pst ){
 	var loader = new THREE.JSONLoader();
 	bathroom = new THREE.Object3D();
 	bathroom_stuff = new THREE.Object3D();
@@ -131,54 +131,70 @@ function loadModelBathroomsV2( _door, _side, _floor, _s, s_white, p_b, p_t, _t, 
 
 							bathroom_stuff.add(br);
 
-							bathroom.add(bathroom_stuff);
-							bathroom.scale.set(1.5,1.5,1.5);
+							// instructions!
+							loader.load( ins1, function( geometry_ins1 ){
+								br = new THREE.Mesh(geometry_ins1, new THREE.MeshLambertMaterial({map: ins1Tex}));
+								bathroom_stuff.add(br);
 
-							// LIGHT!
-								bathroomLight = new THREE.Object3D();
+								loader.load( ins2, function( geometry_ins2 ){
+									br = new THREE.Mesh(geometry_ins2, new THREE.MeshLambertMaterial({map: ins2Tex}));
+									bathroom_stuff.add(br);
 
-								geo = new THREE.TetrahedronGeometry(1.5);
-								mat = new THREE.MeshLambertMaterial({color: 0xfffac4});
-								var meshTemp = new THREE.Mesh( geo, mat );
-								meshTemp.rotation.x = -35 * Math.PI/180;
-								meshTemp.rotation.z = 30 * Math.PI/180;
-								meshTemp.position.y = -29.;
-								bathroomLight.add(meshTemp);
+									loader.load( ins3, function( geometry_ins3 ){
+										br = new THREE.Mesh(geometry_ins3, new THREE.MeshLambertMaterial({map: ins3Tex}));
+										bathroom_stuff.add(br);
 
-								geo = new THREE.BoxGeometry(0.2,30,0.2);
-								transY(geo, -14);	// -14.5
-								meshTemp = new THREE.Mesh(geo, mat);
-								bathroomLight.add(meshTemp);
+										bathroom.add(bathroom_stuff);
+										bathroom.scale.set(1.5,1.5,1.5);
 
-								light = new THREE.PointLight(0xffff00, 1, 50);
-								textureLoader = new THREE.TextureLoader();
-								glowTexture = textureLoader.load( "images/glow_edit.jpg" );
-								mat = new THREE.SpriteMaterial({map: glowTexture, color: 0xffef3b, transparent: false, blending: THREE.AdditiveBlending});
-								meshTemp = new THREE.Sprite(mat);
-								meshTemp.scale.set(2,2,2);	//big
-								light.add(meshTemp);
-								light.position.y = -30;
-								bathroomLight.add(light);
+										// LIGHT!
+											bathroomLight = new THREE.Object3D();
 
-								bathroomLight.position.set(0,35,-5);
+											geo = new THREE.TetrahedronGeometry(1.5);
+											mat = new THREE.MeshLambertMaterial({color: 0xfffac4});
+											var meshTemp = new THREE.Mesh( geo, mat );
+											meshTemp.rotation.x = -35 * Math.PI/180;
+											meshTemp.rotation.z = 30 * Math.PI/180;
+											meshTemp.position.y = -29.;
+											bathroomLight.add(meshTemp);
 
-								bathroom.add(bathroomLight);
+											geo = new THREE.BoxGeometry(0.2,30,0.2);
+											transY(geo, -14);	// -14.5
+											meshTemp = new THREE.Mesh(geo, mat);
+											bathroomLight.add(meshTemp);
 
-							loader.load( _pst, function( geometry6 ){
-								var poster = new THREE.Mesh( geometry6, posterMat );
-								bathroom.add(poster);
+											light = new THREE.PointLight(0xffff00, 1, 50);
+											textureLoader = new THREE.TextureLoader();
+											glowTexture = textureLoader.load( "images/glow_edit.jpg" );
+											mat = new THREE.SpriteMaterial({map: glowTexture, color: 0xffef3b, transparent: false, blending: THREE.AdditiveBlending});
+											meshTemp = new THREE.Sprite(mat);
+											meshTemp.scale.set(2,2,2);	//big
+											light.add(meshTemp);
+											light.position.y = -30;
+											bathroomLight.add(light);
 
-								scene.add(bathroom);
+											bathroomLight.position.set(0,35,-5);
 
-								// loadingCountText("bathroomsss");
+											bathroom.add(bathroomLight);
 
-								// Loaded the latest one!!
-								console.log("ALL LOADED!");
-								startLink.style.display = "";
-								loadingImg.style.display = "none";
-								loadingTxt.style.display = "none";
-								readyToStart = true;
+										loader.load( _pst, function( geometry6 ){
+											var poster = new THREE.Mesh( geometry6, posterMat );
+											bathroom.add(poster);
 
+											scene.add(bathroom);
+
+											// loadingCountText("bathroomsss");
+
+											// Loaded the latest one!!
+											console.log("ALL LOADED!");
+											startLink.style.display = "";
+											loadingImg.style.display = "none";
+											loadingTxt.style.display = "none";
+											readyToStart = true;
+
+										});
+									});
+								});
 							});
 						});
 					});
@@ -284,6 +300,10 @@ function LoadTexBathroom( intestine, poster ) {
 	graffitiTex = textureLoader.load('images/graffitiS.jpg', graffiti_TLM);
 	floorTex = textureLoader.load('images/floor.jpg', graffiti_TLM);
 	doorTex = textureLoader.load('images/door.jpg');
+	//
+	ins1Tex = textureLoader.load('images/instructions/toPoop.jpg');
+	ins2Tex = textureLoader.load('images/instructions/toWalk.jpg');
+	ins3Tex = textureLoader.load('images/instructions/toVR.jpg');
 
 	// var texLoader = new THREE.TextureLoader( br_mat_loadingManager );
 	textureLoader.load(intestine, function(texture){

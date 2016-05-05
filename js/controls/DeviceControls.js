@@ -458,7 +458,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		if(lookAtFlush){
 			EnterSceneEnd();
 		} else {
-			if(lookingAtSomeone != -1){
+			if(lookingAtSomeone != -1 && lookingAtSomeone != whoIamInLife){
 				createHeart( whoIamInLife, lookingAtSomeone );
 				//
 				var h_f_n = dailyLifePlayerDict[ lookingAtSomeone ].nname;
@@ -625,7 +625,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		if(lookAtFlush){
 			EnterSceneEnd();
 		} else {
-			if (lookingAtSomeone != -1){
+			if (lookingAtSomeone != -1 && lookingAtSomeone != whoIamInLife){
 				createHeart( whoIamInLife, lookingAtSomeone );
 
 				var h_f_n = dailyLifePlayerDict[ lookingAtSomeone ].nname;
