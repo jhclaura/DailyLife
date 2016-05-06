@@ -1010,7 +1010,6 @@ function animate(timestamp) {
 		vrmanager.render(scene, camera, timestamp);
 		// stats.update();
 	}
-
 	requestAnimationFrame(animate);
 }
 
