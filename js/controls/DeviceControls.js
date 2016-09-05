@@ -173,8 +173,8 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		// playerStartRotY = yawObject.rotation.y;
 
 	//
-	this.movingEnabled = false;
-	this.clickingTouchingEnabled = false;
+	this.movingEnabled = true;
+	this.clickingTouchingEnabled = true;
 
 	var moveForward = false;
 	var moveBackward = false;
@@ -204,25 +204,24 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	//////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////
 	// WEBSOCKET
-	// if( !addNewPlayerYet && trulyFullyStart ){
-	if( !addNewPlayerYet ){
-		var msg = {
-			'type': 'addNewPlayer',
-			'camID': camID,
-			// 'peerid': peer_id,
-			'id': -1,
-			'playerStartX': myStartX,
-			'playerStartY': myStartY,
-			'playerStartZ': myStartZ,
-			'playerStartRotY': yawObject.rotation.y,
-			'myHex': myColor,
-			'nname': playerNName,
-			'worldId': -1
-		};
+	// if( !addNewPlayerYet ){
+	// 	var msg = {
+	// 		'type': 'addNewPlayer',
+	// 		'camID': camID,
+	// 		// 'peerid': peer_id,
+	// 		'id': -1,
+	// 		'playerStartX': myStartX,
+	// 		'playerStartY': myStartY,
+	// 		'playerStartZ': myStartZ,
+	// 		'playerStartRotY': yawObject.rotation.y,
+	// 		'myHex': myColor,
+	// 		'nname': playerNName,
+	// 		'worldId': -1
+	// 	};
 
-		sendMessage( JSON.stringify(msg) );
-		addNewPlayerYet = true;
-	}
+	// 	sendMessage( JSON.stringify(msg) );
+	// 	addNewPlayerYet = true;
+	// }
 	//////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////
 
@@ -450,50 +449,6 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	function myMouseDown(event) {
 
 		if ( scope.clickingTouchingEnabled === false ) return;
-
-		// if(yogaOver){	// bring back after developing
-		// 	poopCount ++;
-		// }
-
-		if(lookAtFlush){
-			EnterSceneEnd();
-		} else {
-			if(lookingAtSomeone != -1 && lookingAtSomeone != whoIamInLife){
-				createHeart( whoIamInLife, lookingAtSomeone );
-				//
-				var h_f_n = dailyLifePlayerDict[ lookingAtSomeone ].nname;
-				if( final_statistic.meToOthers[ h_f_n ] == undefined ){
-					final_statistic.meToOthers[ h_f_n ] = 1;
-				} else {
-					final_statistic.meToOthers[ h_f_n ] ++;
-				}
-				poopHeartFromMeCount ++;
-				final_statistic.totalHeart ++;
-			}
-			else {
-				createPoop( yawObject.position, scope.getDirection() );
-				//
-				final_statistic.youPoop ++;
-				final_statistic.totalPoop ++;
-			}
-			
-			// Send POSITION + DIRECTION to server!!
-			// DO IT AFTER LATE_INIT!
-			if(trulyFullyStart){
-				var msg = {
-					'type': 'shootPoop',
-					'index': whoIamInLife,
-					'toWhom': lookingAtSomeone,
-					'playerPos': yawObject.position,
-					'playerDir': scope.getDirection(),
-					'worldId': meInWorld
-				};
-
-				if(ws){
-					sendMessage( JSON.stringify(msg) );
-				}
-			}
-		}
 	}
 	
 	var onKeyDown = function ( event ) {
@@ -614,55 +569,6 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			var touch2nd = event.touches[1];
 			touch2ndStartLoc.set(touch2nd.clientX, touch2nd.clientY);
 		}
-
-		// if(lookAtMiniPoop)
-		// 	scope.align();
-
-		if(yogaOver){	// bring back after developing
-			poopCount ++;
-		}
-
-		if(lookAtFlush){
-			EnterSceneEnd();
-		} else {
-			if (lookingAtSomeone != -1 && lookingAtSomeone != whoIamInLife){
-				createHeart( whoIamInLife, lookingAtSomeone );
-
-				var h_f_n = dailyLifePlayerDict[ lookingAtSomeone ].nname;
-				if( final_statistic.meToOthers[ h_f_n ] == undefined ){
-					final_statistic.meToOthers[ h_f_n ] = 1;
-				} else {
-					final_statistic.meToOthers[ h_f_n ] ++;
-				}
-				poopHeartFromMeCount ++;
-				final_statistic.totalHeart ++;
-			}
-			else {
-				createPoop( yawObject.position, scope.getDirection() );
-				final_statistic.youPoop ++;
-				final_statistic.totalPoop ++;
-			}
-
-			if(trulyFullyStart){
-				var msg = {
-					'type': 'shootPoop',
-					'index': whoIamInLife,
-					'toWhom': lookingAtSomeone,
-					'playerPos': yawObject.position,
-					'playerDir': scope.getDirection(),
-					'worldId': meInWorld
-				};
-
-				if(ws){
-					sendMessage( JSON.stringify(msg) );
-				}
-			}
-			
-		}
-
-		//
-		// controls.align();
-		// moveForward = true;
 	};
 
 
@@ -765,8 +671,6 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		moveRight = false;
 		moveBackward = false;
 		moveForward = false;
-
-		// console.log(event);
 	};
 
 
@@ -782,9 +686,9 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		document.addEventListener( 'keyup', onKeyUp, false );
 	}
 
-	if(!isMobile)
-		this.enabled = false;
-	else
+	// if(!isMobile)
+	// 	this.enabled = false;
+	// else
 		this.enabled = true;
 
 	this.getObject = function () {
@@ -792,10 +696,8 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	};
 
 	this.isOnObject = function ( boolean ) {
-
 		isOnObject = boolean;
 		canJump = boolean;
-
 	};
 
 	// FOR_DEBUGGING
@@ -941,24 +843,24 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		new TWEEN.Tween( yawObject.position )
 			.to( {x: _newPos.x, y: _newPos.y, z: _newPos.z}, _time )
 			// .easing( TWEEN.Easing.Cubic.InOut )
-			.onUpdate(function(){
-				var msg = {
-					'type': 'updatePlayer',
-					'index': whoIamInLife,
-					'playerPosX': yawObject.position.x,
-					'playerPosY': yawObject.position.y,
-					'playerPosZ': yawObject.position.z,
-					'playerRotY': yawObject.rotation.y,
-					'playerQ' : eyeFinalQ2,
-					'eyeQ' : eyeFinalQ,
-					'playerQ3' : eyeFinalQ3,
-					'worldId': meInWorld
-				};
+			// .onUpdate(function(){
+			// 	var msg = {
+			// 		'type': 'updatePlayer',
+			// 		'index': whoIamInLife,
+			// 		'playerPosX': yawObject.position.x,
+			// 		'playerPosY': yawObject.position.y,
+			// 		'playerPosZ': yawObject.position.z,
+			// 		'playerRotY': yawObject.rotation.y,
+			// 		'playerQ' : eyeFinalQ2,
+			// 		'eyeQ' : eyeFinalQ,
+			// 		'playerQ3' : eyeFinalQ3,
+			// 		'worldId': meInWorld
+			// 	};
 
-				if(ws){
-					sendMessage( JSON.stringify(msg) );
-				}
-			})
+			// 	if(ws){
+			// 		sendMessage( JSON.stringify(msg) );
+			// 	}
+			// })
 			.start();
 	};
 
@@ -1014,40 +916,6 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	 		eyeFinalQ3._x = 0;
 			eyeFinalQ3._z = 0;
 			eyeFinalQ3.normalize();
-
-			// var vv1 = new THREE.Vector3();
-	 		// vv1 = new THREE.Euler().setFromQuaternion( eyeFinalQ3, 'YXZ');
-	 		// bathroom.rotation.y = vv1.y;
-
-	 		if(!updatedBathroom){
-	 			// bathroom.rotation.y = yawObject.rotation.y;
-				// console.log("update bathroom, mobile!");
-
-	 			setTimeout(function(){
-	 			// 	scope.align();
-	 			// 	scope.calQ();
-	 			// 	yawObject.rotation.setFromQuaternion( scope.finalQ );
-
-					var vv1 = new THREE.Vector3();
-		 			vv1 = new THREE.Euler().setFromQuaternion( eyeFinalQ3, 'YXZ');
-		 			bathroom.rotation.y = vv1.y;
-
-		 			// get position for getting out of the bathroom
-					var v1 = new THREE.Vector3();
-					v1.copy( zAxis ).applyQuaternion( eyeFinalQ3 );
-
-					scope.getOutBathroomPosition.copy(yawObject.position);				
-					scope.getOutBathroomPosition.add( v1.multiplyScalar( -90 ) );
-
-					//
-					pplCount.rotation.y = vv1.y;
-
-					// EnterSceneTwo();
-					PlayAudios();
-				},500);
-				
-				updatedBathroom = true;	
-			}
 	 	}
 
 	 	this.neckAngle.setFromQuaternion( eyeFinalQ2 );
@@ -1080,48 +948,30 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////
 		//WEB_SOCKET
-		if(trulyFullyStart){
-			var msg = {
-				'type': 'updatePlayer',
-				'index': whoIamInLife,
-				'playerPosX': yawObject.position.x,
-				'playerPosY': yawObject.position.y,
-				'playerPosZ': yawObject.position.z,
-				'playerRotY': yawObject.rotation.y,
-				'playerQ' : eyeFinalQ2,
-				'eyeQ' : eyeFinalQ,
-				'playerQ3' : eyeFinalQ3,
-				'worldId': meInWorld
-			};
+		// if(trulyFullyStart){
+		// 	var msg = {
+		// 		'type': 'updatePlayer',
+		// 		'index': whoIamInLife,
+		// 		'playerPosX': yawObject.position.x,
+		// 		'playerPosY': yawObject.position.y,
+		// 		'playerPosZ': yawObject.position.z,
+		// 		'playerRotY': yawObject.rotation.y,
+		// 		'playerQ' : eyeFinalQ2,
+		// 		'eyeQ' : eyeFinalQ,
+		// 		'playerQ3' : eyeFinalQ3,
+		// 		'worldId': meInWorld
+		// 	};
 
-			if(ws){
-				sendMessage( JSON.stringify(msg) );
-				// console.log('A msg sent by DeviceControls when updating.');
-			}
-		}
+		// 	if(ws){
+		// 		sendMessage( JSON.stringify(msg) );
+		// 		// console.log('A msg sent by DeviceControls when updating.');
+		// 	}
+		// }
 		////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////
 
 		
 	};
-
-	if(!updatedBathroom && !thisIsTouchDevice && bathroom){
-		bathroom.rotation.y = yawObject.rotation.y;
-		updatedBathroom = true;
-		// console.log("update bathroom!");
-
-		// get position for getting out of the bathroom
-		var v1 = new THREE.Vector3();
-		this.getOutBathroomPosition.copy( yawObject.position );
-		v1.copy( zAxis ).applyQuaternion( yawObject.quaternion );
-		this.getOutBathroomPosition.add( v1.multiplyScalar( -90 ) );
-
-		//
-		pplCount.rotation.y = yawObject.rotation.y;
-
-		// EnterSceneTwo();
-		PlayAudios();
-	}
 
 	// //debug
 	// window.addEventListener('click', (function(){
