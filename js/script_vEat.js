@@ -11,7 +11,7 @@ var time, clock;
 
 var loadedCount = 0;
 
-var myStartX = 0, myStartZ = 3, myStartY = 3.5; //2
+var myStartX = 0, myStartZ = 10, myStartY = 3.5; //0, 10, 2
 var myPosition, myStartRotY, worldBubble, pplCount, pplCountTex, pplCountMat;
 
 var model, texture;
@@ -20,7 +20,7 @@ var perlin = new ImprovedNoise(), noiseQuality = 1;
 
 var basedURL = "assets/eat/";
 
-var textureLoader, loadingManger, br_mat_loadingManager, starLoadingManager;
+var textureLoader, loadingManger;
 var keyIsPressed;
 
 // WAVE
@@ -95,21 +95,6 @@ var keyIsPressed;
 // TREE
 	var treeTexture, treeGeo, treeMat, trees = [];
 
-// STAR
-	var star, starMat, glowTexture, glowTextures = [], starAnimator, starAnimators = [], stars = [];
-	var starFiles = [ "images/sStar_1.png", "images/sStar_2.png", "images/sStar_3.png", "images/sStar_4.png" ];
-
-
-// Physic
-	Physijs.scripts.worker = 'js/lib/physijs_worker.js';
-	Physijs.scripts.ammo = 'ammo.js';
-
-	var physics_stats, ground;
-	var box_geometry, box_material;
-	var lookingAtSomeone = -1;
-
-	var allThePoops = [], freezeVec = new THREE.Vector3(0,0,0), optimizePoopSize = 8;
-
 // TRANSITION
 	var initTime, meditationTime, celebrationTime, endTime;
 	var descendTween;
@@ -132,8 +117,12 @@ var keyIsPressed;
 	var partyLightMat;
 
 //
-	var planet, truck, curtain, curtainGeo1, curtainGeo2;
+	var planet, truck, curtain, curtainGeo1, curtainGeo2, lanternGroup;
 	var highChair, highChairMat, stomach;
+	var chewerA, chewerB, chewerC, chewerD, chewerTextures = [], chewers = [];
+	var mealTimeIndex = 0;
+
+	var mouth, mouthClosed = false;
 
 ////////////////////////////////////////////////////////////
 
@@ -152,6 +141,8 @@ function superInit(){
 		event.preventDefault();
 	};
 
+	geoFindMe();
+
 	// HOWLER
 		// sound_forest = new Howl({
 		// 	urls: ['../audios/duet/nightForest.mp3'],
@@ -162,6 +153,20 @@ function superInit(){
 
 	time = Date.now();
 
+	// var d = new Date();
+	// var n = d.getHours();
+
+	// if(n>5 && n<11){
+	// 	console.log("it's breakfast time!");
+	// 	mealTimeIndex = 0;
+	// }else if(n>=11 && n<17){
+	// 	console.log("it's lunch time!");
+	// 	mealTimeIndex = 1;
+	// }else{
+	// 	console.log("it's dinner time!");
+	// 	mealTimeIndex = 2;
+	// }
+
 	// THREE.JS -------------------------------------------
 		clock = new THREE.Clock();
 
@@ -170,7 +175,14 @@ function superInit(){
 		renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
 		renderer.setPixelRatio(window.devicePixelRatio);
 		// renderer.setSize(window.innerWidth, window.innerHeight);
-		renderer.setClearColor(0xffff00, 1);
+		// renderer.setClearColor(0x000000, 1);
+		if(mealTimeIndex == 0){
+			renderer.setClearColor(0x77edda, 1); // daytime
+		} else if (mealTimeIndex == 1){
+			renderer.setClearColor(0xffe03e, 1); // noontime
+		} else {
+			renderer.setClearColor(0x34122a, 1);	// nighttime
+		}
 		container.appendChild(renderer.domElement);
 
 	// VR_EFFECT
@@ -190,12 +202,18 @@ function superInit(){
 		// scene.setGravity(new THREE.Vector3( 0, -30, 0 ));
 
 	// LIGHT
-		hemiLight = new THREE.HemisphereLight( 0xf9ff91, 0x3ac5b9, 1);
+		if(mealTimeIndex == 0){
+			hemiLight = new THREE.HemisphereLight( 0xf9ff91, 0x3ac5b9, 1); // daytime
+		} else if (mealTimeIndex == 1){
+			hemiLight = new THREE.HemisphereLight( 0xffce91, 0xff9791, 1); // noontime
+		} else {
+			hemiLight = new THREE.HemisphereLight( 0x224659, 0x593522, 1);	// nighttime
+		}
 		hemiLight.intensity = 0.8;
 		scene.add(hemiLight);
 
 		light = new THREE.SpotLight( 0xffffff );
-		light.position.set( 100, 100, 100);
+		light.position.set( -100, 100, -100);
 		light.intensity = 0.3;
 		scene.add(light);
 
@@ -207,7 +225,12 @@ function superInit(){
 		eyerayCaster = new THREE.Raycaster();	
 
 	// Sinwave
-		sinWave = new SinWave(timeWs[0], frequencyW, amplitudeW, offsetW);
+		//sinWave = new SinWave(timeWs[0], frequencyW, amplitudeW, offsetW);
+
+		for(var i=0; i<timeWs.length; i++){
+			var sw = new SinWave(timeWs[i], frequencyW, amplitudeW, offsetW);
+			sinWaves.push(sw);
+		}
 
 
 	// planet = new THREE.Mesh( new THREE.SphereGeometry(1), new THREE.MeshLambertMaterial() );
@@ -222,32 +245,59 @@ function superInit(){
 	//////////////////////////////////////////////////////////////////////////////////////////
 
 	loadingManger = new THREE.LoadingManager();
-		// loadingManger.onProgress = function ( item, loaded, total ) {
-		//     console.log( item, loaded, total );
-		//     var loadingPercentage = Math.floor(loaded/total*100);
-		//     // loadingTxt.innerHTML = "loading " + loadingPercentage +"%";
-		//     console.log("loading " + loadingPercentage +"%");
-		// };
+	// loadingManger.onProgress = function ( item, loaded, total ) {
+	//     console.log( item, loaded, total );
+	//     var loadingPercentage = Math.floor(loaded/total*100);
+	//     // loadingTxt.innerHTML = "loading " + loadingPercentage +"%";
+	//     console.log("loading " + loadingPercentage +"%");
+	// };
 
-		// loadingManger.onError = function(err) {
-		// 	console.log(err);
-		// };
+	// loadingManger.onError = function(err) {
+	// 	console.log(err);
+	// };
 
-		loadingManger.onLoad = function () {
-		    // console.log( "first step all loaded!" );
-		    // CreateStars();
-		    lateInit();
-		};
+	loadingManger.onLoad = function () {
+	    // console.log( "first step all loaded!" );
+	    // CreateStars();
+	    lateInit();
+	};
 
-	var truckLoader = new THREE.JSONLoader( loadingManger );
+	textureLoader = new THREE.TextureLoader( loadingManger );
+
+	//
+	loadModelTruck( basedURL + "models/foodCarts_small/cart_cart.json",
+					basedURL + "models/foodCarts_small/cart_lantern.json",
+					basedURL + "models/foodCarts_small/cart_rooftop.json",
+					basedURL + "models/foodCarts_small/cart_supports.json",
+					basedURL + "models/foodCarts_small/cart_wheels.json",
+					basedURL + "models/foodCarts_small/cart_wood.json" );
+
+	var modelLoader = new THREE.JSONLoader( loadingManger );
+	/*
 	truckLoader.load( basedURL+"models/foodCart/foodcarttest2.json", function( geometry ) {
 		truck = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial() );
 		// truck.scale.multiplyScalar(0.27);
 		// truck.position.copy( toiletCenters[0]);
 		scene.add( truck );
-	} );
 
-	loadModelCurtain( basedURL + "models/foodCart/foodcarttest2_c1.json", basedURL + "models/foodCart/foodcarttest2_c2.json" );
+		var truckLightBulb = new THREE.Mesh( new THREE.SphereGeometry(0.05), new THREE.MeshLambertMaterial({color: 0xffffff}) );
+		truckLightBulb.position.y = 4;
+		var truckLight = new THREE.PointLight( 0xff8a4f, 0.6, 10 );
+		truckLight.position.y = -0.2;
+		TweenMax.to(truckLight, 3, { intensity: 1, repeat: -1, yoyo: true, ease: RoughEase.ease.config({ template: Power0.easeNone, strength: .2, points: 20, taper: "none", randomize: true, clamp: true}) });
+		truckLightBulb.add(truckLight);
+		truck.add(truckLightBulb);
+
+		loadModelCurtain( basedURL + "models/foodCart/foodcarttest2_c1.json", basedURL + "models/foodCart/foodcarttest2_c2.json" );
+	} );
+	*/
+
+	lanternNRM = textureLoader.load( basedURL + '/images/lanternSphereNRM_2.png' );
+	modelLoader.load( basedURL+"models/foodCart/lanternSphere.json", function( geometry ) {
+		var lantern = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial({normalMap: lanternNRM}) );
+		lantern.position.y = -3;
+		scene.add( lantern );
+	} );	
 
 	highChairMat = new THREE.MeshLambertMaterial( {color: 0xffffff} );
 	loadModelHighChair( basedURL + "models/highChair/hc_chair.json",
@@ -257,8 +307,72 @@ function superInit(){
 						basedURL + "models/highChair/hc_bigPlate.json" );
 
 	loadSitModelPlayer( basedURL + "models/personHead.js",
-						basedURL + "models/personBody.js",
+						// basedURL + "models/personBody.js",
+						basedURL + "models/chewers/body.json",
 						basedURL + "models/stomach.json");
+
+	loadModelChewers( basedURL + "models/chewers/chewerA_1.json", basedURL + "models/chewers/chewerA_2.json", basedURL + "models/chewers/chewerA_3.json",
+		              basedURL + "models/chewers/chewerB_1.json", basedURL + "models/chewers/chewerB_2.json",
+		              basedURL + "models/chewers/chewerC_1.json", basedURL + "models/chewers/chewerC_2.json", basedURL + "models/chewers/chewerC_3.json",
+		              basedURL + "models/chewers/chewerD_1.json", basedURL + "models/chewers/chewerD_2.json" );
+
+	chewerTextures[0] = textureLoader.load( basedURL + '/images/dude0.jpg' );
+	chewerTextures[1] = textureLoader.load( basedURL + '/images/dude1.jpg' );
+	chewerTextures[2] = textureLoader.load( basedURL + '/images/dude2.jpg' );
+	chewerTextures[3] = textureLoader.load( basedURL + '/images/dude3.jpg' );
+
+	// var p_tex = textureLoader.load( basedURL + '/images/pepperLow.png' );
+	// var p_texNRM = textureLoader.load( basedURL + '/images/pepperNRM.png' );
+	// modelLoader.load( basedURL+"models/pepper_test.json", function( geometry ) {
+	// 	var pepper = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial({map: p_tex, normalMap: p_texNRM, side: THREE.DoubleSide}) );
+	// 	pepper.position.set(0,5,10);
+	// 	scene.add( pepper );
+	// } );
+
+	modelLoader.load( basedURL+"models/teeth.json", function( geometry ) {
+		var teeth = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial({color: 0xffffff}) );
+		//scene.add( teeth );
+
+		modelLoader.load( basedURL+"models/mouse_open.json", function( geometry2 ) {
+			var mouthOpen = geometry2;
+
+			modelLoader.load( basedURL+"models/mouse_close.json", function( geometry3 ) {
+				var mouthClose = geometry3;
+				mouthOpen.morphTargets.push({name: 'm1', vertices: mouthClose.vertices});
+				mouthOpen.computeMorphNormals();
+
+				mouth = new THREE.Mesh( mouthOpen, new THREE.MeshLambertMaterial({color: 0xe9ceda, morphTargets: true, side: THREE.DoubleSide}) );
+				//mouth.add(teeth);
+				//mouth.scale.multiplyScalar(2);
+				mouth.position.y = -4;
+				scene.add( mouth );
+			} );
+		} );
+	} );
+
+	// BIRD_testing
+        // var birdMat = new THREE.MeshLambertMaterial({color: 0x00ffff});
+
+        // modelLoader.load( basedURL+"models/bird/bird_body.json", (geometry, material) => {
+        //     bird = new THREE.Mesh(geometry, birdMat);
+            
+        //     modelLoader.load( basedURL+"models/bird/bird_wingR.json", (geometry, material) => {
+        //         var wingR = new THREE.Mesh(geometry, birdMat);
+        //         wingR.position.x = -0.6;
+        //         bird.add(wingR);
+
+        //         modelLoader.load( basedURL+"models/bird/bird_wingL.json", (geometry, material) => {
+        //             var wingL = new THREE.Mesh(geometry, birdMat);
+        //             wingL.position.x = 0.6;
+        //             bird.add(wingL);
+
+        //             bird.position.set(myStartX-5, 1, myStartZ-3);
+        //             scene.add(bird);
+        //         });
+        //     });
+        // });
+			        
+
 
 	stats = new Stats();
 	stats.domElement.style.position = 'absolute';
@@ -292,16 +406,26 @@ function lateInit()
 {	
 	// console.log("late init!");
 	document.body.addEventListener('touchmove', noScrolling, false);
-	// window.addEventListener('keydown', myKeyPressed, false);
-	// window.addEventListener('keyup', myKeyUp, false);
+	window.addEventListener('keydown', myKeyPressed, false);
+	window.addEventListener('keyup', myKeyUp, false);
 
 	clock.start();
 
 	myWorldCenter = new THREE.Vector3();
 
 	// build me!
-	myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ );
-	firstGuy = new PersonEat( myPosition, new THREE.Color(), 1, "laura" );
+	myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ-5 );
+	firstGuy = new PersonEat( myPosition, new THREE.Color(), 0, "laura" );
+
+	secGuy = new PersonEat( myPosition, new THREE.Color(), 1, "andy" );
+	secGuy.player.position.x = 5;
+
+	thirdGuy = new PersonEat( myPosition, new THREE.Color(), 2, "zoe" );
+	thirdGuy.player.position.x = -5;
+
+	fourthGuy = new PersonEat( myPosition, new THREE.Color(), 3, "corbin" );
+	fourthGuy.player.position.x = -5;
+	fourthGuy.player.position.z = 10;
 
 	// create controls
 	controls = new THREE.DeviceControls(camera, myWorldCenter, true);
@@ -313,6 +437,95 @@ function lateInit()
 	trulyFullyStart = true;
 }
 
+function daytimeChange( isDayTime ) {
+	if(isDayTime){
+		TweenMax.to( hemiLight.color, 2, { r:0.976, g:1, b:0.569 } );
+		TweenMax.to( hemiLight.groundColor, 2, { r:0.227, g:0.773, b:0.725 } );
+	} else {
+		TweenMax.to( hemiLight.color, 2, { r:0.078, g:0.29, b:0.404 } );
+		TweenMax.to( hemiLight.groundColor, 2, { r:0.322, g:0.063, b:0.231 } );
+	}
+	
+
+	// ( 0xf9ff91, 0x3ac5b9, 1); // daytime (97.6, 100, 56.9), (22.7, 77.3, 72.5)
+	// 	hemiLight = new THREE.HemisphereLight( 0x144a67, 0x522710, 1) // nightTime (7.8, 29, 40.4), (32.2, 15.3, 6.3)
+	// 52103b, (32.2, 6.3, 23.1)
+}
+
+function geoFindMe() {
+	if(!navigator.geolocation){
+		console.log("Geolocation is not supported by your browser");
+		return;
+	}
+
+	function success(position){
+		var latitude = position.coords.latitude;
+		var longitude = position.coords.longitude;
+		console.log("geolocation - latitude: " + latitude + ", longitude: " + longitude);
+	}
+
+	function error(){
+		console.log("Unable to retrieve your location");
+	}
+
+	navigator.geolocation.getCurrentPosition(success, error)
+}
+
+function myKeyPressed( event ){
+	if(keyIsPressed)	return;
+	keyIsPressed = true;
+
+	switch ( event.keyCode ) {
+
+		case 49: //1
+			firstGuy.chew();
+			break;
+
+		case 50: //2
+			secGuy.chew();
+			break;
+
+		case 51: //3
+			thirdGuy.chew();
+			break;
+
+		case 52: //4
+			fourthGuy.chew();
+			break;
+
+		case 53: //5 --> day time
+			daytimeChange( 1 );
+			break;
+
+		case 54: //6 --> night time
+			daytimeChange( 0 );
+			break;
+
+		case 55: //7 --> mouth close
+			TweenMax.to( mouth.morphTargetInfluences, 2, { endArray: [1] });
+			TweenMax.to( hemiLight, .8, {intensity: 0});
+			break;
+
+		case 56: //8 --> mouth open
+			TweenMax.to( mouth.morphTargetInfluences, 2, { endArray: [0] });
+			TweenMax.to( hemiLight, .8, {intensity: 0.8});
+			break;
+	}
+}
+
+function CloseMouth(){
+	TweenMax.to( mouth.morphTargetInfluences, 2, { endArray: [1] });
+	TweenMax.to( hemiLight, .8, {intensity: 0});
+}
+
+function OpenMouth(){
+	TweenMax.to( mouth.morphTargetInfluences, 2, { endArray: [0] });
+	TweenMax.to( hemiLight, .8, {intensity: 0.8});
+}
+
+function myKeyUp(event){
+	keyIsPressed = false;
+}
 
 // v.2
 // Request animation frame loop function
@@ -336,16 +549,10 @@ function animate(timestamp) {
 function update()
 {	
 
-	TWEEN.update();
+	// TWEEN.update();
 	controls.update( Date.now() - time );
 
 	var dt = clock.getDelta();
-
-	// if(particleGroup && inScCelebration)
-	// 	particleGroup.tick( dt );
-
-	// scene.simulate( undefined, 2 );
-	// physics_stats.update();
 
 
 	// eyeRay!
@@ -370,12 +577,17 @@ function update()
 			// ...
 		}		
 
-	// Bathroom Light!
-	if(curtain){
-		var curtainNum = (sinWave.run()+1)/2;
-		curtain.morphTargetInfluences[0] = curtainNum;
-		// curtainGeo1.computeVertexNormals();
-		// curtainGeo2.computeVertexNormals();
+	// if(truck.children.length>0){
+	// 	var curtainNum = (sinWave.run()+1)/2;
+	// 	truck.children[1].morphTargetInfluences[0] = curtainNum;
+	// }
+
+	if(lanternGroup.children.length>0){
+		for(var i=0; i<lanternGroup.children.length; i++){
+			var lanternRun = sinWaves[i].run()/10;
+			lanternGroup.children[i].rotation.x = lanternRun;
+			lanternGroup.children[i].rotation.z = lanternRun;
+		}
 	}
 
 	//
@@ -416,29 +628,4 @@ function onWindowResize() {
 
 function isTouchDevice() { 
 	return 'ontouchstart' in window || !!(navigator.msMaxTouchPoints);
-}
-
-function loadingCount() {
-	loadedCount ++;
-
-	if(loadedCount>=8) {
-		// hide the loading gif and display start link
-		startLink.style.display = "";
-		loadingImg.style.display = "none";
-		loadingTxt.style.display = "none";
-		readyToStart = true;
-	}
-}
-
-function loadingCountText( item ) {
-	console.log( "loaded " + item );
-	loadedCount ++;
-
-	if(loadedCount>=7) {
-		// hide the loading gif and display start link
-		startLink.style.display = "";
-		loadingImg.style.display = "none";
-		loadingTxt.style.display = "none";
-		readyToStart = true;
-	}
 }

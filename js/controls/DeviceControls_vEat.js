@@ -480,20 +480,22 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	};
 
 	// DEVICE
+	var chewCount = 0;
+	var mouthTimeoutID, didMouthTimeout = false;
+
 	var onTouchStart = function ( event ) {
 
 		if (scope.clickingTouchingEnabled === false) return;
-
 		if (scope.enabled === false) return;
 		if (rotatable === false) return;
 
 		touchActive = true;
 
-		setTimeout(function(){
-			if(touchActive){
-				moveForward = true;
-			}
-		}, 1500);
+		// setTimeout(function(){
+		// 	if(touchActive){
+		// 		moveForward = true;
+		// 	}
+		// }, 1500);
 		
 		var touch = event.touches[0];
 
@@ -502,7 +504,34 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 
 		touchStartLoc.set(startPointX, startPointY);
 
-		// console.log("startX: " + startPointX + ", startY: " + startPointY);
+		console.log("startX: " + startPointX + ", startY: " + startPointY);
+
+		// CHEW!!
+		firstGuy.chew();
+
+		
+
+		if(mouthClosed){
+			chewCount++;
+			if(chewCount>10){
+				OpenMouth();
+				chewCount = 0;
+				mouthClosed = false;
+			}
+		}
+
+		if(!mouthClosed){
+
+			console.log("do setTimeout");
+
+			if(mouthTimeoutID!=null) clearTimeout(mouthTimeoutID);
+			mouthTimeoutID = setTimeout(function(){
+				if(!touchActive){
+					CloseMouth();
+					mouthClosed = true;
+				}
+			}, 5000);
+		}
 
 		/*
 		// Right, 1 up 1 down		
@@ -650,7 +679,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	}
 
 	if(!isMobile)
-		this.enabled = false;
+		this.enabled = true;
 	else
 		this.enabled = true;
 

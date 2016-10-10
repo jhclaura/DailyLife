@@ -11,7 +11,8 @@ function PersonEat( _pos, _color, _id, _name ) {
 
 	// construct physical existence
 	this.player = new THREE.Object3D();
-	this.pMat = new THREE.MeshLambertMaterial( { map: personTex, color: this.color, side: THREE.DoubleSide } );
+	this.pMorphMat = new THREE.MeshLambertMaterial( { map: chewerTextures[ _id%4 ], color: this.color, morphTargets: true } );
+	this.pMat = new THREE.MeshLambertMaterial( { map: chewerTextures[ _id%4 ], color: this.color, side: THREE.DoubleSide } );
 
 	// 1-body
 	this.playerBody = new THREE.Mesh( personBody, this.pMat);
@@ -19,16 +20,16 @@ function PersonEat( _pos, _color, _id, _name ) {
 
 	// if it's ME, create inner poop
 	// if( this.whoIam == whoIamInLife ){
+		// 1-0: stomach
 		this.poopMini = new THREE.Mesh( stomach, new THREE.MeshBasicMaterial({color: 0xff0000}) );
 		this.poopMini.name = "miniPoop";
 		this.poopMini.scale.set(0.1,0.1,0.1);
 		this.poopMini.rotation.y += Math.PI;
 		this.poopMini.rotation.x += Math.PI/2;
-		this.poopMini.position.y -= 1.3;
-		this.poopMini.position.z -= 0.1;
+		this.poopMini.position.set( 0, -1.06, -0.04);
 		this.playerBody.add( this.poopMini );
 
-		// message_name!
+		// 1-1: message_name!
 		scope.wordTexture = new THREEx.DynamicTexture(1024,128);	//512,512; 1000,128
 		scope.wordTexture.context.font = "bolder 70px StupidFont";
 		// scope.wordTexture.clear('#dc5e64').drawText("You got a poop heart from --- <3", undefined, 96, 'white');
@@ -49,7 +50,7 @@ function PersonEat( _pos, _color, _id, _name ) {
 	// 	this.playerBody.add( this.playerToilet );
 	// }
 
-	// message_name!
+	// 1-2: message_name!
 	this.nameTexture = new THREEx.DynamicTexture(512,128);	//512,512
 	this.nameTexture.context.font = "bolder 100px StupidFont";
 	this.nameTexture.clear('cyan').drawText(this.nname, undefined, 96, 'red');
@@ -62,10 +63,10 @@ function PersonEat( _pos, _color, _id, _name ) {
 	this.nameBubble.name = "nameBubble";
 	this.playerBody.add( this.nameBubble );
 
-	// highChair!
+	// 1-3: highChair!
 		this.highChair = highChair.clone();
 		// this.highChair.scale.multiplyScalar(0.27);
-		this.highChair.position.set(0,-3.54,-0.2);
+		this.highChair.position.set(0, -3.17, 0);	// -3.54
 		this.playerBody.add( this.highChair );
 
 	this.player.add( this.playerBody );
@@ -73,11 +74,11 @@ function PersonEat( _pos, _color, _id, _name ) {
 	// 2-head
 	// if it's ME, create empty head
 	// if( this.whoIam == whoIamInLife ){
-		this.playerHead = new THREE.Object3D();
-		this.playerHead.name = _id + " head";
+		// this.playerHead = new THREE.Object3D();
+		// this.playerHead.name = _id + " head";
 	// } else {
-	// 	this.playerHead = new THREE.Mesh( personHead, this.pMat );
-	// 	this.playerHead.name = _id + " head";
+		this.playerHead = new THREE.Mesh( chewers[ _id%4 ], this.pMorphMat );
+		this.playerHead.name = _id + " head";
 		
 	// 	// create poop hat
 	// 	var pHat = poopHat.clone();
@@ -86,8 +87,20 @@ function PersonEat( _pos, _color, _id, _name ) {
 	// 	this.playerHead.add( pHat );
 	// }
 	this.player.add( this.playerHead );
+
 	// this.player.scale.multiplyScalar(2);
 	this.player.position.copy( _pos );
+
+	this.chewAnim = new TimelineMax();
+	if( this.playerHead.morphTargetInfluences.length>1 ){
+		this.chewAnim.add( TweenMax.to( this.playerHead.morphTargetInfluences, .2, { endArray: [1,0] }) )
+					 .add( TweenMax.to( this.playerHead.morphTargetInfluences, .5, { endArray: [0,1] }) )
+					 .add( TweenMax.to( this.playerHead.morphTargetInfluences, .2, { endArray: [0,0] }) );
+	}else {
+		this.chewAnim.add( TweenMax.to( this.playerHead.morphTargetInfluences, .3, { endArray: [1] }) )
+					 .add( TweenMax.to( this.playerHead.morphTargetInfluences, .3, { endArray: [0] }) );
+	}
+	this.chewAnim.pause();
 
 	//
 	scene.add( this.player );
@@ -116,5 +129,18 @@ PersonEat.prototype.update = function( _playerLocX, _playerLocY, _playerLocZ, _p
 	}
 	// if(this.player.children[2]){
 	// 	this.player.children[2].rotation.y = this.ahhRotation.y;
+	// }
+}
+
+PersonEat.prototype.chew = function() {
+	this.chewAnim.restart();
+	// if( this.playerHead.morphTargetInfluences.length>1 ) {
+	// 	aniTimeline = new TimelineMax();    //{repeat: -1}
+ //        tl.to( this.playerHead.morphTargetInfluences, .2, { endArray: [1,0] })
+	// 	  .to( this.playerHead.morphTargetInfluences, .5, { endArray: [0,1] })
+	// 	  .to( this.playerHead.morphTargetInfluences, .2, { endArray: [0,0] });
+	// }
+	// else {
+	// 	TweenMax.to( this.playerHead.morphTargetInfluences, .3, { endArray: [1], repeat: 1, yoyo: true});
 	// }
 }

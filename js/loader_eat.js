@@ -1,176 +1,60 @@
-function loadModelPlayer( _body, _left_arm, _right_arm, _head ){
+
+function loadModelTruck ( cart, lantern, rooftop, supports, wheels, wood ) {
+
 	var loader = new THREE.JSONLoader( loadingManger );
+	truck = new THREE.Object3D();
+	var truckMat = new THREE.MeshLambertMaterial();
 
-	// BODY
-	loader.load( _body, function( geometry ){
-		guyBodyGeo = geometry.clone();
-	});
+	loader.load(cart, function(geometry){
+		var c_mesh = new THREE.Mesh(geometry, truckMat);
+		truck.add(c_mesh);
 
-	// LEFT_ARM
-	loader.load( _left_arm, function( geometry2 ){
-		var tmpLA = geometry2.clone();
-		transY(tmpLA, -0.2);
-		transZ(tmpLA, -0.1);
-		guyLAGeo = tmpLA;
-	});
+		loader.load(rooftop, function(geometry2){
+			var r_mesh = new THREE.Mesh(geometry2, truckMat);
+			truck.add(r_mesh);
 
-	// RIGHT_ARM
-	loader.load( _right_arm, function(geometry3){
-		var tmpRA = geometry3.clone();
-		transY(tmpRA, -0.2);
-		transZ(tmpRA, -0.1);
-		guyRAGeo = tmpRA;
-	});
+			loader.load(supports, function(geometry3){
+				var s_mesh = new THREE.Mesh(geometry3, truckMat);
+				truck.add(s_mesh);
 
-	// HEAD
-	loader.load( _head, function(geometry4){
-		geometry4.center();
-		guyHeadGeo = geometry4.clone();
+				loader.load(wheels, function(geometry4){
+					var w_mesh = new THREE.Mesh(geometry4, truckMat);
+					truck.add(w_mesh);
 
-		// loadingCountText("head");
-	});
-}
+					loader.load(wood, function(geometry5){
+						var ww_mesh = new THREE.Mesh(geometry5, truckMat);
+						truck.add(ww_mesh);
 
-function loadModelBathroomsV2( _door, _side, _floor, _s, s_white, ins1, ins2, ins3, _t, _pst ){
-	var loader = new THREE.JSONLoader();
-	bathroom = new THREE.Object3D();
-	bathroom_stuff = new THREE.Object3D();
+						loader.load(lantern, function(geometry6){
+							lanternGroup = new THREE.Object3D();
 
-	var br;
-	var whiteMat = new THREE.MeshLambertMaterial({color: 0xcccccc});
+							var lanternPos = [ new THREE.Vector3(4.8, 4.4, 2.6), new THREE.Vector3(-4.8, 4.7, 2.6),  new THREE.Vector3(-4.8, 4.7, -3)];
+							for(var i=0; i<3; i++){
+								var lanternMesh = new THREE.Mesh(geometry6, truckMat);
+								lanternMesh.position.copy( lanternPos[i] );
+								lanternGroup.add(lanternMesh);
+							}
+							truck.add(lanternGroup);
 
-	// loader.load( s_white, function( geometry1 ){
-	// 	br = new THREE.Mesh(geometry1, whiteMat);
-	// 	bathroom_stuff.add(br);
+							//
+							var truckLightBulb = new THREE.Mesh( new THREE.SphereGeometry(0.05), new THREE.MeshLambertMaterial({color: 0xffffff}) );
+							truckLightBulb.position.y = 4;
+							var truckLight = new THREE.PointLight( 0xff8a4f, 0.6, 10 );
+							truckLight.position.y = -0.2;
+							TweenMax.to(truckLight, 3, { intensity: 1, repeat: -1, yoyo: true, ease: RoughEase.ease.config({ template: Power0.easeNone, strength: .2, points: 20, taper: "none", randomize: true, clamp: true}) });
+							truckLightBulb.add(truckLight);
+							truck.add(truckLightBulb);
 
-		// back panel
-		br = new THREE.Mesh(new THREE.PlaneGeometry(14,10,1,1), whiteMat);
-		br.rotation.y = Math.PI;
-		br.position.z += 3.3;
-		bathroom_stuff.add(br);
+							scene.add( truck );
 
-		loader.load( _door, function( geometry2 ){
-			br = new THREE.Mesh(geometry2, new THREE.MeshLambertMaterial({map: doorTex}));
-			// br = new THREE.Mesh(geometry2, bathroomMat);
-			bathroom_stuff.add(br);
-
-			loader.load( _side, function( geometry4 ){
-				br = new THREE.Mesh(geometry4, new THREE.MeshLambertMaterial({map: graffitiTex}));	//0xfffac4
-				// br = new THREE.Mesh(geometry4, bathroomMat);
-				bathroom_stuff.add(br);
-
-				loader.load( _floor, function( geometry5 ){
-					br = new THREE.Mesh(geometry5, new THREE.MeshLambertMaterial({map: floorTex}));	//0xfffac4
-					// br = new THREE.Mesh(geometry4, bathroomMat);
-					bathroom_stuff.add(br);
-
-					// small stuff
-					loader.load( _s, function( geometry3 ){
-						br = new THREE.Mesh(geometry3, new THREE.MeshLambertMaterial({color: 0xffea00}));
-						// br = new THREE.Mesh(geometry3, bathroomMat);
-						bathroom_stuff.add(br);
-
-						var tp = toilet_paper.clone();
-						tp.scale.set(0.5,0.5,0.5);
-						tp.rotation.y = -Math.PI/2;
-						//3.3,-1,0
-						var tp2 = tp.clone();
-						tp.position.set(3.1,-1.5,-3.5);
-						//3.3,-1,1.5
-						tp2.position.set(3.1,-1.5,-2);
-						bathroom_stuff.add(tp);
-						bathroom_stuff.add(tp2);
-
-						var fakeT = new THREE.Mesh( personToilet, toiletMat );
-						fakeT.scale.set(3,3,3);
-						fakeT.rotation.y = Math.PI;
-						var ft = fakeT.clone();
-						ft.position.set(6.5,0,0);
-						bathroom_stuff.add(ft);
-						ft = fakeT.clone();
-						ft.position.set(-6.5,0,0);
-						bathroom_stuff.add(ft);
-
-						// intestine
-						loader.load( _t, function( geometry4 ){
-
-							// geometry4.faceVertexUvs[ 1 ] = geometry4.faceVertexUvs[ 0 ];
-
-							br = new THREE.Mesh(geometry4, intestineMat);
-
-							bathroom_stuff.add(br);
-
-							// instructions!
-							loader.load( ins1, function( geometry_ins1 ){
-								br = new THREE.Mesh(geometry_ins1, new THREE.MeshLambertMaterial({map: ins1Tex}));
-								bathroom_stuff.add(br);
-
-								loader.load( ins2, function( geometry_ins2 ){
-									br = new THREE.Mesh(geometry_ins2, new THREE.MeshLambertMaterial({map: ins2Tex}));
-									bathroom_stuff.add(br);
-
-									loader.load( ins3, function( geometry_ins3 ){
-										br = new THREE.Mesh(geometry_ins3, new THREE.MeshLambertMaterial({map: ins3Tex}));
-										bathroom_stuff.add(br);
-
-										bathroom.add(bathroom_stuff);
-										bathroom.scale.set(1.5,1.5,1.5);
-
-										// LIGHT!
-											bathroomLight = new THREE.Object3D();
-
-											geo = new THREE.TetrahedronGeometry(1.5);
-											mat = new THREE.MeshLambertMaterial({color: 0xfffac4});
-											var meshTemp = new THREE.Mesh( geo, mat );
-											meshTemp.rotation.x = -35 * Math.PI/180;
-											meshTemp.rotation.z = 30 * Math.PI/180;
-											meshTemp.position.y = -29.;
-											bathroomLight.add(meshTemp);
-
-											geo = new THREE.BoxGeometry(0.2,30,0.2);
-											transY(geo, -14);	// -14.5
-											meshTemp = new THREE.Mesh(geo, mat);
-											bathroomLight.add(meshTemp);
-
-											light = new THREE.PointLight(0xffff00, 1, 50);
-											textureLoader = new THREE.TextureLoader();
-											glowTexture = textureLoader.load( "images/glow_edit.jpg" );
-											mat = new THREE.SpriteMaterial({map: glowTexture, color: 0xffef3b, transparent: false, blending: THREE.AdditiveBlending});
-											meshTemp = new THREE.Sprite(mat);
-											meshTemp.scale.set(2,2,2);	//big
-											light.add(meshTemp);
-											light.position.y = -30;
-											bathroomLight.add(light);
-
-											bathroomLight.position.set(0,35,-5);
-
-											bathroom.add(bathroomLight);
-
-										loader.load( _pst, function( geometry6 ){
-											var poster = new THREE.Mesh( geometry6, posterMat );
-											bathroom.add(poster);
-
-											scene.add(bathroom);
-
-											// loadingCountText("bathroomsss");
-
-											// Loaded the latest one!!
-											console.log("ALL LOADED!");
-											startLink.style.display = "";
-											loadingImg.style.display = "none";
-											loadingTxt.style.display = "none";
-											readyToStart = true;
-
-										});
-									});
-								});
-							});
+							//
+							loadModelCurtain( basedURL + "models/foodCart/foodcarttest2_c1.json", basedURL + "models/foodCart/foodcarttest2_c2.json" );
 						});
 					});
 				});
-			});
+			});	
 		});	
-	// });
+	});
 }
 
 function loadModelCurtain (model, model2) {
@@ -183,14 +67,15 @@ function loadModelCurtain (model, model2) {
 		loader.load(model2, function(geometry2){
 			curtainGeo2 = geometry2;
 			curtainGeo2.computeVertexNormals();
-			curtainGeo2.computeMorphNormals();
+			// curtainGeo2.computeMorphNormals();
 
-			curtainGeo1.morphTargets[0] = {name: 't1', vertices: curtainGeo2.vertices};
+			curtainGeo1.morphTargets.push( {name: 't1', vertices: curtainGeo2.vertices} );
 			curtainGeo1.computeVertexNormals();
 			curtainGeo1.computeMorphNormals();
 
-			curtain = new THREE.Mesh( curtainGeo1, new THREE.MeshLambertMaterial({morphTargets: true, side: THREE.DoubleSide}) );
-			scene.add(curtain);
+			curtain = new THREE.Mesh( curtainGeo1, new THREE.MeshLambertMaterial({morphTargets: true, morphNormals: true, side: THREE.DoubleSide}) );
+			truck.add(curtain);
+			// scene.add(curtain);
 		});
 		
 	});
@@ -252,152 +137,63 @@ function loadSitModelPlayer( _head, _body, _stomach ){
 	});
 }
 
-function LoadStarTexture() {
-	// var textureLoader = new THREE.TextureLoader( starLoadingManager );
-	var textureLoader = new THREE.TextureLoader( loadingManger );
-	
-	for(var i=0; i<starFiles.length; i++){
-		textureLoader.load( starFiles[i], function(texture){
-			glowTexture = texture;
-			glowTextures.push(glowTexture);
-			starAnimator = new TextureAnimator( glowTexture, 4, 1, 8, 60, [0,1,2,3,2,1,3,2] );
-			starAnimators.push(starAnimator);
+function loadModelChewers( _A1, _A2, _A3, _B1, _B2, _C1, _C2, _C3, _D1, _D2 ){
+	var loader = new THREE.JSONLoader( loadingManger );
 
-			// if(index==3)
-			// 	CreateStars();
-		} );
-	}	
-}
+	// chewerA
+	loader.load( _A1, function( geoA1 ){
+		chewerA = geoA1;
 
-function CreateStars() {
-	for(var i=0; i<50; i++){
-		mat = new THREE.SpriteMaterial({map: glowTextures[i%4], color: 0xffef3b, transparent: false, blending: THREE.AdditiveBlending});
-		var st = new THREE.Sprite(mat);
-		st.position.set( Math.random()*(myStartX+400)-(myStartX+200), Math.random()*-100+400, Math.random()*(myStartZ+400)-(myStartZ+200) );
-		st.rotation.y = Math.random()*Math.PI;
-		st.scale.set(7,7,7);
-		scene.add(st);
-		stars.push(st);
-	}
-}
+		loader.load( _A2, function( geoA2 ){
+			var chewerA2 = geoA2;
 
-function LoadTexBathroom( intestine, poster ) {
+			loader.load( _A3, function( geoA3 ){
+				var chewerA3 = geoA3;
 
-	function graffiti_TLM (txt){
-		txt.wrapS = txt.wrapT = THREE.RepeatWrapping;
-		txt.repeat.set( 4, 4 );
-	};
-	var textureLoader = new THREE.TextureLoader( loadingManger );
-	graffitiTex = textureLoader.load('images/graffitiS.jpg', graffiti_TLM);
-	floorTex = textureLoader.load('images/floor.jpg', graffiti_TLM);
-	doorTex = textureLoader.load('images/door.jpg');
-	//
-	ins1Tex = textureLoader.load('images/instructions/toPoop.jpg');
-	ins2Tex = textureLoader.load('images/instructions/toWalk.jpg');
-	ins3Tex = textureLoader.load('images/instructions/toVR.jpg');
-
-	// var texLoader = new THREE.TextureLoader( br_mat_loadingManager );
-	textureLoader.load(intestine, function(texture){
-		intestineTex = texture;
-		intestineAnimator = new TextureAnimator( intestineTex, 3, 1, 4, 60, [0,1,2,1] );
-		intestineMat = new THREE.MeshBasicMaterial({map: intestineTex});
-		bigToiletAniMat = new THREE.MeshBasicMaterial({ map: intestineTex, transparent: true, opacity: 0.0, side: THREE.DoubleSide });
-
-		// need intestineAniMat
-		loadModelToiletTube();
-	});
-
-	// var texLoader2 = new THREE.TextureLoader( br_mat_loadingManager );
-	textureLoader.load(poster, function(texture2){
-		posterTex = texture2;
-		posterMat = new THREE.MeshLambertMaterial({map: posterTex});
-	});
-}
-
-function LoadTexModelWave( tex, model ){
-	var textureLoader = new THREE.TextureLoader( loadingManger );
-	textureLoader.load(tex, function(texture){
-		waterwaveTex = texture;
-		
-		var loader = new THREE.JSONLoader( loadingManger );
-		loader.load( model, function( geometry ) {
-			var waterPos = 	new THREE.Vector3(0,-7,3);
-			waterPos.add( toiletCenters[0] );
-
-			waterwave = new AniObject( 0.3, waterKeyframeSet, waterAniOffsetSet, geometry,
-									   new THREE.MeshBasicMaterial({ map: waterwaveTex, morphTargets: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide }),
-									   new THREE.Vector3(0,-12,3), 1.7 );
-
-			// loadingCountText("water wave");
+				chewerA.morphTargets.push({name: 'a_1', vertices: chewerA2.vertices});
+				chewerA.morphTargets.push({name: 'a_2', vertices: chewerA3.vertices});
+				chewerA.computeMorphNormals();
+				chewers[0] = chewerA;
+			});
 		});
 	});
-}
 
-function LoadTexModelPoopHeart( _tex, _model ){
-	var h_texLoader = new THREE.TextureLoader( loadingManger );
-	// h_texLoader.load(_tex, function(texture){
-		// poopHeartTex = texture;
-		// poopHeartMat = new THREE.MeshLambertMaterial({map: poopHeartTex});
-		poopHeartTex = h_texLoader.load(_tex);
-		poopHeartMat = new THREE.MeshLambertMaterial({map: poopHeartTex});
-		
-		// MODEL_BODY
-		var h_loader = new THREE.JSONLoader( loadingManger );
-		h_loader.load( _model, function( geometry ){
-			poopHeartGeo = geometry.clone();
-			// poopHeartGeo.computeBoundingSphere();
-
-			poopHeart = new THREE.Mesh(poopHeartGeo, poopHeartMat);
-
-			// then create person!
-
-			// loadingCountText("poop heart");
+	// chewerB
+	loader.load( _B1, function( geoB1 ){
+		chewerB = geoB1;
+		loader.load( _B2, function( geoB2 ){
+			var chewerB2 = geoB2;
+			chewerB.morphTargets.push({name: 'b1', vertices: chewerB2.vertices});
+			chewerB.computeMorphNormals();
+			chewers[1] = chewerB;
 		});
-	// });
-}
+	});
 
-function LoadTexModelPoop( _tex, _model ){
+	// chewerC
+	loader.load( _C1, function( geoC1 ){
+		chewerC = geoC1;
+		loader.load( _C2, function( geoC2 ){
+			var chewerC2 = geoC2;
+			loader.load( _C3, function( geoC3 ){
+				var chewerC3 = geoC3;
 
-	// TEXTURE
-	var poop_texLoader = new THREE.TextureLoader( loadingManger );
-	poop_texLoader.load( _tex, function( texture ){
-		poopTex = texture;
-		poopMat = new THREE.MeshLambertMaterial({map: poopTex});
-		
-		// MODEL_BODY
-		var poop_loader = new THREE.JSONLoader( loadingManger );
-		poop_loader.load( _model, function( geometry ){
-			poopGeo = geometry.clone();
-			poopGeo.computeBoundingBox();
-			// poopGeo.computeBoundingSphere();
+				chewerC.morphTargets.push({name: 'c1', vertices: chewerC2.vertices});
+				chewerC.morphTargets.push({name: 'c2', vertices: chewerC3.vertices});
+				chewerC.computeMorphNormals();
+				chewers[2] = chewerC;
+			});
+		});
+	});
 
-			poop = new THREE.Mesh(poopGeo, poopMat);
-			poopHat = poop.clone();
-			// poop.rotation.y += Math.PI;
-			// poop.position.y += 0.3;
+	// chewerD
+	loader.load( _D1, function( geoD1 ){
+		chewerD = geoD1;
+		loader.load( _D2, function( geoD2 ){
+			var chewerD2 = geoD2;
 
-			var ps_RA = poopStick.clone();
-			ps_RA.name = "right arm";
-			ps_RA.position.set(0.6,0.3,0);
-			ps_RA.rotation.z += Math.PI;
-			poop.add(ps_RA);
-
-			var ps_LA = poopStick.clone();
-			ps_LA.name = "left arm";
-			ps_LA.position.set(-0.6,0.3,0);
-			poop.add(ps_LA);
-
-			var ps_RL = poopStick.clone();
-			ps_RL.position.set(0.3,-1,0);
-			poop.add(ps_RL);
-
-			var ps_LL = poopStick.clone();
-			ps_LL.position.set(-0.3,-1,0);
-			poop.add(ps_LL);
-
-			// loadingCountText("poop");
-
-			CreatePoopRing();
+			chewerD.morphTargets.push({name: 'd1', vertices: chewerD2.vertices});
+			chewerD.computeMorphNormals();
+			chewers[3] = chewerD;
 		});
 	});
 }
