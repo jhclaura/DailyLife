@@ -144,3 +144,20 @@ PersonEat.prototype.chew = function() {
 	// 	TweenMax.to( this.playerHead.morphTargetInfluences, .3, { endArray: [1], repeat: 1, yoyo: true});
 	// }
 }
+
+PersonEat.prototype.openMouth = function() {
+	if( this.playerHead.morphTargetInfluences.length>1 ){
+		TweenMax.to( this.playerHead.morphTargetInfluences, .2, { endArray: [1,0] });
+		TweenMax.to( this.playerHead.morphTargetInfluences, .5, { endArray: [0,1], delay: .2 });
+	}else {
+		TweenMax.to( this.playerHead.morphTargetInfluences, .3, { endArray: [1] });
+	}
+}
+
+PersonEat.prototype.closeMouth = function() {
+	if( this.playerHead.morphTargetInfluences.length>1 ){
+		TweenMax.to( this.playerHead.morphTargetInfluences, .2, { endArray: [0,0] });
+	}else {
+		TweenMax.to( this.playerHead.morphTargetInfluences, .3, { endArray: [0] });
+	}
+}

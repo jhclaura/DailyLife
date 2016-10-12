@@ -121,23 +121,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	this.lookAtCenterQ = new THREE.Quaternion();
 	this.worldCenter = worldCenter.clone();
 
-	//LOOKAT_CENTER_TWEAK SO HARD!
-	// v1
-		// var m1 = new THREE.Matrix4();
-		// var center = new THREE.Vector3(0,yawObject.position.y,0);
-		// m1.lookAt( yawObject.position, center, yawObject.up );
-
-		// if(thisIsTouchDevice)
-		// 	this.lookAtCenterQ.setFromRotationMatrix( m1 );
-		// else
-		// 	yawObject.quaternion.setFromRotationMatrix( m1 );
-
-		// var checkQ = Math.abs( Math.sin( yawObject.rotation.y / 2 ) - yawObject.quaternion.y );
-		
-		// if( checkQ > 0.001 )
-		// 	quaternionChanged = true;
-
-	// v2
+	//LOOKAT_CENTER
 		var m1 = new THREE.Matrix4();
 		// var center = new THREE.Vector3(0,yawObject.position.y,0);
 		// m1.lookAt( yawObject.position, center, yawObject.up );
@@ -191,6 +175,31 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	var touchCurrentLoc = new THREE.Vector2();
 	var touch2ndStartLoc = new THREE.Vector2();
 	var touch2ndCurrentLoc = new THREE.Vector2();
+
+	//////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////
+	// WEBSOCKET
+	// if( !addNewPlayerYet && trulyFullyStart ){
+	if( !addNewPlayerYet ){
+		var msg = {
+			'type': 'addNewPlayer',
+			'camID': camID,
+			// 'peerid': peer_id,
+			'id': -1,
+			'playerStartX': myStartX,
+			'playerStartY': myStartY,
+			'playerStartZ': myStartZ,
+			'playerStartRotY': yawObject.rotation.y,
+			'myHex': myColor,
+			'nname': playerNName,
+			'worldId': -1
+		};
+
+		sendMessage( JSON.stringify(msg) );
+		addNewPlayerYet = true;
+	}
+	//////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////
 
 	// DEVICE_ORIENTATION_CONTROL
 	this.freeze = false;		// origin: true
@@ -281,8 +290,6 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		orientationQuaternionPublic.multiply(screenTransform.setFromAxisAngle(zee, - this.orient));
 		this.finalQ2.copy( alignQuaternionPublic );
 		this.finalQ2.multiply( orientationQuaternionPublic );
-
-		// console.log( this.finalQ );
 		
 		if (this.autoAlign && this.alpha !== 0) {
 				this.autoAlign = false;
@@ -360,11 +367,8 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			tempEuler.set(0, ttt, 0);
 			alignQuaternionPublic.setFromEuler(tempEuler);
 
-			console.log(ttt);
 			console.log("aligneddd!");
 		};
-
-	//
 
 	var onMouseMove = function ( event ) {
 
@@ -407,12 +411,13 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			mouseTimeOut = setTimeout(function(){
 				mouseActive = false;
 			}, 50);
-
 	};
 
 	function myMouseDown(event) {
 
 		if ( scope.clickingTouchingEnabled === false ) return;
+
+		interact();
 	}
 	
 	var onKeyDown = function ( event ) {
@@ -503,65 +508,41 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		var startPointY = touch.clientY;
 
 		touchStartLoc.set(startPointX, startPointY);
-
-		console.log("startX: " + startPointX + ", startY: " + startPointY);
+		// console.log("startX: " + startPointX + ", startY: " + startPointY);
 
 		// CHEW!!
-		firstGuy.chew();
+		// firstGuy.chew();		
 
-		
+		// MONSTER_MOUTH!
+		// if(mouthClosed){
+		// 	chewCount++;
+		// 	if(chewCount>10){
+		// 		OpenMouth();
+		// 		chewCount = 0;
+		// 		mouthClosed = false;
+		// 	}
+		// }
 
-		if(mouthClosed){
-			chewCount++;
-			if(chewCount>10){
-				OpenMouth();
-				chewCount = 0;
-				mouthClosed = false;
-			}
-		}
+		// if(!mouthClosed){
 
-		if(!mouthClosed){
+		// 	console.log("do setTimeout");
 
-			console.log("do setTimeout");
-
-			if(mouthTimeoutID!=null) clearTimeout(mouthTimeoutID);
-			mouthTimeoutID = setTimeout(function(){
-				if(!touchActive){
-					CloseMouth();
-					mouthClosed = true;
-				}
-			}, 5000);
-		}
-
-		/*
-		// Right, 1 up 1 down		
-		if( startPointX>screenWidth-100 && startPointY<50 ) {
-			console.log(startPointX + ", " + startPointY);
-			sample.trigger(0,5);
-		}
-		if( startPointX>screenWidth-100 && startPointY>screenHeight-50 ) {
-			console.log(startPointX + ", " + startPointY);
-			sample.trigger(1,5);
-		}
-		// Left 1 up 1 down, right 1 down
-		if( startPointX<100 && startPointY<50 ) {
-			console.log("trigger ding");
-			sample.trigger(3,5);		// ding --> explain thesis
-		}
-		if( startPointX<100 && startPointY>screenHeight-50 ) {
-			console.log("trigger mouth");
-			sample.trigger(2,3);		// mouth --> hi 
-		}
-		if( startPointX>screenWidth-100 && startPointY>screenHeight-50 ) {
-			console.log("trigger hug!");
-			sample.trigger(0,5);		// hug --> giggle
-		}
-		*/
+		// 	if(mouthTimeoutID!=null) clearTimeout(mouthTimeoutID);
+		// 	mouthTimeoutID = setTimeout(function(){
+		// 		if(!touchActive){
+		// 			CloseMouth();
+		// 			mouthClosed = true;
+		// 		}
+		// 	}, 5000);
+		// }
 
 		if(event.touches.length==2){
 			var touch2nd = event.touches[1];
 			touch2ndStartLoc.set(touch2nd.clientX, touch2nd.clientY);
 		}
+
+		// INTERACTION!!!
+		interact();
 	};
 
 
@@ -580,63 +561,6 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 
 		var movementX = touchCurrentLoc.clone().sub(touchStartLoc).x;
 		var movementY = touchCurrentLoc.clone().sub(touchStartLoc).y;
-
-		// console.log("movementX: " + movementX + ", movementY: " + movementY);
-
-		//HRAD_ROTATION
-		// replace by device orientation
-		/*	
-		//adjust_rotY
-			mouseActive = true;
-
-			if( quaternionChanged )
-				yawObject.rotation.y += movementX * 0.00009;
-			else
-				yawObject.rotation.y -= movementX * 0.00009;
-		//
-
-		// yawObject.rotation.y -= movementX * 0.00009;
-		pitchObject.rotation.x -= movementY * 0.00009;
-		pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
-		*/
-
-		//MOVE_AROUND
-		// v.1
-		/*
-		if( event.touches.length>=2) {
-			var touchSecond = event.touches[1];
-
-			touch2ndCurrentLoc.set(touchSecond.clientX, touchSecond.clientY);
-
-			var movement2X = touch2ndCurrentLoc.clone().sub(touch2ndStartLoc).x;
-			var movement2Y = touch2ndCurrentLoc.clone().sub(touch2ndStartLoc).y;
-
-			if(movement2X > 15){
-				moveRight = true;
-				console.log("moveRight");
-			}
-
-			if(movement2X < -15){
-				moveLeft = true;
-				console.log("moveLeft");
-			}
-
-			if(movement2Y > 15){
-				moveBackward = true;
-				console.log("moveBackward");
-			}
-
-			if(movement2Y < -15){
-				moveForward = true;
-				console.log("moveForward");
-			}
-		} else {
-			moveLeft = false;
-			moveRight = false;
-			moveBackward = false;
-			moveForward = false;
-		}
-		*/
 
 		// v.2
 		if(movementY < -20){
@@ -682,6 +606,42 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		this.enabled = true;
 	else
 		this.enabled = true;
+
+	var interact = function () {
+		if (lookingAtSomeone != -1 && lookingAtSomeone != whoIamInLife){
+			createHeart( whoIamInLife, lookingAtSomeone );
+
+			var h_f_n = dailyLifePlayerDict[ lookingAtSomeone ].nname;
+			// if( final_statistic.meToOthers[ h_f_n ] == undefined ){
+			// 	final_statistic.meToOthers[ h_f_n ] = 1;
+			// } else {
+			// 	final_statistic.meToOthers[ h_f_n ] ++;
+			// }
+			// poopHeartFromMeCount ++;
+			// final_statistic.totalHeart ++;
+		}
+		else {
+			// createPoop( yawObject.position, scope.getDirection() );
+			// final_statistic.youPoop ++;
+			// final_statistic.totalPoop ++;
+			firstGuy.chew();
+		}
+
+		if(trulyFullyStart){
+			var msg = {
+				'type': 'chew',
+				'index': whoIamInLife,
+				'toWhom': lookingAtSomeone,
+				'playerPos': yawObject.position,
+				'playerDir': scope.getDirection(),
+				'worldId': meInWorld
+			};
+
+			if(ws){
+				sendMessage( JSON.stringify(msg) );
+			}
+		}
+	} 
 
 	this.getObject = function () {
 		return yawObject;
@@ -832,24 +792,24 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		new TWEEN.Tween( yawObject.position )
 			.to( {x: _newPos.x, y: _newPos.y, z: _newPos.z}, _time )
 			// .easing( TWEEN.Easing.Cubic.InOut )
-			// .onUpdate(function(){
-			// 	var msg = {
-			// 		'type': 'updatePlayer',
-			// 		'index': whoIamInLife,
-			// 		'playerPosX': yawObject.position.x,
-			// 		'playerPosY': yawObject.position.y,
-			// 		'playerPosZ': yawObject.position.z,
-			// 		'playerRotY': yawObject.rotation.y,
-			// 		'playerQ' : eyeFinalQ2,
-			// 		'eyeQ' : eyeFinalQ,
-			// 		'playerQ3' : eyeFinalQ3,
-			// 		'worldId': meInWorld
-			// 	};
+			.onUpdate(function(){
+				var msg = {
+					'type': 'updatePlayer',
+					'index': whoIamInLife,
+					'playerPosX': yawObject.position.x,
+					'playerPosY': yawObject.position.y,
+					'playerPosZ': yawObject.position.z,
+					'playerRotY': yawObject.rotation.y,
+					'playerQ' : eyeFinalQ2,
+					'eyeQ' : eyeFinalQ,
+					'playerQ3' : eyeFinalQ3,
+					'worldId': meInWorld
+				};
 
-			// 	if(ws){
-			// 		sendMessage( JSON.stringify(msg) );
-			// 	}
-			// })
+				if(ws){
+					sendMessage( JSON.stringify(msg) );
+				}
+			})
 			.start();
 	};
 
@@ -937,25 +897,25 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////
 		//WEB_SOCKET
-		// if(trulyFullyStart){
-		// 	var msg = {
-		// 		'type': 'updatePlayer',
-		// 		'index': whoIamInLife,
-		// 		'playerPosX': yawObject.position.x,
-		// 		'playerPosY': yawObject.position.y,
-		// 		'playerPosZ': yawObject.position.z,
-		// 		'playerRotY': yawObject.rotation.y,
-		// 		'playerQ' : eyeFinalQ2,
-		// 		'eyeQ' : eyeFinalQ,
-		// 		'playerQ3' : eyeFinalQ3,
-		// 		'worldId': meInWorld
-		// 	};
+		if(trulyFullyStart){
+			var msg = {
+				'type': 'updatePlayer',
+				'index': whoIamInLife,
+				'playerPosX': yawObject.position.x,
+				'playerPosY': yawObject.position.y,
+				'playerPosZ': yawObject.position.z,
+				'playerRotY': yawObject.rotation.y,
+				'playerQ' : eyeFinalQ2,
+				'eyeQ' : eyeFinalQ,
+				'playerQ3' : eyeFinalQ3,
+				'worldId': meInWorld
+			};
 
-		// 	if(ws){
-		// 		sendMessage( JSON.stringify(msg) );
-		// 		// console.log('A msg sent by DeviceControls when updating.');
-		// 	}
-		// }
+			if(ws){
+				sendMessage( JSON.stringify(msg) );
+				// console.log('A msg sent by DeviceControls when updating.');
+			}
+		}
 		////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////
 

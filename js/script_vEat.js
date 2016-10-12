@@ -136,6 +136,8 @@ superInit();			// init automatically
 ///////////////////////////////////////////////////////////
 function superInit(){
 
+	myColor = new THREE.Color();
+
 	//Prevent scrolling for Mobile
 	noScrolling = function(event){
 		event.preventDefault();
@@ -245,21 +247,33 @@ function superInit(){
 	//////////////////////////////////////////////////////////////////////////////////////////
 
 	loadingManger = new THREE.LoadingManager();
-	// loadingManger.onProgress = function ( item, loaded, total ) {
-	//     console.log( item, loaded, total );
-	//     var loadingPercentage = Math.floor(loaded/total*100);
-	//     // loadingTxt.innerHTML = "loading " + loadingPercentage +"%";
-	//     console.log("loading " + loadingPercentage +"%");
-	// };
+	loadingManger.onProgress = function ( item, loaded, total ) {
+	    console.log( item, loaded, total );
+	    var loadingPercentage = Math.floor(loaded/total*100);
+	    loadingTxt.innerHTML = "loading " + loadingPercentage +"%";
+	    // console.log("loading " + loadingPercentage +"%");
+	};
 
-	// loadingManger.onError = function(err) {
-	// 	console.log(err);
-	// };
+	loadingManger.onError = function(err) {
+		console.log(err);
+	};
 
 	loadingManger.onLoad = function () {
 	    // console.log( "first step all loaded!" );
 	    // CreateStars();
-	    lateInit();
+
+	    // lateInit();
+
+	    // 1. load everything
+	    // 2. connect to socket
+	    // 3. late init after name 
+	    // connectSocket();
+
+	    console.log("ALL LOADED!");
+		startLink.style.display = "";
+		loadingImg.style.display = "none";
+		loadingTxt.style.display = "none";
+		readyToStart = true;
 	};
 
 	textureLoader = new THREE.TextureLoader( loadingManger );
@@ -395,10 +409,26 @@ function superInit(){
 
 	// After trigger the loading functions
 	// Connect to WebSocket!
-		// connectSocket();
+		connectSocket();
 
 	//
 	// lateInit();
+}
+
+function AssignIndex() {
+	// console.log("whoIamInLife: " + whoIamInLife);
+
+	// Assign position
+	// meInWorld = Math.floor(whoIamInLife/18);			// which world
+	// meInBGroup = Math.floor(whoIamInLife/18) % 3;		// which toilet
+	meInSGroup = ( whoIamInLife%18 )%18;					// which seat on the toilet
+	myStartX = Math.sin(Math.PI*2/18*meInSGroup)*18;
+	myStartZ = Math.cos(Math.PI*2/18*meInSGroup)*18;
+
+	// Math.sin(Math.PI*2/6*i)*18, 0, Math.cos(Math.PI*2/6*i)*18
+	myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ );
+	// myPosition.set( Math.sin(Math.PI*2/6*meInSGroup)*18, 150, Math.cos(Math.PI*2/6*meInSGroup)*18 );
+	console.log("Me in world: " + meInWorld + ", seat: " + meInSGroup);
 }
 
 // lateInit() happens after click "Start"
@@ -414,18 +444,19 @@ function lateInit()
 	myWorldCenter = new THREE.Vector3();
 
 	// build me!
-	myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ-5 );
-	firstGuy = new PersonEat( myPosition, new THREE.Color(), 0, "laura" );
+	// myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ-5 );
+	firstGuy = new PersonEat( myPosition, myColor, whoIamInLife, playerNName );
+	dailyLifePlayerDict[ whoIamInLife ] = firstGuy;
 
-	secGuy = new PersonEat( myPosition, new THREE.Color(), 1, "andy" );
-	secGuy.player.position.x = 5;
+	// secGuy = new PersonEat( myPosition, new THREE.Color(), 1, "andy" );
+	// secGuy.player.position.x = 5;
 
-	thirdGuy = new PersonEat( myPosition, new THREE.Color(), 2, "zoe" );
-	thirdGuy.player.position.x = -5;
+	// thirdGuy = new PersonEat( myPosition, new THREE.Color(), 2, "zoe" );
+	// thirdGuy.player.position.x = -5;
 
-	fourthGuy = new PersonEat( myPosition, new THREE.Color(), 3, "corbin" );
-	fourthGuy.player.position.x = -5;
-	fourthGuy.player.position.z = 10;
+	// fourthGuy = new PersonEat( myPosition, new THREE.Color(), 3, "corbin" );
+	// fourthGuy.player.position.x = -5;
+	// fourthGuy.player.position.z = 10;
 
 	// create controls
 	controls = new THREE.DeviceControls(camera, myWorldCenter, true);
@@ -469,6 +500,44 @@ function geoFindMe() {
 	}
 
 	navigator.geolocation.getCurrentPosition(success, error)
+}
+
+function createHeart( fromIndex, toIndex ) {
+	// Needs: camera position, camera direction
+
+	var position_from = dailyLifePlayerDict[ fromIndex ].player.position.clone();
+	var position_to = dailyLifePlayerDict[ toIndex ].player.position.clone();
+
+	position_to.subVectors( position_to, position_from ).multiplyScalar(4/6).add( position_from );
+	// position_to = dailyLifePlayerDict[ fromIndex ].player.worldToLocal( position_to );
+
+	var shootT = position_from.distanceTo( position_to );
+
+	// var poopH = poopHeart.clone();
+	// poopH.scale.set(0.5,0.5,0.5);
+	// poopH.position.copy( dailyLifePlayerDict[ fromIndex ].player.position );
+	// poopH.lookAt( dailyLifePlayerDict[ toIndex ].player.position );
+	// scene.add(poopH);
+
+	// var mHOut = new TWEEN.Tween(poopH.position)
+	// 			.to( {x: position_to.x,
+	// 				  y: position_to.y-1,
+	// 				  z: position_to.z}, Math.floor(shootT)*400 )
+	// 			.easing( TWEEN.Easing.Quadratic.InOut );
+
+	// var mHGone = new TWEEN.Tween(poopH.scale)
+	// 			.to( {x: 0.01, y: 0.01, z: 0.01}, 1000 )
+	// 			.easing( TWEEN.Easing.Elastic.In )
+	// 			.onComplete(function(){
+	// 				scene.remove(poopH);
+	// 			});
+
+	// mHOut.chain(mHGone);
+	// mHOut.start();
+
+	// sample.trigger( 4, 1 );
+
+	console.log("send heart from " + fromIndex + " to " + toIndex);
 }
 
 function myKeyPressed( event ){
@@ -562,19 +631,28 @@ function update()
 		//console.log(intersects);
 
 		if( eyeIntersects.length > 0 ){
-			// var iName = eyeIntersects[ 0 ].object.name;
-			// iName = iName.split(" ");
-			// console.log(eyeIntersects[ 0 ].object);
+			var iName = eyeIntersects[ 0 ].object.name;
+			iName = iName.split(" ");
+			if(iName.length==2){
+				lookingAtSomeone = iName[0];
+			} else {
+				lookingAtSomeone = -1;
+			}
 
 			// if ( eyeIntersects[ 0 ].object == flushHandler ){
 			// 	// ...
 			// }
 
 			// if ( eyeIntersects.length > 1 ) {
-			// 	// ...
+				// if(eyeIntersects[ 1 ].object.name == "miniPoop"){
+				// 	// console.log("See mini poop!");
+				// 	lookAtMiniPoop = true;
+				// } else {
+				// 	lookAtMiniPoop = false;
+				// }
 			// }
 		} else {
-			// ...
+			lookingAtSomeone = -1;
 		}		
 
 	// if(truck.children.length>0){
@@ -599,6 +677,14 @@ function render()
 	effect.render(scene, camera);
 }
 
+function removePlayer(playerID){
+	if(dailyLifePlayerDict[playerID]){
+		scene.remove( dailyLifePlayerDict[playerID].player );
+		//
+		delete dailyLifePlayerDict[playerID];
+	}
+}
+
 function changeAni ( aniIndex ) {
 
 	animOffset = animOffsetSet[ aniIndex ];
@@ -606,6 +692,16 @@ function changeAni ( aniIndex ) {
 	currentKeyframe = keyframe;
 	keyduration = keyframeSet[ aniIndex ];
 	aniStep = 0;
+}
+
+function UpdatePplCount( thisWorldCount, totalCount, totalVisit ) {
+	if(bathroom.visible) return;
+
+	pplCountTex.clear().drawText("Pooper", undefined, 100, 'white');
+	pplCountTex.drawText("Counter", undefined, 250, 'white');
+	pplCountTex.drawText("this world: " + thisWorldCount, undefined, 400, 'white');
+	pplCountTex.drawText("current: " + totalCount, undefined, 550, 'white');
+	pplCountTex.drawText("visited: " + totalVisit, undefined, 700, 'white');
 }
 
 function fullscreen() {
