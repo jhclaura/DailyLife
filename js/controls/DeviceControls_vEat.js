@@ -9,7 +9,6 @@
  * 									 doug / http://github.com/doug
  *      THREE.VRControls by dmarcos / https://github.com/dmarcos
  * 							mrdoob / http://mrdoob.com
- * @author Laura / http://jhclaura.com
  */
 
 var deviceOrientation = {};
@@ -66,7 +65,6 @@ var zAxis = new THREE.Vector3(0,0,1);
 
 //
 var deviceDirection;
-
 
 THREE.DeviceControls = function ( camera, worldCenter ) {
 
@@ -612,13 +610,14 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			createHeart( whoIamInLife, lookingAtSomeone );
 
 			var h_f_n = dailyLifePlayerDict[ lookingAtSomeone ].nname;
-			// if( final_statistic.meToOthers[ h_f_n ] == undefined ){
-			// 	final_statistic.meToOthers[ h_f_n ] = 1;
-			// } else {
-			// 	final_statistic.meToOthers[ h_f_n ] ++;
-			// }
-			// poopHeartFromMeCount ++;
-			// final_statistic.totalHeart ++;
+			
+			if( final_statistic.meToOthers[ h_f_n ] == undefined ){
+				final_statistic.meToOthers[ h_f_n ] = 1;
+			} else {
+				final_statistic.meToOthers[ h_f_n ] ++;
+			}
+			poopHeartFromMeCount ++;
+			final_statistic.totalHeart ++;
 		}
 		else {
 			// createPoop( yawObject.position, scope.getDirection() );
@@ -789,28 +788,53 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	};
 
 	this.createTweenForMove = function( _newPos, _time ){
-		new TWEEN.Tween( yawObject.position )
-			.to( {x: _newPos.x, y: _newPos.y, z: _newPos.z}, _time )
-			// .easing( TWEEN.Easing.Cubic.InOut )
-			.onUpdate(function(){
-				var msg = {
-					'type': 'updatePlayer',
-					'index': whoIamInLife,
-					'playerPosX': yawObject.position.x,
-					'playerPosY': yawObject.position.y,
-					'playerPosZ': yawObject.position.z,
-					'playerRotY': yawObject.rotation.y,
-					'playerQ' : eyeFinalQ2,
-					'eyeQ' : eyeFinalQ,
-					'playerQ3' : eyeFinalQ3,
-					'worldId': meInWorld
-				};
+		// new TWEEN.Tween( yawObject.position )
+		// 	.to( {x: _newPos.x, y: _newPos.y, z: _newPos.z}, _time )
+		// 	// .easing( TWEEN.Easing.Cubic.InOut )
+		// 	.onUpdate(function(){
+		// 		var msg = {
+		// 			'type': 'updatePlayer',
+		// 			'index': whoIamInLife,
+		// 			'playerPosX': yawObject.position.x,
+		// 			'playerPosY': yawObject.position.y,
+		// 			'playerPosZ': yawObject.position.z,
+		// 			'playerRotY': yawObject.rotation.y,
+		// 			'playerQ' : eyeFinalQ2,
+		// 			'eyeQ' : eyeFinalQ,
+		// 			'playerQ3' : eyeFinalQ3,
+		// 			'worldId': meInWorld
+		// 		};
 
-				if(ws){
-					sendMessage( JSON.stringify(msg) );
-				}
-			})
-			.start();
+		// 		if(ws){
+		// 			sendMessage( JSON.stringify(msg) );
+		// 		}
+		// 	})
+		// 	.start();
+
+		TweenMax.to( yawObject.position, 
+					 _time,
+					 {x: _newPos.x, y: _newPos.y, z: _newPos.z,
+					 	ease: Power1.easeInOut,
+					 	onUpdate: ()=>{
+					 		var msg = {
+								'type': 'updatePlayer',
+								'index': whoIamInLife,
+								'playerPosX': yawObject.position.x,
+								'playerPosY': yawObject.position.y,
+								'playerPosZ': yawObject.position.z,
+								'playerRotY': yawObject.rotation.y,
+								'playerQ' : eyeFinalQ2,
+								'eyeQ' : eyeFinalQ,
+								'playerQ3' : eyeFinalQ3,
+								'worldId': meInWorld
+							};
+
+							if(ws){
+								sendMessage( JSON.stringify(msg) );
+							}
+					 	}
+					 }
+					);
 	};
 
 	//
@@ -947,8 +971,13 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		v1.applyQuaternion( q1 );
 		obj.position.add( v1.multiplyScalar( distance ) );
 	};
-
 };
+
+function UpdateRotationWithMe( item ){
+	var vv1 = new THREE.Vector3();
+	vv1 = new THREE.Euler().setFromQuaternion( eyeFinalQ3, 'YXZ');
+	item.rotation.y = vv1.y + Math.PI;
+}
 
 function smooth(target, readings, input){
 

@@ -12,6 +12,7 @@ function PersonEat( _pos, _color, _id, _name ) {
 	// construct physical existence
 	this.player = new THREE.Object3D();
 	this.pMorphMat = new THREE.MeshLambertMaterial( { map: chewerTextures[ _id%4 ], color: this.color, morphTargets: true } );
+	this.pMorphMiniMat = new THREE.MeshLambertMaterial( { map: chewerTextures[ _id%4 ], color: this.color, morphTargets: true } );
 	this.pMat = new THREE.MeshLambertMaterial( { map: chewerTextures[ _id%4 ], color: this.color, side: THREE.DoubleSide } );
 
 	// 1-body
@@ -37,8 +38,8 @@ function PersonEat( _pos, _color, _id, _name ) {
 		scope.wordMaterial = new THREE.MeshBasicMaterial({map: this.wordTexture.texture, side: THREE.DoubleSide, transparent: true});
 		scope.wordBubble = new THREE.Mesh(new THREE.PlaneGeometry( this.wordTexture.canvas.width, this.wordTexture.canvas.height), this.wordMaterial);
 		scope.wordBubble.scale.set(0.002,0.002,0.002);
-		scope.wordBubble.position.z = 3;
-		scope.wordBubble.position.y = -1;
+		scope.wordBubble.position.z = 2;
+		scope.wordBubble.position.y = -0.2;
 		scope.wordBubble.rotation.y = Math.PI;
 		scope.wordBubble.name = "wordBubble";
 		scope.playerBody.add( scope.wordBubble );
@@ -69,6 +70,13 @@ function PersonEat( _pos, _color, _id, _name ) {
 		this.highChair.position.set(0, -3.17, 0);	// -3.54
 		this.playerBody.add( this.highChair );
 
+	//
+		this.miniMe = new THREE.Mesh( chewers[ _id%4 ], this.pMorphMiniMat );
+		this.miniMe.scale.multiplyScalar(0.3);
+		this.miniMe.position.set(0,-0.5,1.2);
+		this.miniMe.rotation.y = Math.PI;
+		this.playerBody.add( this.miniMe );
+
 	this.player.add( this.playerBody );
 
 	// 2-head
@@ -79,7 +87,9 @@ function PersonEat( _pos, _color, _id, _name ) {
 	// } else {
 		this.playerHead = new THREE.Mesh( chewers[ _id%4 ], this.pMorphMat );
 		this.playerHead.name = _id + " head";
-		
+		// this.playerHead.position.z = -2;
+		// this.playerHead.rotation.y = Math.PI;
+
 	// 	// create poop hat
 	// 	var pHat = poopHat.clone();
 	// 	pHat.rotation.y += Math.PI;
@@ -101,6 +111,18 @@ function PersonEat( _pos, _color, _id, _name ) {
 					 .add( TweenMax.to( this.playerHead.morphTargetInfluences, .3, { endArray: [0] }) );
 	}
 	this.chewAnim.pause();
+
+	//
+	this.chewMiniAnim = new TimelineMax();
+	if( this.miniMe.morphTargetInfluences.length>1 ){
+		this.chewMiniAnim.add( TweenMax.to( this.miniMe.morphTargetInfluences, .2, { endArray: [1,0] }) )
+					 .add( TweenMax.to( this.miniMe.morphTargetInfluences, .5, { endArray: [0,1] }) )
+					 .add( TweenMax.to( this.miniMe.morphTargetInfluences, .2, { endArray: [0,0] }) );
+	}else {
+		this.chewMiniAnim.add( TweenMax.to( this.miniMe.morphTargetInfluences, .3, { endArray: [1] }) )
+					 .add( TweenMax.to( this.miniMe.morphTargetInfluences, .3, { endArray: [0] }) );
+	}
+	this.chewMiniAnim.pause();
 
 	//
 	scene.add( this.player );
@@ -134,6 +156,8 @@ PersonEat.prototype.update = function( _playerLocX, _playerLocY, _playerLocZ, _p
 
 PersonEat.prototype.chew = function() {
 	this.chewAnim.restart();
+	
+	this.chewMiniAnim.restart();
 	// if( this.playerHead.morphTargetInfluences.length>1 ) {
 	// 	aniTimeline = new TimelineMax();    //{repeat: -1}
  //        tl.to( this.playerHead.morphTargetInfluences, .2, { endArray: [1,0] })
