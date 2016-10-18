@@ -143,7 +143,7 @@ function superInit(){
 		event.preventDefault();
 	};
 
-	geoFindMe();
+	// geoFindMe();
 
 	// HOWLER
 		// sound_forest = new Howl({
@@ -249,8 +249,8 @@ function superInit(){
 	loadingManger = new THREE.LoadingManager();
 	loadingManger.onProgress = function ( item, loaded, total ) {
 	    console.log( item, loaded, total );
-	    var loadingPercentage = Math.floor(loaded/total*100);
-	    loadingTxt.innerHTML = "loading " + loadingPercentage +"%";
+	    // var loadingPercentage = Math.floor(loaded/total*100);
+	    // loadingTxt.innerHTML = "loading " + loadingPercentage +"%";
 	    // console.log("loading " + loadingPercentage +"%");
 	};
 
@@ -262,7 +262,7 @@ function superInit(){
 	    // console.log( "first step all loaded!" );
 	    // CreateStars();
 
-	    // lateInit();
+	    lateInit();
 
 	    // 1. load everything
 	    // 2. connect to socket
@@ -270,10 +270,10 @@ function superInit(){
 	    // connectSocket();
 
 	    console.log("ALL LOADED!");
-		startLink.style.display = "";
-		loadingImg.style.display = "none";
-		loadingTxt.style.display = "none";
-		readyToStart = true;
+		// startLink.style.display = "";
+		// loadingImg.style.display = "none";
+		// loadingTxt.style.display = "none";
+		// readyToStart = true;
 	};
 
 	textureLoader = new THREE.TextureLoader( loadingManger );
@@ -409,7 +409,7 @@ function superInit(){
 
 	// After trigger the loading functions
 	// Connect to WebSocket!
-		connectSocket();
+		// connectSocket();
 
 	//
 	// lateInit();
@@ -444,9 +444,9 @@ function lateInit()
 	myWorldCenter = new THREE.Vector3();
 
 	// build me!
-	// myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ-5 );
-	firstGuy = new PersonEat( myPosition, myColor, whoIamInLife, playerNName );
-	dailyLifePlayerDict[ whoIamInLife ] = firstGuy;
+	myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ-5 );
+	firstGuy = new PersonEat( myPosition, myColor, 0, "laura" );
+	dailyLifePlayerDict[ 0 ] = firstGuy;
 
 	// secGuy = new PersonEat( myPosition, new THREE.Color(), 1, "andy" );
 	// secGuy.player.position.x = 5;
@@ -631,28 +631,15 @@ function update()
 		//console.log(intersects);
 
 		if( eyeIntersects.length > 0 ){
-			var iName = eyeIntersects[ 0 ].object.name;
-			iName = iName.split(" ");
-			if(iName.length==2){
-				lookingAtSomeone = iName[0];
-			} else {
-				lookingAtSomeone = -1;
-			}
-
-			// if ( eyeIntersects[ 0 ].object == flushHandler ){
-			// 	// ...
-			// }
-
-			// if ( eyeIntersects.length > 1 ) {
-				// if(eyeIntersects[ 1 ].object.name == "miniPoop"){
-				// 	// console.log("See mini poop!");
-				// 	lookAtMiniPoop = true;
-				// } else {
-				// 	lookAtMiniPoop = false;
-				// }
+			// var iName = eyeIntersects[ 0 ].object.name;
+			// iName = iName.split(" ");
+			// if(iName.length==2){
+			// 	lookingAtSomeone = iName[0];
+			// } else {
+			// 	lookingAtSomeone = -1;
 			// }
 		} else {
-			lookingAtSomeone = -1;
+			// lookingAtSomeone = -1;
 		}		
 
 	// if(truck.children.length>0){
