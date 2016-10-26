@@ -11,7 +11,7 @@ var time, clock;
 
 var loadedCount = 0;
 
-var myStartX = 0, myStartZ = 10, myStartY = 3.5; //0, 10, 2
+var myStartX = 10, myStartZ = 10, myStartY = 3.5; //0, 10, 2
 var myPosition, myStartRotY, worldBubble, pplCount, pplCountTex, pplCountMat;
 
 var model, texture;
@@ -124,6 +124,17 @@ var keyIsPressed;
 
 	var mouth, mouthClosed = false;
 
+	var particleGroup;
+	var downVelocity, upVelocity, centerVelocity;
+	var outerUp = true;
+	var firstRingEmitters = [], secondRingEmitters = [], centerRingEmitters = [];
+	var waterAnimationLines = [];
+
+	// event
+	var animStart = false, nextAnim = null;
+	var sequenceConfig;
+	var spotLights = [], spotLightCenters=[], center;
+
 ////////////////////////////////////////////////////////////
 
 // init();				// Init after CONNECTION
@@ -135,6 +146,13 @@ superInit();			// init automatically
 // FUNCTIONS 
 ///////////////////////////////////////////////////////////
 function superInit(){
+
+    // Event Setting
+	    sequenceConfig = [
+	        { time: 5, anim: ()=>{firstAni()} }
+	        // { time: 10, anim: ()=>{secondAni()} }
+	    ];
+	    completeSequenceSetup();
 
 	myColor = new THREE.Color();
 
@@ -155,19 +173,20 @@ function superInit(){
 
 	time = Date.now();
 
-	// var d = new Date();
-	// var n = d.getHours();
 
-	// if(n>5 && n<11){
-	// 	console.log("it's breakfast time!");
-	// 	mealTimeIndex = 0;
-	// }else if(n>=11 && n<17){
-	// 	console.log("it's lunch time!");
-	// 	mealTimeIndex = 1;
-	// }else{
-	// 	console.log("it's dinner time!");
-	// 	mealTimeIndex = 2;
-	// }
+		// var d = new Date();
+		// var n = d.getHours();
+
+		// if(n>5 && n<11){
+		// 	console.log("it's breakfast time!");
+		// 	mealTimeIndex = 0;
+		// }else if(n>=11 && n<17){
+		// 	console.log("it's lunch time!");
+		// 	mealTimeIndex = 1;
+		// }else{
+		// 	console.log("it's dinner time!");
+		// 	mealTimeIndex = 2;
+		// }
 
 	// THREE.JS -------------------------------------------
 		clock = new THREE.Clock();
@@ -234,7 +253,6 @@ function superInit(){
 			sinWaves.push(sw);
 		}
 
-
 	// planet = new THREE.Mesh( new THREE.SphereGeometry(1), new THREE.MeshLambertMaterial() );
 	// scene.add( planet );
 
@@ -242,127 +260,104 @@ function superInit(){
 	//////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////
 	/*
-		START LOADING	                                                          
+		                                                          
 	*/
 	//////////////////////////////////////////////////////////////////////////////////////////
 
-	loadingManger = new THREE.LoadingManager();
-	loadingManger.onProgress = function ( item, loaded, total ) {
-	    console.log( item, loaded, total );
-	    // var loadingPercentage = Math.floor(loaded/total*100);
-	    // loadingTxt.innerHTML = "loading " + loadingPercentage +"%";
-	    // console.log("loading " + loadingPercentage +"%");
-	};
+	// START LOADING	
+		loadingManger = new THREE.LoadingManager();
+		loadingManger.onProgress = function ( item, loaded, total ) {
+		    console.log( item, loaded, total );
+		    // var loadingPercentage = Math.floor(loaded/total*100);
+		    // loadingTxt.innerHTML = "loading " + loadingPercentage +"%";
+		    // console.log("loading " + loadingPercentage +"%");
+		};
 
-	loadingManger.onError = function(err) {
-		console.log(err);
-	};
+		loadingManger.onError = function(err) {
+			console.log(err);
+		};
 
-	loadingManger.onLoad = function () {
-	    // console.log( "first step all loaded!" );
-	    // CreateStars();
+		loadingManger.onLoad = function () {
+		    // console.log( "first step all loaded!" );
+		    // CreateStars();
 
-	    lateInit();
+		    lateInit();
 
-	    // 1. load everything
-	    // 2. connect to socket
-	    // 3. late init after name 
-	    // connectSocket();
+		    // startCycle();
 
-	    console.log("ALL LOADED!");
-		// startLink.style.display = "";
-		// loadingImg.style.display = "none";
-		// loadingTxt.style.display = "none";
-		// readyToStart = true;
-	};
+		    // 1. load everything
+		    // 2. connect to socket
+		    // 3. late init after name 
+		    // connectSocket();
 
-	textureLoader = new THREE.TextureLoader( loadingManger );
+		    console.log("ALL LOADED!");
+			// startLink.style.display = "";
+			// loadingImg.style.display = "none";
+			// loadingTxt.style.display = "none";
+			// readyToStart = true;
+		};
 
-	//
-	loadModelTruck( basedURL + "models/foodCarts_small/cart_cart.json",
-					basedURL + "models/foodCarts_small/cart_lantern.json",
-					basedURL + "models/foodCarts_small/cart_rooftop.json",
-					basedURL + "models/foodCarts_small/cart_supports.json",
-					basedURL + "models/foodCarts_small/cart_wheels.json",
-					basedURL + "models/foodCarts_small/cart_wood.json" );
+		textureLoader = new THREE.TextureLoader( loadingManger );
 
-	var modelLoader = new THREE.JSONLoader( loadingManger );
-	/*
-	truckLoader.load( basedURL+"models/foodCart/foodcarttest2.json", function( geometry ) {
-		truck = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial() );
-		// truck.scale.multiplyScalar(0.27);
-		// truck.position.copy( toiletCenters[0]);
-		scene.add( truck );
+		//
+		loadModelTruck( basedURL + "models/foodCarts_small/cart_cart.json",
+						basedURL + "models/foodCarts_small/cart_lantern.json",
+						basedURL + "models/foodCarts_small/cart_rooftop.json",
+						basedURL + "models/foodCarts_small/cart_supports.json",
+						basedURL + "models/foodCarts_small/cart_wheels.json",
+						basedURL + "models/foodCarts_small/cart_wood.json" );
 
-		var truckLightBulb = new THREE.Mesh( new THREE.SphereGeometry(0.05), new THREE.MeshLambertMaterial({color: 0xffffff}) );
-		truckLightBulb.position.y = 4;
-		var truckLight = new THREE.PointLight( 0xff8a4f, 0.6, 10 );
-		truckLight.position.y = -0.2;
-		TweenMax.to(truckLight, 3, { intensity: 1, repeat: -1, yoyo: true, ease: RoughEase.ease.config({ template: Power0.easeNone, strength: .2, points: 20, taper: "none", randomize: true, clamp: true}) });
-		truckLightBulb.add(truckLight);
-		truck.add(truckLightBulb);
+		var modelLoader = new THREE.JSONLoader( loadingManger );
 
-		loadModelCurtain( basedURL + "models/foodCart/foodcarttest2_c1.json", basedURL + "models/foodCart/foodcarttest2_c2.json" );
-	} );
-	*/
+		lanternNRM = textureLoader.load( basedURL + '/images/lanternSphereNRM_2.png' );
+		modelLoader.load( basedURL+"models/foodCart/lanternSphere.json", function( geometry ) {
+			var lantern = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial({normalMap: lanternNRM}) );
+			lantern.position.y = -3;
+			scene.add( lantern );
+		} );	
 
-	lanternNRM = textureLoader.load( basedURL + '/images/lanternSphereNRM_2.png' );
-	modelLoader.load( basedURL+"models/foodCart/lanternSphere.json", function( geometry ) {
-		var lantern = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial({normalMap: lanternNRM}) );
-		lantern.position.y = -3;
-		scene.add( lantern );
-	} );	
+		highChairMat = new THREE.MeshLambertMaterial( {color: 0xffffff} );
+		loadModelHighChair( basedURL + "models/highChair/hc_chair.json",
+							basedURL + "models/highChair/hc_table.json",
+							basedURL + "models/highChair/hc_stuff.json",
+							basedURL + "models/highChair/hc_smallPlate.json",
+							basedURL + "models/highChair/hc_bigPlate.json" );
 
-	highChairMat = new THREE.MeshLambertMaterial( {color: 0xffffff} );
-	loadModelHighChair( basedURL + "models/highChair/hc_chair.json",
-						basedURL + "models/highChair/hc_table.json",
-						basedURL + "models/highChair/hc_stuff.json",
-						basedURL + "models/highChair/hc_smallPlate.json",
-						basedURL + "models/highChair/hc_bigPlate.json" );
+		loadSitModelPlayer( basedURL + "models/personHead.js",
+							// basedURL + "models/personBody.js",
+							basedURL + "models/chewers/body.json",
+							basedURL + "models/stomach.json");
 
-	loadSitModelPlayer( basedURL + "models/personHead.js",
-						// basedURL + "models/personBody.js",
-						basedURL + "models/chewers/body.json",
-						basedURL + "models/stomach.json");
+		loadModelChewers( basedURL + "models/chewers/chewerA_1.json", basedURL + "models/chewers/chewerA_2.json", basedURL + "models/chewers/chewerA_3.json",
+			              basedURL + "models/chewers/chewerB_1.json", basedURL + "models/chewers/chewerB_2.json",
+			              basedURL + "models/chewers/chewerC_1.json", basedURL + "models/chewers/chewerC_2.json", basedURL + "models/chewers/chewerC_3.json",
+			              basedURL + "models/chewers/chewerD_1.json", basedURL + "models/chewers/chewerD_2.json" );
 
-	loadModelChewers( basedURL + "models/chewers/chewerA_1.json", basedURL + "models/chewers/chewerA_2.json", basedURL + "models/chewers/chewerA_3.json",
-		              basedURL + "models/chewers/chewerB_1.json", basedURL + "models/chewers/chewerB_2.json",
-		              basedURL + "models/chewers/chewerC_1.json", basedURL + "models/chewers/chewerC_2.json", basedURL + "models/chewers/chewerC_3.json",
-		              basedURL + "models/chewers/chewerD_1.json", basedURL + "models/chewers/chewerD_2.json" );
+		chewerTextures[0] = textureLoader.load( basedURL + '/images/dude0.jpg' );
+		chewerTextures[1] = textureLoader.load( basedURL + '/images/dude1.jpg' );
+		chewerTextures[2] = textureLoader.load( basedURL + '/images/dude2.jpg' );
+		chewerTextures[3] = textureLoader.load( basedURL + '/images/dude3.jpg' );
 
-	chewerTextures[0] = textureLoader.load( basedURL + '/images/dude0.jpg' );
-	chewerTextures[1] = textureLoader.load( basedURL + '/images/dude1.jpg' );
-	chewerTextures[2] = textureLoader.load( basedURL + '/images/dude2.jpg' );
-	chewerTextures[3] = textureLoader.load( basedURL + '/images/dude3.jpg' );
+		modelLoader.load( basedURL+"models/teeth.json", function( geometry ) {
+			var teeth = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial({color: 0xffffff}) );
+			//scene.add( teeth );
 
-	// var p_tex = textureLoader.load( basedURL + '/images/pepperLow.png' );
-	// var p_texNRM = textureLoader.load( basedURL + '/images/pepperNRM.png' );
-	// modelLoader.load( basedURL+"models/pepper_test.json", function( geometry ) {
-	// 	var pepper = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial({map: p_tex, normalMap: p_texNRM, side: THREE.DoubleSide}) );
-	// 	pepper.position.set(0,5,10);
-	// 	scene.add( pepper );
-	// } );
+			modelLoader.load( basedURL+"models/mouse_open.json", function( geometry2 ) {
+				var mouthOpen = geometry2;
 
-	modelLoader.load( basedURL+"models/teeth.json", function( geometry ) {
-		var teeth = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial({color: 0xffffff}) );
-		//scene.add( teeth );
+				modelLoader.load( basedURL+"models/mouse_close.json", function( geometry3 ) {
+					var mouthClose = geometry3;
+					mouthOpen.morphTargets.push({name: 'm1', vertices: mouthClose.vertices});
+					mouthOpen.computeMorphNormals();
 
-		modelLoader.load( basedURL+"models/mouse_open.json", function( geometry2 ) {
-			var mouthOpen = geometry2;
-
-			modelLoader.load( basedURL+"models/mouse_close.json", function( geometry3 ) {
-				var mouthClose = geometry3;
-				mouthOpen.morphTargets.push({name: 'm1', vertices: mouthClose.vertices});
-				mouthOpen.computeMorphNormals();
-
-				mouth = new THREE.Mesh( mouthOpen, new THREE.MeshLambertMaterial({color: 0xe9ceda, morphTargets: true, side: THREE.DoubleSide}) );
-				//mouth.add(teeth);
-				//mouth.scale.multiplyScalar(2);
-				mouth.position.y = -4;
-				scene.add( mouth );
+					mouth = new THREE.Mesh( mouthOpen, new THREE.MeshLambertMaterial({color: 0xe9ceda, morphTargets: true, side: THREE.DoubleSide}) );
+					//mouth.add(teeth);
+					//mouth.scale.multiplyScalar(2);
+					mouth.position.y = -4;
+					scene.add( mouth );
+				} );
 			} );
 		} );
-	} );
 
 	// BIRD_testing
         // var birdMat = new THREE.MeshLambertMaterial({color: 0x00ffff});
@@ -387,6 +382,104 @@ function superInit(){
         // });
 			        
 
+    // FOUNTAIN_TESTING
+    	particleGroup = new SPE.Group({
+            texture: {
+                value: textureLoader.load(basedURL + 'images/water_splash.png')
+            },
+            maxParticleCount: 6000
+        });
+
+        fireParticleGroup = new SPE.Group({
+            texture: {
+                value: textureLoader.load(basedURL + 'images/fire.jpg'),
+                frames: new THREE.Vector2(4,1),
+                loop: 8
+            },
+            maxParticleCount: 2000
+        });
+
+        downVelocity = new THREE.Vector3(1.5,6,0);
+		upVelocity = new THREE.Vector3(1.5,8,0);
+	    centerVelocity = new THREE.Vector3(0,9,0);
+
+	    let angle = 30;
+        let radius = 2.0;
+        let basePos = new THREE.Vector3(10,3,0);
+        let position = new THREE.Vector3(0,1,0);
+        let rotation = 0;
+        position.copy( basePos );
+
+        createFire(position, 0xffffff);
+        scene.add(this.fireParticleGroup.mesh);
+
+	    // Center Water
+        
+        createTrickleCenter(position, centerVelocity, 0x00ffff);
+        scene.add(particleGroup.mesh);
+
+        // First circle
+        position.y = 2;
+        for (let i = 0; i <= 360; i+= angle ) {
+            rotation = i * Math.PI / 180;
+            position.x = basePos.x + Math.cos(rotation) * radius;
+            position.z = basePos.z + Math.sin(rotation) * radius;
+            createTrickle(position, rotation, downVelocity, 0xB7C5C9);
+        }
+
+        // Second
+        position.y = 1;
+        radius = 3.5;
+
+        for (let i = 0; i <= 360; i+= angle ) {
+            rotation = i * Math.PI / 180;
+            position.x = basePos.x + Math.cos(rotation) * radius;
+            position.z = basePos.z + Math.sin(rotation) * radius;
+            let backFace = (i + 180) * Math.PI / 180;
+            createTrickle(position, backFace, upVelocity, 0xff0000);
+        }
+
+        console.log(particleGroup.emitters.length);
+
+         for(var i=0; i<particleGroup.emitters.length; i++){
+        	if(i==0) {
+        		centerRingEmitters.push(particleGroup.emitters[i]);
+        	} else if (i<=(particleGroup.emitters.length-1)/2) {
+        		firstRingEmitters.push( particleGroup.emitters[i] );
+        	} else {
+        		secondRingEmitters.push( particleGroup.emitters[i] );
+        	}
+        }
+
+       	let geo = new THREE.SphereGeometry( .3 );
+		let mat = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+		center = new THREE.Mesh(geo, mat);
+
+        spotLights[0] = createSpotLight( new THREE.Vector3(2.95, 1.63, 0.7),
+                                                   1,   // intensity
+                                                   0.6, // angle
+                                                   64,  // distance
+                                                   1.5, // decay
+                                                   0.3  // penumbra
+                                                );
+        spotLights[1] = createSpotLight( new THREE.Vector3(-0.5, 1.63, 1.5),
+                                                   1,   // intensity
+                                                   0.6, // angle
+                                                   64,  // distance
+                                                   1.5, // decay
+                                                   0.3  // penumbra
+                                                );
+        spotLights[2] = createSpotLight( new THREE.Vector3(0.7, 1.3, -3.4),
+                                                   1,   // intensity
+                                                   0.7, // angle
+                                                   64,  // distance
+                                                   1.5, // decay
+                                                   0.3  // penumbra
+                                                );
+
+        spotLightCenters[0] = spotLights[0].target;
+        spotLightCenters[1] = spotLights[1].target;
+        spotLightCenters[2] = spotLights[2].target;
 
 	stats = new Stats();
 	stats.domElement.style.position = 'absolute';
@@ -395,14 +488,6 @@ function superInit(){
 	stats.domElement.children[ 0 ].style.background = "transparent";
 	stats.domElement.children[ 0 ].children[1].style.display = "none";
 	container.appendChild( stats.domElement );
-
-	// physics_stats = new Stats();
-	// physics_stats.domElement.style.position = 'absolute';
-	// physics_stats.domElement.style.bottom = '55px';
-	// physics_stats.domElement.style.zIndex = 100;
-	// physics_stats.domElement.children[ 0 ].style.background = "transparent";
-	// physics_stats.domElement.children[ 0 ].children[1].style.display = "none";
-	// container.appendChild( physics_stats.domElement );
 	
 	// EVENTS
 	window.addEventListener('resize', onWindowResize, false);
@@ -413,6 +498,20 @@ function superInit(){
 
 	//
 	// lateInit();
+}
+
+function createSpotLight( pos, _intensity, _angle, _distance, _decay, _penumbra ) {
+	let geometry = new THREE.ConeGeometry( .2, 1, 8 );
+	let material = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+	let cone = new THREE.Mesh( geometry, material );
+
+    let s_l = new THREE.SpotLight( 0xfff291, _intensity, _distance, _angle, _penumbra, _decay );
+    s_l.target.add( center.clone() );
+    s_l.position.copy( pos );
+    s_l.add(cone);
+    scene.add(s_l);
+    scene.add(s_l.target);
+    return s_l;
 }
 
 function AssignIndex() {
@@ -444,7 +543,7 @@ function lateInit()
 	myWorldCenter = new THREE.Vector3();
 
 	// build me!
-	myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ-5 );
+	myPosition = new THREE.Vector3( myStartX-10, myStartY, myStartZ-5 );
 	firstGuy = new PersonEat( myPosition, myColor, 0, "laura" );
 	dailyLifePlayerDict[ 0 ] = firstGuy;
 
@@ -466,6 +565,390 @@ function lateInit()
 	animate(performance ? performance.now() : Date.now());
 
 	trulyFullyStart = true;
+
+	initTime = Date.now();
+
+	startEvent();
+}
+
+// TO_ANI: velocity.value, velocity.spread, acceleration.value, acceleration.spread
+
+function updateEmittersValue( emitters, arrayOfIndex, arrayOfValue, time, _yoyo, _repeatTime, _delay, _repeatDelay ){
+
+	// for(let i=0; i<emitters.length; i++){
+		var dummyVectors = [];
+		
+		for(let j=0; j<arrayOfIndex.length; j++){
+			dummyVectors.push( selectToChangeValue(emitters[0], arrayOfIndex[j]) );
+			
+			if(j==0)
+				console.log(dummyVectors[j]);
+		}
+
+		TweenMax.to( dummyVectors[0], time, { x: arrayOfValue[0].x,
+											  y: arrayOfValue[0].y,
+											  z: arrayOfValue[0].z,
+											  yoyo: _yoyo, repeat: _repeatTime,
+											  delay: _delay, repeatDelay: _repeatDelay,
+					onStart:()=>{
+						if(dummyVectors.length>1){
+							for(let k=1; k<dummyVectors.length; k++){
+								 TweenMax.to( dummyVectors[k], time, { x: arrayOfValue[k].x,
+																	   y: arrayOfValue[k].y,
+																	   z: arrayOfValue[k].z,
+																	   yoyo: _yoyo, repeat: _repeatTime,
+											  						   delay: _delay, repeatDelay: _repeatDelay });
+							}
+						}
+			        },
+			        onUpdate: ()=>{
+			        	for(let i=0; i<emitters.length; i++){
+				        	for(let k=0; k<dummyVectors.length; k++){
+				        		if(i==0 && k==0)
+				        			// console.log(dummyVectors[k]);
+
+				        		setEmitterValue( emitters[i], arrayOfIndex[k], dummyVectors[k] );
+				        		
+							}
+						}
+			        }
+			   //      ,
+			   //      onComplete: ()=>{
+			   //      	for(let i=0; i<emitters.length; i++){
+				  //       	for(let k=0; k<dummyVectors.length; k++){
+				  //       		setEmitterValue( emitters[i], arrayOfIndex[k], dummyVectors[k] );
+				  //       		if(i==0 && k==0)
+				  //       			console.log(dummyVectors[k]);
+						// 	}
+						// }
+			   //      }
+
+		    	}
+        );
+		
+	//}
+}
+
+function setEmitterValue( emitter, valueIndex, value ){
+    switch ( valueIndex ) {
+        case 0:
+            emitter.velocity.value = value;
+            break;
+
+        case 1:
+            emitter.velocity.spread = value;
+            break;
+
+        case 2:
+            emitter.acceleration.value = value;
+            break;
+
+        case 3:
+            emitter.acceleration.spread = value;
+            break;
+    }
+}
+
+function selectToChangeValue( emitter, valueIndex ){
+    switch ( valueIndex ) {
+        case 0:
+            return emitter.velocity.value.clone();
+            break;
+
+        case 1:
+            return emitter.velocity.spread.clone();
+            break;
+
+        case 2:
+            return emitter.acceleration.value.clone();
+            break;
+
+        case 3:
+            return emitter.acceleration.spread.clone();
+            break;
+    }
+}
+
+function firstAni() {
+	console.log("do first ani!");
+
+	updateEmittersValue( secondRingEmitters,
+                         [ 0 ],
+                         [ {x:1.5, y:6, z:0} ],
+                         0.1, true, 3, 0, 2);
+
+ //    updateEmittersValue( firstRingEmitters,
+ //                         [ 0 ],
+ //                         [ {x:1.5, y:8, z:0} ],
+ //                         0, true, 5, 0, 2);
+
+
+	// //emitters, arrayOfIndex, _arrayOfValue, time
+	// updateEmittersValue( centerRingEmitters,
+	// 					 [ 0,1,2 ],
+	// 					 [ {x:0, y:16, z:0}, {x:8, y:0.5, z:8}, {x:0, y: -30, z:0} ],
+	// 					 5, true, 1, 0, 0);
+
+	// v.Work!
+		/*
+		for(var i=0; i<centerRingEmitters.length; i++){
+			var dummyVector = centerRingEmitters[i].velocity.value.clone();
+			var dummyVector2 = centerRingEmitters[i].velocity.spread.clone();
+			var dummyVector3 = centerRingEmitters[i].acceleration.value.clone();
+
+			TweenMax.to( dummyVector, 5, { y: 16,
+				onStartParams:[ i ],
+				onStart:( i )=>{
+		            TweenMax.to( dummyVector2, 5, {x:8, z:8});
+		            TweenMax.to( dummyVector3, 5, {y:-30});
+		        },
+		        onUpdateParams:[ i ],
+		        onUpdate: (i)=>{
+		        	centerRingEmitters[i].velocity.value = new THREE.Vector3(
+		        		dummyVector.x,
+		        		dummyVector.y,
+		        		dummyVector.z);
+		        	
+		        	centerRingEmitters[i].velocity.spread = new THREE.Vector3(
+		        		dummyVector2.x, 
+		        		dummyVector2.y, 
+		        		dummyVector2.z);
+		        	
+		        	centerRingEmitters[i].acceleration.value = new THREE.Vector3(
+		        		dummyVector3.x,
+		        		dummyVector3.y,
+		        		dummyVector3.z);	            
+		        }}
+	        );
+		}
+		*/
+}
+
+function secondAni() {
+	console.log("do second ani!");
+}
+
+function createWaterAnimation( ringEmitters ) {
+	for(let i=0; i<ringEmitters.length; i++){
+		let e = ringEmitters[i];
+		// console.log(e_velocity);
+
+		let tl = new TimelineMax({repeat: -1, yoyo: true, repeatDelay: 2});
+	    tl.to( [e.velocity.value], 0, { y: toValue, onCompleteParams:[i], onComplete: (i)=>{
+				ringEmitters[i].velocity.value = e_velocity;
+			} })
+			.to( e_velocity, 0, { endArray: [0,0,0,0,1,0], onComplete: (i)=>{
+				ringEmitters[i].velocity.value = e_velocity;
+			} })
+			.to( e_velocity, 0, { endArray: [0,0,0,0,0,1], onComplete: (i)=>{
+				ringEmitters[i].velocity.value = e_velocity;
+			} });
+	    
+	    waterAnimationLines.push(tl)
+	}
+}
+
+function startCycle() {
+    setInterval(() => {
+        //console.log("Fountain cycle!", this.particleGroup.emitters.length + " Emitters");
+        outerUp = !outerUp;
+        for (let i = 0; i < particleGroup.emitters.length; i++) {
+            if (i < particleGroup.emitters.length / 2) {
+                particleGroup.emitters[i].velocity.value = outerUp ? downVelocity : upVelocity;
+            } else {
+                particleGroup.emitters[i].velocity.value = outerUp ? upVelocity : downVelocity;
+            }
+        }
+
+    },8000);
+}
+
+function createTrickle(position, rotation, velocity, colorCode) {
+    // Get the velocity after rotation
+    let emitter = new SPE.Emitter({
+        maxAge: {
+            value: 1,
+            spread: 0
+        },
+        type: SPE.distributions.BOX,
+        position : {
+            value: position
+        },
+        rotation: {
+            axis: new THREE.Vector3(0, 1, 0),
+            angle: rotation,
+            static: true
+        },
+        acceleration: {
+            value: new THREE.Vector3(0,-12,0)
+        },
+        velocity: {
+            value: velocity.clone()
+        },
+        color: {
+            value: new THREE.Color(colorCode)
+        },
+        size: {
+            value: [0.2, 0.4, 0.0]
+        },
+        particleCount: 200,
+        opacity: {
+            value: [0.3, 0.8, 0.5]
+        },
+        transparent: true,
+        wiggle: {
+            value: 3,
+            spread: 2
+        }
+    });
+    particleGroup.addEmitter(emitter);
+}
+
+/*
+// 1
+particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,19,0);
+particleGroup.emitters[0].velocity.spread = new THREE.Vector3(10,0.5,10);
+particleGroup.emitters[0].acceleration.value = new THREE.Vector3(0,-24,0);
+
+// 2
+particleGroup.emitters[0].velocity.spread = new THREE.Vector3(5,0.5,5);
+
+// 2
+particleGroup.emitters[0].velocity.spread = new THREE.Vector3(8,0.5,8);
+
+// 3
+particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,13,0);
+particleGroup.emitters[0].acceleration.value = new THREE.Vector3(0,-14,0);
+particleGroup.emitters[0].velocity.spread = new THREE.Vector3(4,0.5,4);
+
+// 4
+particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,7,0);
+particleGroup.emitters[0].velocity.spread = new THREE.Vector3(2,0.5,2);
+
+//=========================================================================
+
+// 1
+particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,22,0);
+particleGroup.emitters[0].velocity.spread = new THREE.Vector3(13,0.5,13);
+particleGroup.emitters[0].acceleration.value = new THREE.Vector3(0,-35,0);
+
+// 2
+particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,16,0);
+particleGroup.emitters[0].acceleration.value = new THREE.Vector3(0,-26,0);
+
+// 3
+particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,20,0);
+particleGroup.emitters[0].velocity.spread = new THREE.Vector3(11,0.5,11);
+
+// 4
+particleGroup.emitters[0].velocity.spread = new THREE.Vector3(6,0.5,6);
+particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,15,0);
+
+// 5
+particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,18,0);
+
+// 6
+particleGroup.emitters[0].velocity.spread = new THREE.Vector3(3,0.5,3);
+particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,14,0);
+
+// 7
+particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,20,0);
+
+// 8
+particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,12,0);
+
+// 9
+loooop
+
+// 10: wider and wider
+particleGroup.emitters[0].velocity.spread = new THREE.Vector3(10,0.5,10);
+
+// 11
+particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,18,0);
+particleGroup.emitters[0].velocity.spread = new THREE.Vector3(8,0.5,8);
+
+// 12
+
+
+*/
+function createTrickleCenter(position, velocity, colorCode) {
+    // Get the velocity after rotation
+    let emitter = new SPE.Emitter({
+        maxAge: {
+            value: 2,
+            spread: 0
+        },
+        type: SPE.distributions.BOX,
+        position : {
+            value: position,
+            spread: new THREE.Vector3(.3, 0, .3)
+        },
+        acceleration: {
+            value: new THREE.Vector3(0, -14, 0),
+            spread: new THREE.Vector3( 1, 0, 1 )
+        },
+        velocity: {
+            value: velocity, // orig: 0, 9, 0
+            spread: new THREE.Vector3( 0, 0.5, 0 )
+        },
+        color: {
+            value: new THREE.Color(colorCode)
+        },
+        size: {
+            value: [0.3, .4, 0.2, 0.0]
+        },
+        particleCount: 1000,
+        opacity: {
+            value: [0.5, 0.8, 0.5, 0.5]
+        },
+        transparent: true
+    });
+    particleGroup.addEmitter(emitter);
+}
+
+function createFire(position, colorCode) {
+    // Get the velocity after rotation
+    let emitter = new SPE.Emitter({
+        maxAge: {
+            value: 0.5,
+            spread: 0
+        },
+        type: SPE.distributions.BOX,
+        position : {
+            value: position,
+            spread: new THREE.Vector3( .2, 0, .2 )
+        },
+        velocity: {
+            value: new THREE.Vector3( 0, 5, 0 ),
+            spread: new THREE.Vector3( 0, 1, 0 )
+        },
+        acceleration: {
+            value: new THREE.Vector3( 0.3, 0, 0.2 ),
+            spread: new THREE.Vector3()
+        },
+        color: {
+            value: new THREE.Color(colorCode)
+        },
+        size: {
+            value: [4, 3, 2, 0]
+        },
+        particleCount: 200,
+        opacity: {
+            value: [1, 0.8, 0.6, 0]
+        },
+        transparent: true,
+        drag: {
+            value: 0.5,
+            spread: 0
+        }
+    });
+    fireParticleGroup.addEmitter(emitter);
+}
+
+function completeSequenceSetup() {
+    for(let i=0; i<sequenceConfig.length; i++){
+        sequenceConfig[i].performed = false;
+    }
 }
 
 function daytimeChange( isDayTime ) {
@@ -596,6 +1079,26 @@ function myKeyUp(event){
 	keyIsPressed = false;
 }
 
+let currentSequence;
+function startEvent() {
+	console.log("start event!");
+    currentSequence = sequenceConfig.slice(0);
+    nextAnim = currentSequence.shift();
+}
+
+function updateVideoTime(time) {
+    if (nextAnim && time >= nextAnim.time) {
+        console.log("do anim sequence ", nextAnim);
+        nextAnim.anim();
+
+        if (currentSequence.length > 0) {
+            nextAnim = currentSequence.shift();
+        } else {
+            nextAnim = null;
+        }
+    }
+}
+
 // v.2
 // Request animation frame loop function
 var lastRender = 0;
@@ -614,15 +1117,14 @@ function animate(timestamp) {
 	requestAnimationFrame(animate);
 }
 
-
 function update()
 {	
 
-	// TWEEN.update();
 	controls.update( Date.now() - time );
 
 	var dt = clock.getDelta();
-
+	particleGroup.tick( dt * 0.4 );
+	fireParticleGroup.tick( dt * 0.4 );
 
 	// eyeRay!
 		var directionCam = controls.getDirection(1).clone();
@@ -654,6 +1156,8 @@ function update()
 			lanternGroup.children[i].rotation.z = lanternRun;
 		}
 	}
+
+	updateVideoTime( (time-initTime)/1000 );
 
 	//
 	time = Date.now();

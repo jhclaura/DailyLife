@@ -608,6 +608,9 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		this.enabled = true;
 
 	var interact = function () {
+		firstGuy.chew();
+
+		/*
 		if (lookingAtSomeone != -1 && lookingAtSomeone != whoIamInLife){
 			createHeart( whoIamInLife, lookingAtSomeone );
 
@@ -627,8 +630,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			// final_statistic.totalPoop ++;
 			firstGuy.chew();
 		}
-
-		/*
+		
 		if(trulyFullyStart){
 			var msg = {
 				'type': 'chew',
@@ -948,7 +950,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////
 		*/
-		
+
 		// if(firstGuy)
 			// firstGuy.update( yawObject.position.x, yawObject.position.y, yawObject.position.z, yawObject.rotation.y, eyeFinalQ2 );
 	};
