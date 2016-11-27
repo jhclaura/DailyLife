@@ -124,16 +124,22 @@ var keyIsPressed;
 
 	var mouth, mouthClosed = false;
 
-	var particleGroup;
-	var downVelocity, upVelocity, centerVelocity;
-	var outerUp = true;
-	var firstRingEmitters = [], secondRingEmitters = [], centerRingEmitters = [];
-	var waterAnimationLines = [];
 
 	// event
 	var animStart = false, nextAnim = null;
 	var sequenceConfig;
 	var spotLights = [], spotLightCenters=[], center;
+
+	//
+	var lookupTable = [];
+	var cloudAmount = 20, cloudRadius = 5;
+	var cloudColors = [ new THREE.Color(0xafe2f3), new THREE.Color(0xf3afc0) ];
+	var itzhakLoadingManager, cloudGeos=[], heartGeos=[], cloudGroup=[];
+	var cloudVirtualGroup = {};
+	var cloudFiles = [ basedURL + "models/cloud1.json", basedURL + "models/cloud2.json" ];
+    var heartFiles = [ basedURL + "models/heart1.json", basedURL + "models/heart2.json" ];
+    var cloudIndex = [];
+
 
 ////////////////////////////////////////////////////////////
 
@@ -359,6 +365,29 @@ function superInit(){
 			} );
 		} );
 
+	// ================= TZINA =====================
+	for (let i=0; i<50; i++) {
+      lookupTable.push(Math.random());
+    }
+	// CLOUD
+        // ============== Changeable Setting ================
+            cloudAmount = 20;
+            cloudRadius = 5;
+            cloudColors = [ new THREE.Color(0xafe2f3), new THREE.Color(0xf3afc0) ];
+        // ================ Setting End =====================
+        for(let i=0; i<cloudAmount; i++){
+        	cloudIndex.push(i);
+        }
+        itzhakLoadingManager = new THREE.LoadingManager();
+        itzhakLoadingManager.onLoad = ()=>{
+            for(let j=0; j<cloudGeos.length; j++){
+                cloudGeos[j].morphTargets.push( {name: 'h1', vertices: heartGeos[j].vertices} );
+                cloudGeos[j].computeMorphNormals();
+            }
+            createClouds();
+        };
+        loadClouds( cloudFiles, heartFiles );
+
 	// BIRD_testing
         // var birdMat = new THREE.MeshLambertMaterial({color: 0x00ffff});
 
@@ -383,103 +412,7 @@ function superInit(){
 			        
 
     // FOUNTAIN_TESTING
-    	particleGroup = new SPE.Group({
-            texture: {
-                value: textureLoader.load(basedURL + 'images/water_splash.png')
-            },
-            maxParticleCount: 6000
-        });
-
-        fireParticleGroup = new SPE.Group({
-            texture: {
-                value: textureLoader.load(basedURL + 'images/fire.jpg'),
-                frames: new THREE.Vector2(4,1),
-                loop: 8
-            },
-            maxParticleCount: 2000
-        });
-
-        downVelocity = new THREE.Vector3(1.5,6,0);
-		upVelocity = new THREE.Vector3(1.5,8,0);
-	    centerVelocity = new THREE.Vector3(0,9,0);
-
-	    let angle = 30;
-        let radius = 2.0;
-        let basePos = new THREE.Vector3(10,3,0);
-        let position = new THREE.Vector3(0,1,0);
-        let rotation = 0;
-        position.copy( basePos );
-
-        createFire(position, 0xffffff);
-        scene.add(this.fireParticleGroup.mesh);
-
-	    // Center Water
-        
-        createTrickleCenter(position, centerVelocity, 0x00ffff);
-        scene.add(particleGroup.mesh);
-
-        // First circle
-        position.y = 2;
-        for (let i = 0; i <= 360; i+= angle ) {
-            rotation = i * Math.PI / 180;
-            position.x = basePos.x + Math.cos(rotation) * radius;
-            position.z = basePos.z + Math.sin(rotation) * radius;
-            createTrickle(position, rotation, downVelocity, 0xB7C5C9);
-        }
-
-        // Second
-        position.y = 1;
-        radius = 3.5;
-
-        for (let i = 0; i <= 360; i+= angle ) {
-            rotation = i * Math.PI / 180;
-            position.x = basePos.x + Math.cos(rotation) * radius;
-            position.z = basePos.z + Math.sin(rotation) * radius;
-            let backFace = (i + 180) * Math.PI / 180;
-            createTrickle(position, backFace, upVelocity, 0xff0000);
-        }
-
-        console.log(particleGroup.emitters.length);
-
-         for(var i=0; i<particleGroup.emitters.length; i++){
-        	if(i==0) {
-        		centerRingEmitters.push(particleGroup.emitters[i]);
-        	} else if (i<=(particleGroup.emitters.length-1)/2) {
-        		firstRingEmitters.push( particleGroup.emitters[i] );
-        	} else {
-        		secondRingEmitters.push( particleGroup.emitters[i] );
-        	}
-        }
-
-       	let geo = new THREE.SphereGeometry( .3 );
-		let mat = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-		center = new THREE.Mesh(geo, mat);
-
-        spotLights[0] = createSpotLight( new THREE.Vector3(2.95, 1.63, 0.7),
-                                                   1,   // intensity
-                                                   0.6, // angle
-                                                   64,  // distance
-                                                   1.5, // decay
-                                                   0.3  // penumbra
-                                                );
-        spotLights[1] = createSpotLight( new THREE.Vector3(-0.5, 1.63, 1.5),
-                                                   1,   // intensity
-                                                   0.6, // angle
-                                                   64,  // distance
-                                                   1.5, // decay
-                                                   0.3  // penumbra
-                                                );
-        spotLights[2] = createSpotLight( new THREE.Vector3(0.7, 1.3, -3.4),
-                                                   1,   // intensity
-                                                   0.7, // angle
-                                                   64,  // distance
-                                                   1.5, // decay
-                                                   0.3  // penumbra
-                                                );
-
-        spotLightCenters[0] = spotLights[0].target;
-        spotLightCenters[1] = spotLights[1].target;
-        spotLightCenters[2] = spotLights[2].target;
+    	
 
 	stats = new Stats();
 	stats.domElement.style.position = 'absolute';
@@ -498,36 +431,6 @@ function superInit(){
 
 	//
 	// lateInit();
-}
-
-function createSpotLight( pos, _intensity, _angle, _distance, _decay, _penumbra ) {
-	let geometry = new THREE.ConeGeometry( .2, 1, 8 );
-	let material = new THREE.MeshBasicMaterial( {color: 0xff0000} );
-	let cone = new THREE.Mesh( geometry, material );
-
-    let s_l = new THREE.SpotLight( 0xfff291, _intensity, _distance, _angle, _penumbra, _decay );
-    s_l.target.add( center.clone() );
-    s_l.position.copy( pos );
-    s_l.add(cone);
-    scene.add(s_l);
-    scene.add(s_l.target);
-    return s_l;
-}
-
-function AssignIndex() {
-	// console.log("whoIamInLife: " + whoIamInLife);
-
-	// Assign position
-	// meInWorld = Math.floor(whoIamInLife/18);			// which world
-	// meInBGroup = Math.floor(whoIamInLife/18) % 3;		// which toilet
-	meInSGroup = ( whoIamInLife%18 )%18;					// which seat on the toilet
-	myStartX = Math.sin(Math.PI*2/18*meInSGroup)*18;
-	myStartZ = Math.cos(Math.PI*2/18*meInSGroup)*18;
-
-	// Math.sin(Math.PI*2/6*i)*18, 0, Math.cos(Math.PI*2/6*i)*18
-	myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ );
-	// myPosition.set( Math.sin(Math.PI*2/6*meInSGroup)*18, 150, Math.cos(Math.PI*2/6*meInSGroup)*18 );
-	console.log("Me in world: " + meInWorld + ", seat: " + meInSGroup);
 }
 
 // lateInit() happens after click "Start"
@@ -573,159 +476,233 @@ function lateInit()
 
 // TO_ANI: velocity.value, velocity.spread, acceleration.value, acceleration.spread
 
-function updateEmittersValue( emitters, arrayOfIndex, arrayOfValue, time, _yoyo, _repeatTime, _delay, _repeatDelay ){
-
-	// for(let i=0; i<emitters.length; i++){
-		var dummyVectors = [];
-		
-		for(let j=0; j<arrayOfIndex.length; j++){
-			dummyVectors.push( selectToChangeValue(emitters[0], arrayOfIndex[j]) );
-			
-			if(j==0)
-				console.log(dummyVectors[j]);
-		}
-
-		TweenMax.to( dummyVectors[0], time, { x: arrayOfValue[0].x,
-											  y: arrayOfValue[0].y,
-											  z: arrayOfValue[0].z,
-											  yoyo: _yoyo, repeat: _repeatTime,
-											  delay: _delay, repeatDelay: _repeatDelay,
-					onStart:()=>{
-						if(dummyVectors.length>1){
-							for(let k=1; k<dummyVectors.length; k++){
-								 TweenMax.to( dummyVectors[k], time, { x: arrayOfValue[k].x,
-																	   y: arrayOfValue[k].y,
-																	   z: arrayOfValue[k].z,
-																	   yoyo: _yoyo, repeat: _repeatTime,
-											  						   delay: _delay, repeatDelay: _repeatDelay });
-							}
-						}
-			        },
-			        onUpdate: ()=>{
-			        	for(let i=0; i<emitters.length; i++){
-				        	for(let k=0; k<dummyVectors.length; k++){
-				        		if(i==0 && k==0)
-				        			// console.log(dummyVectors[k]);
-
-				        		setEmitterValue( emitters[i], arrayOfIndex[k], dummyVectors[k] );
-				        		
-							}
-						}
-			        }
-			   //      ,
-			   //      onComplete: ()=>{
-			   //      	for(let i=0; i<emitters.length; i++){
-				  //       	for(let k=0; k<dummyVectors.length; k++){
-				  //       		setEmitterValue( emitters[i], arrayOfIndex[k], dummyVectors[k] );
-				  //       		if(i==0 && k==0)
-				  //       			console.log(dummyVectors[k]);
-						// 	}
-						// }
-			   //      }
-
-		    	}
-        );
-		
-	//}
-}
-
-function setEmitterValue( emitter, valueIndex, value ){
-    switch ( valueIndex ) {
-        case 0:
-            emitter.velocity.value = value;
-            break;
-
-        case 1:
-            emitter.velocity.spread = value;
-            break;
-
-        case 2:
-            emitter.acceleration.value = value;
-            break;
-
-        case 3:
-            emitter.acceleration.spread = value;
-            break;
-    }
-}
-
-function selectToChangeValue( emitter, valueIndex ){
-    switch ( valueIndex ) {
-        case 0:
-            return emitter.velocity.value.clone();
-            break;
-
-        case 1:
-            return emitter.velocity.spread.clone();
-            break;
-
-        case 2:
-            return emitter.acceleration.value.clone();
-            break;
-
-        case 3:
-            return emitter.acceleration.spread.clone();
-            break;
-    }
-}
-
 function firstAni() {
 	console.log("do first ani!");
-
-	updateEmittersValue( secondRingEmitters,
-                         [ 0 ],
-                         [ {x:1.5, y:6, z:0} ],
-                         0.1, true, 3, 0, 2);
-
- //    updateEmittersValue( firstRingEmitters,
- //                         [ 0 ],
- //                         [ {x:1.5, y:8, z:0} ],
- //                         0, true, 5, 0, 2);
-
-
-	// //emitters, arrayOfIndex, _arrayOfValue, time
-	// updateEmittersValue( centerRingEmitters,
-	// 					 [ 0,1,2 ],
-	// 					 [ {x:0, y:16, z:0}, {x:8, y:0.5, z:8}, {x:0, y: -30, z:0} ],
-	// 					 5, true, 1, 0, 0);
-
-	// v.Work!
-		/*
-		for(var i=0; i<centerRingEmitters.length; i++){
-			var dummyVector = centerRingEmitters[i].velocity.value.clone();
-			var dummyVector2 = centerRingEmitters[i].velocity.spread.clone();
-			var dummyVector3 = centerRingEmitters[i].acceleration.value.clone();
-
-			TweenMax.to( dummyVector, 5, { y: 16,
-				onStartParams:[ i ],
-				onStart:( i )=>{
-		            TweenMax.to( dummyVector2, 5, {x:8, z:8});
-		            TweenMax.to( dummyVector3, 5, {y:-30});
-		        },
-		        onUpdateParams:[ i ],
-		        onUpdate: (i)=>{
-		        	centerRingEmitters[i].velocity.value = new THREE.Vector3(
-		        		dummyVector.x,
-		        		dummyVector.y,
-		        		dummyVector.z);
-		        	
-		        	centerRingEmitters[i].velocity.spread = new THREE.Vector3(
-		        		dummyVector2.x, 
-		        		dummyVector2.y, 
-		        		dummyVector2.z);
-		        	
-		        	centerRingEmitters[i].acceleration.value = new THREE.Vector3(
-		        		dummyVector3.x,
-		        		dummyVector3.y,
-		        		dummyVector3.z);	            
-		        }}
-	        );
-		}
-		*/
 }
 
 function secondAni() {
 	console.log("do second ani!");
+}
+
+function loadClouds( cloudFiles, heartFiles ) {
+    let cloudLoader = new THREE.JSONLoader( itzhakLoadingManager );
+    // let modelLoader = new THREE.JSONLoader( this.loadingManager );
+    for(let i=0; i<cloudFiles.length; i++){
+        cloudLoader.load( cloudFiles[i], (geometry)=>{
+            geometry.name = "cloudGeo" + i;
+            cloudGeos.push(geometry);
+        } );
+
+        cloudLoader.load( heartFiles[i], (geometry2)=>{
+            geometry2.name = "heartGeo" + i;
+            heartGeos.push(geometry2);
+        } );
+    }
+}
+
+function dropCloud( c_index, theCloud, theParent ) {
+	// totalTime: 2 + 5 + 2 + 5 + 2 + 1 = 17
+
+	// change to heart
+		TweenMax.to( theCloud.material.color, 2, {
+            r: cloudColors[1].r,
+            g: cloudColors[1].g,
+            b: cloudColors[1].b
+        });
+		TweenMax.to( theCloud.morphTargetInfluences, 2, {
+			endArray: [1], ease: RoughEase.ease.config({
+				template:  Power0.easeNone, strength: 1, points: 20, taper: "none", randomize:  true, clamp: false}),
+            onComplete: ()=>{
+            	setTimeout( ()=>{            		
+            		THREE.SceneUtils.detach( theCloud, theParent, scene);
+            	}, 4500);
+
+            	TweenMax.to(theCloud.position, 2, {y:0, ease: Bounce.easeOut, delay:5+c_index*0.05,
+            		onStart: ()=>{
+            			TweenMax.to(theCloud.rotation, 1, {x:Math.PI/2});
+            		},
+            		onCompleteParams: [theCloud.position.y+theParent.position.y],
+            		onComplete: (oriHeight)=>{
+
+						TweenMax.to(theCloud.position, 2, {y: oriHeight, delay: 5,
+							onStart:()=>{
+								TweenMax.to( theCloud.morphTargetInfluences, 2, {
+									endArray: [0], ease: RoughEase.ease.config({
+										template:  Power0.easeNone, strength: 1, points: 20, taper: "none", randomize:  true, clamp: false
+									})
+								});
+								TweenMax.to( theCloud.material.color, 2, {
+				                    r: cloudColors[0].r,
+				                    g: cloudColors[0].g,
+				                    b: cloudColors[0].b
+				                });
+							},
+							onComplete:()=>{
+								THREE.SceneUtils.attach(theCloud, scene, theParent);
+								TweenMax.to(theCloud.rotation, 1, {x:0});
+							}
+						});
+					}
+				});
+            }
+        });		
+}
+
+function dropSingleCloud( c_index ){
+	var whichCloud = c_index%3;
+	var childIndex = Math.floor( c_index / 3 );
+	var theParent = cloudGroup[whichCloud];
+	var theCloud = cloudGroup[whichCloud].children[childIndex];
+	dropCloud( c_index, theCloud, theParent );
+}
+
+function dropMultiCloud( c_index ) {
+	var theCloud = cloudVirtualGroup[c_index].object;
+	var theParent = theCloud.parent;
+	dropCloud( c_index, theCloud, theParent );
+}
+
+function dropClouds( amount ) {
+	let counter = 0;
+	shuffle( cloudIndex );
+	for(let i=0; i<amount; i++){
+		dropMultiCloud( cloudIndex[i] );
+	}
+}
+
+function shuffle(a) {
+    for (let i = a.length; i; i--) {
+        let j = Math.floor(Math.random() * i);
+        [a[i - 1], a[j]] = [a[j], a[i - 1]];
+    }
+}
+
+function createClouds() {
+    let cloudMaterial = new THREE.MeshLambertMaterial({color: cloudColors[0], morphTargets: true, morphNormals: true});
+    
+    for(let i=0; i<3; i++){
+        let cloudRing = new THREE.Object3D();
+        cloudRing.position.set(10, 0, 0);
+        cloudRing.position.y = 3 - i;
+        cloudRing.name = "cloudRing #" + i;
+        scene.add(cloudRing);
+        cloudGroup.push(cloudRing);
+
+        TweenMax.to( cloudRing.rotation, 150+i*20, {
+            y: Math.PI*2,
+            ease: Power0.easeNone,
+            repeat:-1
+        });
+    }
+
+    for(let i=0; i<cloudAmount; i++){
+    	let cloudObject = {};
+        let cloudd = new THREE.Mesh( cloudGeos[i%2], cloudMaterial.clone() );
+        cloudd.position.set(
+            Math.sin(Math.PI*2/cloudAmount*i) * cloudRadius,
+            lookupTable[i]*2,
+            Math.cos(Math.PI*2/cloudAmount*i) * cloudRadius
+        );
+        // cloudd.rotation.y = Math.PI*2/cloudAmount*i + Math.PI;
+        cloudd.rotation.set(
+        	0,
+        	Math.PI*2/cloudAmount*i + Math.PI,
+        	0,
+        	'YXZ'
+        );
+        cloudd.scale.multiplyScalar( 0.1 + 0.2*lookupTable[i] );
+        cloudGroup[i%3].add(cloudd);
+
+        // clouds being up & down
+        // TweenMax.to( cloudd.position, 2+(i%2)/2, {
+        //     y: "+=0.1",
+        //     delay: i%3,
+        //     yoyo: true, repeat:-1
+        // });
+
+  //       let tl = new TimelineMax({repeat:-1});
+  //       tl.add( "updown", 0 );
+  //       tl.add( TweenMax.to( cloudd.position, 2+(i%2)/2, {
+  //       	y: "+=0.1",
+	 //        delay: i%3,
+  //           yoyo: true, repeat:3
+  //       }), "updown" );
+
+  //       tl.add( "turnHeart", "+=0" );
+  //       tl.add( TweenMax.to( cloudd.morphTargetInfluences, 2, {
+  //       	endArray: [1], ease: RoughEase.ease.config({
+  //       		template:  Power0.easeNone, strength: 1, points: 20, taper: "none", randomize:  true, clamp: false
+  //       	}),
+  //       	onStart: ()=>{
+  //       		TweenMax.to( cloudd.material.color, 2, {
+  //                   r: cloudColors[1].r,
+  //                   g: cloudColors[1].g,
+  //                   b: cloudColors[1].b
+  //               });
+  //       	}
+  //       }), "turnHeart" );
+
+  //       tl.add( "detachHeart", "+=5" );
+  //       tl.add( ()=>{THREE.SceneUtils.detach( cloudd, cloudd.parent, scene)}, "detachHeart" );
+
+  //       tl.add( "dropHeart", "+=0.5" );
+  //       tl.add( TweenMax.to( cloudd.position, 1, {
+  //       	y:0, ease: Bounce.easeOut
+  //   		// onStart:()=>{
+  //   		// 	THREE.SceneUtils.detach( cloudd, cloudd.parent, scene);
+  //   		// }
+		// }), "dropHeart" );
+
+		// tl.add( "riseHeart", "+=3" );
+		// tl.add( TweenMax.to( cloudd.position, 2, {
+		// 	y: cloudd.parent.position.y,
+		// 	onStart:()=>{
+		// 		TweenMax.to( cloudd.morphTargetInfluences, 2, {
+		// 			endArray: [0], ease: RoughEase.ease.config({
+		// 				template:  Power0.easeNone, strength: 1, points: 20, taper: "none", randomize:  true, clamp: false
+		// 			})
+		// 		});
+		// 		TweenMax.to( cloudd.material.color, 2, {
+  //                   r: cloudColors[0].r,
+  //                   g: cloudColors[0].g,
+  //                   b: cloudColors[0].b
+  //               });
+		// 	},
+		// 	onComplete:()=>{
+		// 		THREE.SceneUtils.attach(cloudd, scene, cloudd.parent);
+		// 	}
+		// }), "riseHeart" );
+
+  //       tl.addPause( "turnHeart" );
+
+        cloudObject.object = cloudd;
+		// cloudObject.timeline = tl;
+        cloudVirtualGroup[i] = cloudObject;
+        
+
+        // auto test mode
+        /*
+        TweenMax.to( cloudd.morphTargetInfluences, 2, {
+        	endArray: [1], yoyo: true, repeat:-1, repeatDelay: 5, ease: RoughEase.ease.config({
+        		template:  Power0.easeNone, strength: 1, points: 20, taper: "none", randomize:  true, clamp: false
+        	}),
+        	onStart: ()=>{
+        		TweenMax.to( cloudd.material.color, 2, {
+                    r: cloudColors[1].r,
+                    g: cloudColors[1].g,
+                    b: cloudColors[1].b,
+                    yoyo: true, repeat:-1, repeatDelay: 5
+                });
+
+                TweenMax.to( cloudd.position, 2+(i%2)/2, {
+                    y: "+=0.1",
+                    delay: i%3,
+                    yoyo: true, repeat:-1
+                });
+            }
+        });
+        */                                       
+    }
 }
 
 function createWaterAnimation( ringEmitters ) {
@@ -746,203 +723,6 @@ function createWaterAnimation( ringEmitters ) {
 	    
 	    waterAnimationLines.push(tl)
 	}
-}
-
-function startCycle() {
-    setInterval(() => {
-        //console.log("Fountain cycle!", this.particleGroup.emitters.length + " Emitters");
-        outerUp = !outerUp;
-        for (let i = 0; i < particleGroup.emitters.length; i++) {
-            if (i < particleGroup.emitters.length / 2) {
-                particleGroup.emitters[i].velocity.value = outerUp ? downVelocity : upVelocity;
-            } else {
-                particleGroup.emitters[i].velocity.value = outerUp ? upVelocity : downVelocity;
-            }
-        }
-
-    },8000);
-}
-
-function createTrickle(position, rotation, velocity, colorCode) {
-    // Get the velocity after rotation
-    let emitter = new SPE.Emitter({
-        maxAge: {
-            value: 1,
-            spread: 0
-        },
-        type: SPE.distributions.BOX,
-        position : {
-            value: position
-        },
-        rotation: {
-            axis: new THREE.Vector3(0, 1, 0),
-            angle: rotation,
-            static: true
-        },
-        acceleration: {
-            value: new THREE.Vector3(0,-12,0)
-        },
-        velocity: {
-            value: velocity.clone()
-        },
-        color: {
-            value: new THREE.Color(colorCode)
-        },
-        size: {
-            value: [0.2, 0.4, 0.0]
-        },
-        particleCount: 200,
-        opacity: {
-            value: [0.3, 0.8, 0.5]
-        },
-        transparent: true,
-        wiggle: {
-            value: 3,
-            spread: 2
-        }
-    });
-    particleGroup.addEmitter(emitter);
-}
-
-/*
-// 1
-particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,19,0);
-particleGroup.emitters[0].velocity.spread = new THREE.Vector3(10,0.5,10);
-particleGroup.emitters[0].acceleration.value = new THREE.Vector3(0,-24,0);
-
-// 2
-particleGroup.emitters[0].velocity.spread = new THREE.Vector3(5,0.5,5);
-
-// 2
-particleGroup.emitters[0].velocity.spread = new THREE.Vector3(8,0.5,8);
-
-// 3
-particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,13,0);
-particleGroup.emitters[0].acceleration.value = new THREE.Vector3(0,-14,0);
-particleGroup.emitters[0].velocity.spread = new THREE.Vector3(4,0.5,4);
-
-// 4
-particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,7,0);
-particleGroup.emitters[0].velocity.spread = new THREE.Vector3(2,0.5,2);
-
-//=========================================================================
-
-// 1
-particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,22,0);
-particleGroup.emitters[0].velocity.spread = new THREE.Vector3(13,0.5,13);
-particleGroup.emitters[0].acceleration.value = new THREE.Vector3(0,-35,0);
-
-// 2
-particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,16,0);
-particleGroup.emitters[0].acceleration.value = new THREE.Vector3(0,-26,0);
-
-// 3
-particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,20,0);
-particleGroup.emitters[0].velocity.spread = new THREE.Vector3(11,0.5,11);
-
-// 4
-particleGroup.emitters[0].velocity.spread = new THREE.Vector3(6,0.5,6);
-particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,15,0);
-
-// 5
-particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,18,0);
-
-// 6
-particleGroup.emitters[0].velocity.spread = new THREE.Vector3(3,0.5,3);
-particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,14,0);
-
-// 7
-particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,20,0);
-
-// 8
-particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,12,0);
-
-// 9
-loooop
-
-// 10: wider and wider
-particleGroup.emitters[0].velocity.spread = new THREE.Vector3(10,0.5,10);
-
-// 11
-particleGroup.emitters[0].velocity.value = new THREE.Vector3(0,18,0);
-particleGroup.emitters[0].velocity.spread = new THREE.Vector3(8,0.5,8);
-
-// 12
-
-
-*/
-function createTrickleCenter(position, velocity, colorCode) {
-    // Get the velocity after rotation
-    let emitter = new SPE.Emitter({
-        maxAge: {
-            value: 2,
-            spread: 0
-        },
-        type: SPE.distributions.BOX,
-        position : {
-            value: position,
-            spread: new THREE.Vector3(.3, 0, .3)
-        },
-        acceleration: {
-            value: new THREE.Vector3(0, -14, 0),
-            spread: new THREE.Vector3( 1, 0, 1 )
-        },
-        velocity: {
-            value: velocity, // orig: 0, 9, 0
-            spread: new THREE.Vector3( 0, 0.5, 0 )
-        },
-        color: {
-            value: new THREE.Color(colorCode)
-        },
-        size: {
-            value: [0.3, .4, 0.2, 0.0]
-        },
-        particleCount: 1000,
-        opacity: {
-            value: [0.5, 0.8, 0.5, 0.5]
-        },
-        transparent: true
-    });
-    particleGroup.addEmitter(emitter);
-}
-
-function createFire(position, colorCode) {
-    // Get the velocity after rotation
-    let emitter = new SPE.Emitter({
-        maxAge: {
-            value: 0.5,
-            spread: 0
-        },
-        type: SPE.distributions.BOX,
-        position : {
-            value: position,
-            spread: new THREE.Vector3( .2, 0, .2 )
-        },
-        velocity: {
-            value: new THREE.Vector3( 0, 5, 0 ),
-            spread: new THREE.Vector3( 0, 1, 0 )
-        },
-        acceleration: {
-            value: new THREE.Vector3( 0.3, 0, 0.2 ),
-            spread: new THREE.Vector3()
-        },
-        color: {
-            value: new THREE.Color(colorCode)
-        },
-        size: {
-            value: [4, 3, 2, 0]
-        },
-        particleCount: 200,
-        opacity: {
-            value: [1, 0.8, 0.6, 0]
-        },
-        transparent: true,
-        drag: {
-            value: 0.5,
-            spread: 0
-        }
-    });
-    fireParticleGroup.addEmitter(emitter);
 }
 
 function completeSequenceSetup() {
@@ -1123,8 +903,6 @@ function update()
 	controls.update( Date.now() - time );
 
 	var dt = clock.getDelta();
-	particleGroup.tick( dt * 0.4 );
-	fireParticleGroup.tick( dt * 0.4 );
 
 	// eyeRay!
 		var directionCam = controls.getDirection(1).clone();
