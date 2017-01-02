@@ -811,30 +811,32 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		// 	})
 		// 	.start();
 
-		TweenMax.to( yawObject.position, 
-					 _time,
-					 {x: _newPos.x, y: _newPos.y, z: _newPos.z,
-					 	ease: Power1.easeInOut,
-					 	onUpdate: ()=>{
-					 		var msg = {
-								'type': 'updatePlayer',
-								'index': whoIamInLife,
-								'playerPosX': yawObject.position.x,
-								'playerPosY': yawObject.position.y,
-								'playerPosZ': yawObject.position.z,
-								'playerRotY': yawObject.rotation.y,
-								'playerQ' : eyeFinalQ2,
-								'eyeQ' : eyeFinalQ,
-								'playerQ3' : eyeFinalQ3,
-								'worldId': meInWorld
-							};
+		TweenMax.to(
+			yawObject.position, 
+			_time,
+			{
+				x: _newPos.x, y: _newPos.y, z: _newPos.z,
+				ease: Power1.easeInOut,
+				onUpdate: ()=>{
+					var msg = {
+						'type': 'updatePlayer',
+						'index': whoIamInLife,
+						'playerPosX': yawObject.position.x,
+						'playerPosY': yawObject.position.y,
+						'playerPosZ': yawObject.position.z,
+						'playerRotY': yawObject.rotation.y,
+						'playerQ' : eyeFinalQ2,
+						'eyeQ' : eyeFinalQ,
+						'playerQ3' : eyeFinalQ3,
+						'worldId': meInWorld
+					};
 
-							if(ws){
-								sendMessage( JSON.stringify(msg) );
-							}
-					 	}
-					 }
-					);
+					if(ws){
+						sendMessage( JSON.stringify(msg) );
+					}
+				}
+			}
+		);
 	};
 
 	//
@@ -921,7 +923,8 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////
 		//WEB_SOCKET
-		if(trulyFullyStart){
+		/*
+		if(trulyFullyStart){			
 			var msg = {
 				'type': 'updatePlayer',
 				'index': whoIamInLife,
@@ -940,6 +943,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 				// console.log('A msg sent by DeviceControls when updating.');
 			}
 		}
+		*/
 		////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////
 

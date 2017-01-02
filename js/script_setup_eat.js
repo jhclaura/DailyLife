@@ -6,7 +6,7 @@ WebVRConfig = {
 	predistorted: true,
 	DIRTY_SUBMIT_FRAME_BINDINGS: true, // Polyfill optimizations
 	// isUndistorted: false
-	TOUCH_PANNER_DISABLED: true,
+	TOUCH_PANNER_DISABLED: true
 };
 
 // PointerLockControls

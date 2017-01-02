@@ -296,24 +296,6 @@ function superInit(){
 					basedURL + "models/foodCarts_small/cart_wood.json" );
 
 	var modelLoader = new THREE.JSONLoader( loadingManger );
-	/*
-	truckLoader.load( basedURL+"models/foodCart/foodcarttest2.json", function( geometry ) {
-		truck = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial() );
-		// truck.scale.multiplyScalar(0.27);
-		// truck.position.copy( toiletCenters[0]);
-		scene.add( truck );
-
-		var truckLightBulb = new THREE.Mesh( new THREE.SphereGeometry(0.05), new THREE.MeshLambertMaterial({color: 0xffffff}) );
-		truckLightBulb.position.y = 4;
-		var truckLight = new THREE.PointLight( 0xff8a4f, 0.6, 10 );
-		truckLight.position.y = -0.2;
-		TweenMax.to(truckLight, 3, { intensity: 1, repeat: -1, yoyo: true, ease: RoughEase.ease.config({ template: Power0.easeNone, strength: .2, points: 20, taper: "none", randomize: true, clamp: true}) });
-		truckLightBulb.add(truckLight);
-		truck.add(truckLightBulb);
-
-		loadModelCurtain( basedURL + "models/foodCart/foodcarttest2_c1.json", basedURL + "models/foodCart/foodcarttest2_c2.json" );
-	} );
-	*/
 
 	lanternNRM = textureLoader.load( basedURL + '/images/lanternSphereNRM_2.png' );
 	modelLoader.load( basedURL+"models/foodCart/lanternSphere.json", function( geometry ) {
@@ -357,24 +339,19 @@ function superInit(){
 	// 	scene.add( pepper );
 	// } );
 
-	modelLoader.load( basedURL+"models/teeth.json", function( geometry ) {
-		var teeth = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial({color: 0xffffff}) );
-		//scene.add( teeth );
+	modelLoader.load( basedURL+"models/mouth_open2.json", function( geometry2 ) {
+		var mouthOpen = geometry2;
 
-		modelLoader.load( basedURL+"models/mouse_open.json", function( geometry2 ) {
-			var mouthOpen = geometry2;
+		modelLoader.load( basedURL+"models/mouth_close2.json", function( geometry3 ) {
+			var mouthClose = geometry3;
+			mouthOpen.morphTargets.push({name: 'm1', vertices: mouthClose.vertices});
+			mouthOpen.computeMorphNormals();
 
-			modelLoader.load( basedURL+"models/mouse_close.json", function( geometry3 ) {
-				var mouthClose = geometry3;
-				mouthOpen.morphTargets.push({name: 'm1', vertices: mouthClose.vertices});
-				mouthOpen.computeMorphNormals();
-
-				mouth = new THREE.Mesh( mouthOpen, new THREE.MeshLambertMaterial({color: 0xe9ceda, morphTargets: true, side: THREE.DoubleSide}) );
-				//mouth.add(teeth);
-				mouth.scale.multiplyScalar(0.8);
-				mouth.position.y = -4;
-				scene.add( mouth );
-			} );
+			mouth = new THREE.Mesh( mouthOpen, new THREE.MeshLambertMaterial({color: 0xe9ceda, morphTargets: true, side: THREE.DoubleSide}) );
+			//mouth.add(teeth);
+			mouth.scale.multiplyScalar(0.8);
+			mouth.position.y = -4;
+			scene.add( mouth );
 		} );
 	} );
 
@@ -386,45 +363,22 @@ function superInit(){
 	                   basedURL+"models/intro/intro_leftW.json", basedURL+"models/intro/intro_right.json",
 	                   basedURL+"models/intro/intro_down.json" ];
 	introRoom = new THREE.Object3D();
-	for(let i=0; i<introFiles.length; i++){
-		modelLoader.load( introFiles[i], function( geometry ) {
-			// console.log("load intro: " + i);
+
+	for(let _i=0; _i<introFiles.length; _i++){
+		modelLoader.load( introFiles[_i], function( geometry ) {
+			//console.log("load intro: " + _i);
 			var intro = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial({color: 0xffffff, side: THREE.DoubleSide}) );
-			intro.introIndex = i;
-			if(i==4){
+			intro.introIndex = _i;
+			if(_i==4){
 				var roomLight = new THREE.PointLight( 0xffef9d, 1, 10 );
 				roomLight.position.set(0,7,-1);
 				intro.add(roomLight);
 			}
 			introRoom.add( intro );
-			introRoomObject[i] = intro;
+			introRoomObject[_i] = intro;
 		} );
 		scene.add(introRoom);
 	}
-
-	// BIRD_testing
-        // var birdMat = new THREE.MeshLambertMaterial({color: 0x00ffff});
-
-        // modelLoader.load( basedURL+"models/bird/bird_body.json", (geometry, material) => {
-        //     bird = new THREE.Mesh(geometry, birdMat);
-            
-        //     modelLoader.load( basedURL+"models/bird/bird_wingR.json", (geometry, material) => {
-        //         var wingR = new THREE.Mesh(geometry, birdMat);
-        //         wingR.position.x = -0.6;
-        //         bird.add(wingR);
-
-        //         modelLoader.load( basedURL+"models/bird/bird_wingL.json", (geometry, material) => {
-        //             var wingL = new THREE.Mesh(geometry, birdMat);
-        //             wingL.position.x = 0.6;
-        //             bird.add(wingL);
-
-        //             bird.position.set(myStartX-5, 1, myStartZ-3);
-        //             scene.add(bird);
-        //         });
-        //     });
-        // });
-			        
-
 
 	stats = new Stats();
 	stats.domElement.style.position = 'absolute';
@@ -661,13 +615,11 @@ function myKeyPressed( event ){
 			break;
 
 		case 55: //7 --> mouth close
-			TweenMax.to( mouth.morphTargetInfluences, 2, { endArray: [1] });
-			TweenMax.to( hemiLight, .8, {intensity: 0});
+			CloseMouth();
 			break;
 
 		case 56: //8 --> mouth open
-			TweenMax.to( mouth.morphTargetInfluences, 2, { endArray: [0] });
-			TweenMax.to( hemiLight, .8, {intensity: 0.8});
+			OpenMouth();
 			break;
 	}
 }

@@ -18,7 +18,7 @@ console.log('Server started on port ' + port);
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
-/*
+
 // WebSocket setup
 var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({'server': server});
@@ -124,16 +124,13 @@ wss.on('connection', function(ws){
 					'totalVisit': totalVisit
 				};
 
-				// console.log("player #%d disconnected.", ws.id);		// allSocketIDs[i]
 				console.log("a player #%d disconnected. total #: %d", ws.id, totalCount);
 
 				// update & splice the sockets array
 				allSockets.splice(i,1);
 
-				// update & splice the players array
-				// allPlayers.splice(i,1);
-					// but the order of the allPlayers is not the same as allSockets O_O
-					// FUCK!
+				// update the players array
+					// because the order of the allPlayers is not the same as allSockets, can't use splice() O_O
 					for(var j=0; j<allPlayers.length; j++){
 						if(allPlayers[j].id == ws.id){
 							// delete the allPlayers[j]
@@ -170,7 +167,6 @@ var socketHandlers = function(socket,msg){
 					msg.camID++;
 					// console.log('camID -->' + msg.camID);
 
-					//
 					msg.worldId = socket.worldId;
 					msg.totalCount = totalCount;
 					msg.totalVisit = totalVisit;
@@ -193,7 +189,7 @@ var socketHandlers = function(socket,msg){
 		}
 	}
 };
-*/
+
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////

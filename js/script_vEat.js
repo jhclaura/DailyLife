@@ -124,6 +124,7 @@ var keyIsPressed;
 
 	var mouth, mouthClosed = false;
 
+	var turkey, avocado;
 
 	// event
 	var animStart = false, nextAnim = null;
@@ -132,14 +133,6 @@ var keyIsPressed;
 
 	//
 	var lookupTable = [];
-	var cloudAmount = 20, cloudRadius = 5;
-	var cloudColors = [ new THREE.Color(0xafe2f3), new THREE.Color(0xf3afc0) ];
-	var itzhakLoadingManager, cloudGeos=[], heartGeos=[], cloudGroup=[];
-	var cloudVirtualGroup = {};
-	var cloudFiles = [ basedURL + "models/cloud1.json", basedURL + "models/cloud2.json" ];
-    var heartFiles = [ basedURL + "models/heart1.json", basedURL + "models/heart2.json" ];
-    var cloudIndex = [];
-
 
 ////////////////////////////////////////////////////////////
 
@@ -259,6 +252,11 @@ function superInit(){
 			sinWaves.push(sw);
 		}
 
+	// Lookup Table
+		for (let i=0; i<50; i++) {
+	      lookupTable.push(Math.random());
+	    }  
+
 	// planet = new THREE.Mesh( new THREE.SphereGeometry(1), new THREE.MeshLambertMaterial() );
 	// scene.add( planet );
 
@@ -339,10 +337,10 @@ function superInit(){
 			              basedURL + "models/chewers/chewerC_1.json", basedURL + "models/chewers/chewerC_2.json", basedURL + "models/chewers/chewerC_3.json",
 			              basedURL + "models/chewers/chewerD_1.json", basedURL + "models/chewers/chewerD_2.json" );
 
-		chewerTextures[0] = textureLoader.load( basedURL + '/images/dude0.jpg' );
-		chewerTextures[1] = textureLoader.load( basedURL + '/images/dude1.jpg' );
-		chewerTextures[2] = textureLoader.load( basedURL + '/images/dude2.jpg' );
-		chewerTextures[3] = textureLoader.load( basedURL + '/images/dude3.jpg' );
+		chewerTextures[0] = textureLoader.load( basedURL + 'images/dude0.jpg' );
+		chewerTextures[1] = textureLoader.load( basedURL + 'images/dude1.jpg' );
+		chewerTextures[2] = textureLoader.load( basedURL + 'images/dude2.jpg' );
+		chewerTextures[3] = textureLoader.load( basedURL + 'images/dude3.jpg' );
 
 		modelLoader.load( basedURL+"models/teeth.json", function( geometry ) {
 			var teeth = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial({color: 0xffffff}) );
@@ -365,54 +363,35 @@ function superInit(){
 			} );
 		} );
 
-	// ================= TZINA =====================
-	for (let i=0; i<50; i++) {
-      lookupTable.push(Math.random());
-    }
-	// CLOUD
-        // ============== Changeable Setting ================
-            cloudAmount = 20;
-            cloudRadius = 5;
-            cloudColors = [ new THREE.Color(0xafe2f3), new THREE.Color(0xf3afc0) ];
-        // ================ Setting End =====================
-        for(let i=0; i<cloudAmount; i++){
-        	cloudIndex.push(i);
-        }
-        itzhakLoadingManager = new THREE.LoadingManager();
-        itzhakLoadingManager.onLoad = ()=>{
-            for(let j=0; j<cloudGeos.length; j++){
-                cloudGeos[j].morphTargets.push( {name: 'h1', vertices: heartGeos[j].vertices} );
-                cloudGeos[j].computeMorphNormals();
-            }
-            createClouds();
-        };
-        loadClouds( cloudFiles, heartFiles );
+		var turkeyTex = textureLoader.load( basedURL + 'images/turkey/turkey.jpg' );
+		var turkeyAO = textureLoader.load( basedURL + 'images/turkey/turkey_AO.jpg' );
+		var turkeyNRM = textureLoader.load( basedURL + 'images/turkey/turkey_NM.jpg' );
+		var turkeyMat = new THREE.MeshPhongMaterial({
+			map: turkeyTex, normalMap: turkeyNRM, //displacementMap: turkeyDIS,
+			side: THREE.DoubleSide, emissive: 0xffffff, emissiveIntensity:0.2
+			// normalScale: new THREE.Vector2(3,3)
+		});
+		modelLoader.load( basedURL + "models/turkey.json", function( geometry ) {
+			turkey = new THREE.Mesh( geometry, turkeyMat );
+			turkey.scale.multiplyScalar(0.2);
+			turkey.position.x = 15;
+			scene.add( turkey ); 
+		} );
 
-	// BIRD_testing
-        // var birdMat = new THREE.MeshLambertMaterial({color: 0x00ffff});
+		var avocadoTex = textureLoader.load( basedURL + 'images/avocado/avocado_TEX.jpg' );
+		var avocadoNRM = textureLoader.load( basedURL + 'images/avocado/avocado_NRM.png' );
+		var avocadoMat = new THREE.MeshPhongMaterial({
+			map: avocadoTex, normalMap: avocadoNRM,
+			side: THREE.DoubleSide, emissive: 0xffffff, emissiveIntensity:0.2
+			//normalScale: new THREE.Vector2(3,3)
+		});
+		modelLoader.load( basedURL + "models/avocado.json", function( geometry ) {
+			avocado = new THREE.Mesh( geometry, avocadoMat );
+			// avocado.scale.multiplyScalar(0.2);
+			avocado.position.set(15,1,7);
+			scene.add( avocado );
+		} );
 
-        // modelLoader.load( basedURL+"models/bird/bird_body.json", (geometry, material) => {
-        //     bird = new THREE.Mesh(geometry, birdMat);
-            
-        //     modelLoader.load( basedURL+"models/bird/bird_wingR.json", (geometry, material) => {
-        //         var wingR = new THREE.Mesh(geometry, birdMat);
-        //         wingR.position.x = -0.6;
-        //         bird.add(wingR);
-
-        //         modelLoader.load( basedURL+"models/bird/bird_wingL.json", (geometry, material) => {
-        //             var wingL = new THREE.Mesh(geometry, birdMat);
-        //             wingL.position.x = 0.6;
-        //             bird.add(wingL);
-
-        //             bird.position.set(myStartX-5, 1, myStartZ-3);
-        //             scene.add(bird);
-        //         });
-        //     });
-        // });
-			        
-
-    // FOUNTAIN_TESTING
-    	
 
 	stats = new Stats();
 	stats.domElement.style.position = 'absolute';
@@ -484,22 +463,6 @@ function secondAni() {
 	console.log("do second ani!");
 }
 
-function loadClouds( cloudFiles, heartFiles ) {
-    let cloudLoader = new THREE.JSONLoader( itzhakLoadingManager );
-    // let modelLoader = new THREE.JSONLoader( this.loadingManager );
-    for(let i=0; i<cloudFiles.length; i++){
-        cloudLoader.load( cloudFiles[i], (geometry)=>{
-            geometry.name = "cloudGeo" + i;
-            cloudGeos.push(geometry);
-        } );
-
-        cloudLoader.load( heartFiles[i], (geometry2)=>{
-            geometry2.name = "heartGeo" + i;
-            heartGeos.push(geometry2);
-        } );
-    }
-}
-
 function dropCloud( c_index, theCloud, theParent ) {
 	// totalTime: 2 + 5 + 2 + 5 + 2 + 1 = 17
 
@@ -548,181 +511,11 @@ function dropCloud( c_index, theCloud, theParent ) {
         });		
 }
 
-function dropSingleCloud( c_index ){
-	var whichCloud = c_index%3;
-	var childIndex = Math.floor( c_index / 3 );
-	var theParent = cloudGroup[whichCloud];
-	var theCloud = cloudGroup[whichCloud].children[childIndex];
-	dropCloud( c_index, theCloud, theParent );
-}
-
-function dropMultiCloud( c_index ) {
-	var theCloud = cloudVirtualGroup[c_index].object;
-	var theParent = theCloud.parent;
-	dropCloud( c_index, theCloud, theParent );
-}
-
-function dropClouds( amount ) {
-	let counter = 0;
-	shuffle( cloudIndex );
-	for(let i=0; i<amount; i++){
-		dropMultiCloud( cloudIndex[i] );
-	}
-}
-
 function shuffle(a) {
     for (let i = a.length; i; i--) {
         let j = Math.floor(Math.random() * i);
         [a[i - 1], a[j]] = [a[j], a[i - 1]];
     }
-}
-
-function createClouds() {
-    let cloudMaterial = new THREE.MeshLambertMaterial({color: cloudColors[0], morphTargets: true, morphNormals: true});
-    
-    for(let i=0; i<3; i++){
-        let cloudRing = new THREE.Object3D();
-        cloudRing.position.set(10, 0, 0);
-        cloudRing.position.y = 3 - i;
-        cloudRing.name = "cloudRing #" + i;
-        scene.add(cloudRing);
-        cloudGroup.push(cloudRing);
-
-        TweenMax.to( cloudRing.rotation, 150+i*20, {
-            y: Math.PI*2,
-            ease: Power0.easeNone,
-            repeat:-1
-        });
-    }
-
-    for(let i=0; i<cloudAmount; i++){
-    	let cloudObject = {};
-        let cloudd = new THREE.Mesh( cloudGeos[i%2], cloudMaterial.clone() );
-        cloudd.position.set(
-            Math.sin(Math.PI*2/cloudAmount*i) * cloudRadius,
-            lookupTable[i]*2,
-            Math.cos(Math.PI*2/cloudAmount*i) * cloudRadius
-        );
-        // cloudd.rotation.y = Math.PI*2/cloudAmount*i + Math.PI;
-        cloudd.rotation.set(
-        	0,
-        	Math.PI*2/cloudAmount*i + Math.PI,
-        	0,
-        	'YXZ'
-        );
-        cloudd.scale.multiplyScalar( 0.1 + 0.2*lookupTable[i] );
-        cloudGroup[i%3].add(cloudd);
-
-        // clouds being up & down
-        // TweenMax.to( cloudd.position, 2+(i%2)/2, {
-        //     y: "+=0.1",
-        //     delay: i%3,
-        //     yoyo: true, repeat:-1
-        // });
-
-  //       let tl = new TimelineMax({repeat:-1});
-  //       tl.add( "updown", 0 );
-  //       tl.add( TweenMax.to( cloudd.position, 2+(i%2)/2, {
-  //       	y: "+=0.1",
-	 //        delay: i%3,
-  //           yoyo: true, repeat:3
-  //       }), "updown" );
-
-  //       tl.add( "turnHeart", "+=0" );
-  //       tl.add( TweenMax.to( cloudd.morphTargetInfluences, 2, {
-  //       	endArray: [1], ease: RoughEase.ease.config({
-  //       		template:  Power0.easeNone, strength: 1, points: 20, taper: "none", randomize:  true, clamp: false
-  //       	}),
-  //       	onStart: ()=>{
-  //       		TweenMax.to( cloudd.material.color, 2, {
-  //                   r: cloudColors[1].r,
-  //                   g: cloudColors[1].g,
-  //                   b: cloudColors[1].b
-  //               });
-  //       	}
-  //       }), "turnHeart" );
-
-  //       tl.add( "detachHeart", "+=5" );
-  //       tl.add( ()=>{THREE.SceneUtils.detach( cloudd, cloudd.parent, scene)}, "detachHeart" );
-
-  //       tl.add( "dropHeart", "+=0.5" );
-  //       tl.add( TweenMax.to( cloudd.position, 1, {
-  //       	y:0, ease: Bounce.easeOut
-  //   		// onStart:()=>{
-  //   		// 	THREE.SceneUtils.detach( cloudd, cloudd.parent, scene);
-  //   		// }
-		// }), "dropHeart" );
-
-		// tl.add( "riseHeart", "+=3" );
-		// tl.add( TweenMax.to( cloudd.position, 2, {
-		// 	y: cloudd.parent.position.y,
-		// 	onStart:()=>{
-		// 		TweenMax.to( cloudd.morphTargetInfluences, 2, {
-		// 			endArray: [0], ease: RoughEase.ease.config({
-		// 				template:  Power0.easeNone, strength: 1, points: 20, taper: "none", randomize:  true, clamp: false
-		// 			})
-		// 		});
-		// 		TweenMax.to( cloudd.material.color, 2, {
-  //                   r: cloudColors[0].r,
-  //                   g: cloudColors[0].g,
-  //                   b: cloudColors[0].b
-  //               });
-		// 	},
-		// 	onComplete:()=>{
-		// 		THREE.SceneUtils.attach(cloudd, scene, cloudd.parent);
-		// 	}
-		// }), "riseHeart" );
-
-  //       tl.addPause( "turnHeart" );
-
-        cloudObject.object = cloudd;
-		// cloudObject.timeline = tl;
-        cloudVirtualGroup[i] = cloudObject;
-        
-
-        // auto test mode
-        /*
-        TweenMax.to( cloudd.morphTargetInfluences, 2, {
-        	endArray: [1], yoyo: true, repeat:-1, repeatDelay: 5, ease: RoughEase.ease.config({
-        		template:  Power0.easeNone, strength: 1, points: 20, taper: "none", randomize:  true, clamp: false
-        	}),
-        	onStart: ()=>{
-        		TweenMax.to( cloudd.material.color, 2, {
-                    r: cloudColors[1].r,
-                    g: cloudColors[1].g,
-                    b: cloudColors[1].b,
-                    yoyo: true, repeat:-1, repeatDelay: 5
-                });
-
-                TweenMax.to( cloudd.position, 2+(i%2)/2, {
-                    y: "+=0.1",
-                    delay: i%3,
-                    yoyo: true, repeat:-1
-                });
-            }
-        });
-        */                                       
-    }
-}
-
-function createWaterAnimation( ringEmitters ) {
-	for(let i=0; i<ringEmitters.length; i++){
-		let e = ringEmitters[i];
-		// console.log(e_velocity);
-
-		let tl = new TimelineMax({repeat: -1, yoyo: true, repeatDelay: 2});
-	    tl.to( [e.velocity.value], 0, { y: toValue, onCompleteParams:[i], onComplete: (i)=>{
-				ringEmitters[i].velocity.value = e_velocity;
-			} })
-			.to( e_velocity, 0, { endArray: [0,0,0,0,1,0], onComplete: (i)=>{
-				ringEmitters[i].velocity.value = e_velocity;
-			} })
-			.to( e_velocity, 0, { endArray: [0,0,0,0,0,1], onComplete: (i)=>{
-				ringEmitters[i].velocity.value = e_velocity;
-			} });
-	    
-	    waterAnimationLines.push(tl)
-	}
 }
 
 function completeSequenceSetup() {
