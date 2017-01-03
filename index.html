@@ -282,7 +282,7 @@
 								var newPlayerStartPos = new THREE.Vector3(data.playerStartX, data.playerStartY, data.playerStartZ);
 								var newPlayerStartRotY = data.playerStartRotY;
 
-								var newGuy = new PersonEat(newPlayerStartPos, data.myHex, data.id, data.nname);
+								var newGuy = new PersonEat(newPlayerStartPos, data.myHex, data.id, data.nname, mouth);
 
 								dailyLifePlayerDict[data.id] = newGuy;
 
@@ -417,7 +417,7 @@
 									var oldPlayerName = data[i].nname;
 
 									// var oldPlayer = new Person( oldPlayerStartPos, oldHex, oldPlayerID, oldPlayerName );
-									var oldPlayer = new PersonEat( oldPlayerStartPos, new THREE.Color(), oldPlayerID, oldPlayerName );
+									var oldPlayer = new PersonEat( oldPlayerStartPos, new THREE.Color(), oldPlayerID, oldPlayerName, mouth );
 									dailyLifePlayerDict[ oldPlayerID ] = oldPlayer;
 									console.log("create history players #" + data[i].id + ", in world #" + data[i].worldId);	
 								// }

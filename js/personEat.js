@@ -1,6 +1,6 @@
 
 // THE SIT PERSON OBJECT
-function PersonEat( _pos, _color, _id, _name ) {
+function PersonEat( _pos, _color, _id, _name, _parent ) {
 
 	var scope = this;
 
@@ -125,7 +125,10 @@ function PersonEat( _pos, _color, _id, _name ) {
 	this.chewMiniAnim.pause();
 
 	//
-	scene.add( this.player );
+	if(_parent != null)
+		_parent.add(this.player);
+	else
+		scene.add( this.player );
 }
 
 PersonEat.prototype.update = function( _playerLocX, _playerLocY, _playerLocZ, _playerRotY, _playerQ ) {

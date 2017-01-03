@@ -11,7 +11,7 @@ var time, clock;
 
 var loadedCount = 0;
 
-var myStartX = 0, myStartZ = 10, myStartY = 100; //y: 3.5
+var myStartX = 0, myStartZ = 10, myStartY = 3.5; //y: 3.5, 100
 var myPosition, myStartRotY, worldBubble, pplCount, pplCountTex, pplCountMat;
 
 var model, texture;
@@ -129,7 +129,13 @@ var keyIsPressed;
 	var mealTimeIndex = 2;
 
 	var mouth, mouthClosed = false;
+	var looptime = 20 * 1000, monsterPath, monsterPathTube;
+	var m_binormal = new THREE.Vector3();
+	var m_normal = new THREE.Vector3(0,1,0);
 	var intros = {}, introRoom, introRoomObject = {};
+
+	var tablePositions = [];
+	var worldTotal = 18, eaterPerTable = 6, tableAmount = 3;
 
 ////////////////////////////////////////////////////////////
 
@@ -297,16 +303,35 @@ function superInit(){
 
 	var modelLoader = new THREE.JSONLoader( loadingManger );
 
-	lanternNRM = textureLoader.load( basedURL + '/images/lanternSphereNRM_2.png' );
-	modelLoader.load( basedURL+"models/foodCart/lanternSphere.json", function( geometry ) {
-		var lantern = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial({normalMap: lanternNRM}) );
-		lantern.position.y = -3;
-		scene.add( lantern );
-	} );
+	// lanternNRM = textureLoader.load( basedURL + '/images/lanternSphereNRM_2.png' );
+	// modelLoader.load( basedURL+"models/foodCart/lanternSphere.json", function( geometry ) {
+	// 	var lantern = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial({normalMap: lanternNRM}) );
+	// 	lantern.position.y = -3;
+	// 	scene.add( lantern );
+	// } );
+
+	for(var i=0; i<tableAmount; i++){
+		var t_pos = new THREE.Vector3(
+			Math.sin(Math.PI*2/tableAmount * i)*12 - 10,
+			0,
+			Math.cos(Math.PI*2/tableAmount * i)*12 - 10
+		);
+		tablePositions.push(t_pos);
+	}
 
 	modelLoader.load( basedURL+"models/table.json", function( geometry ) {
 		table = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial({color: 0xff4e7b}) );
-		scene.add( table );
+		var s_table = table.clone();
+		table.scale.multiplyScalar(2);
+		s_table.position.y -= 1;
+		// s_table.scale.multiplyScalar(0.7);
+		table.add(s_table);
+
+		for(var i=0; i<tableAmount; i++){
+			var newT = table.clone();
+			newT.position.copy( tablePositions[i] );
+			scene.add( newT );
+		}
 	} );	
 
 	highChairMat = new THREE.MeshLambertMaterial( {color: 0xffffff} );
@@ -339,6 +364,30 @@ function superInit(){
 	// 	scene.add( pepper );
 	// } );
 
+	// line for monster
+	var curveE = new THREE.EllipseCurve(
+		0,0,
+		500, 1000,
+		0, Math.PI*2,
+		false,
+		0
+	);
+	var curve = new THREE.CatmullRomCurve3([
+		new THREE.Vector3( -250, 100, 500 ),
+		new THREE.Vector3( -250, 100, -500 ),
+		new THREE.Vector3( 250, 100, -500 ),
+		new THREE.Vector3( 250, 100, 500 )
+	]);
+	curve.type = 'catmullrom';
+	curve.closed = true;
+	// var curve_path = new THREE.Path(curve.getPoints(50));
+	// var curve_geometry = curve_path.createPointsGeometry(50);
+	// var curve_mat = new THREE.LineBasicMaterial({color: 0xff0000});
+	// var ellipse = new THREE.Line(curve_geometry, curve_mat);
+	monsterPath = new THREE.TubeGeometry(curve, 50, 2, 4, true);
+	monsterPathTube = new THREE.Mesh(monsterPath, new THREE.MeshBasicMaterial({color: 0xff0000}));
+	scene.add(monsterPathTube);
+
 	modelLoader.load( basedURL+"models/mouth_open2.json", function( geometry2 ) {
 		var mouthOpen = geometry2;
 
@@ -348,9 +397,8 @@ function superInit(){
 			mouthOpen.computeMorphNormals();
 
 			mouth = new THREE.Mesh( mouthOpen, new THREE.MeshLambertMaterial({color: 0xe9ceda, morphTargets: true, side: THREE.DoubleSide}) );
-			//mouth.add(teeth);
-			mouth.scale.multiplyScalar(0.8);
-			mouth.position.y = -4;
+			mouth.scale.multiplyScalar(2);
+			mouth.position.y = -1.8;
 			scene.add( mouth );
 		} );
 	} );
@@ -407,28 +455,26 @@ function superInit(){
 	// lateInit();
 }
 
-var worldTotal = 18, tableTotal = 6;
-
 function AssignIndex() {
 	// console.log("whoIamInLife: " + whoIamInLife);
 
 	// Assign position
-	var eaterPerTable = worldTotal / tableTotal;
 	// meInWorld = Math.floor(whoIamInLife/18);			// which world
 	meInBGroup = Math.floor(( (whoIamInLife-1)%worldTotal ) / eaterPerTable);		// which table (0~2)
-	meInSGroup = ( (whoIamInLife-1)%worldTotal ) % eaterPerTable;				// which seat on the table (0~5)
+	meInSGroup = ( (whoIamInLife-1)%worldTotal ) % eaterPerTable;					// which seat of the table (0~5)
+
+	// var tableX = Math.sin(Math.PI*2/eaterPerTable * meInBGroup)*10 + 10;
+	// var tableZ = Math.cos(Math.PI*2/eaterPerTable * meInBGroup)*10 + 10;
+	// myWorldCenter = new THREE.Vector3(tableX, 0, tableZ);
+	myWorldCenter = tablePositions[meInBGroup].clone();
+
+	myStartX = Math.sin(Math.PI*2/eaterPerTable * meInSGroup)*2.5 + myWorldCenter.x;
+	myStartZ = Math.cos(Math.PI*2/eaterPerTable * meInSGroup)*2.5 + myWorldCenter.z;
 	
-	// myWorldCenter = new THREE.Vector3();
-	var tableX = Math.sin(Math.PI*2/tableTotal * meInBGroup)*10 + 10;
-	var tableZ = Math.cos(Math.PI*2/tableTotal * meInBGroup)*10 + 10;
-	myWorldCenter = new THREE.Vector3(tableX, 0, tableZ);
-
-	myStartX = Math.sin(Math.PI*2/eaterPerTable * meInSGroup)*1.6 + tableX;
-	myStartZ = Math.cos(Math.PI*2/eaterPerTable * meInSGroup)*1.6 + tableZ;
-
-	// Math.sin(Math.PI*2/6*i)*18, 0, Math.cos(Math.PI*2/6*i)*18
+	// myStartX = 50;
+	// myStartY = 50;
+	// myStartZ = 50;
 	myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ );
-	// myPosition.set( Math.sin(Math.PI*2/6*meInSGroup)*18, 150, Math.cos(Math.PI*2/6*meInSGroup)*18 );
 
 	console.log("Me in world: " + meInWorld + ", table: " + meInBGroup + ", seat: " + meInSGroup);
 }
@@ -446,7 +492,7 @@ function lateInit()
 	// build me!
 	// myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ-5 );
 	console.log(myPosition);
-	firstGuy = new PersonEat( myPosition, myColor, whoIamInLife, playerNName );
+	firstGuy = new PersonEat( myPosition, myColor, whoIamInLife, playerNName, mouth );
 	dailyLifePlayerDict[ whoIamInLife ] = firstGuy;
 
 	// secGuy = new PersonEat( myPosition, new THREE.Color(), 1, "andy" );
@@ -461,12 +507,13 @@ function lateInit()
 
 	// create controls
 	controls = new THREE.DeviceControls(camera, myWorldCenter, true);
-	scene.add( controls.getObject() );
+	// scene.add( controls.getObject() );
+	mouth.add( controls.getObject() );
 
 	// update stuff position based on myPosition
 		introRoom.position.set( myPosition.x, myPosition.y-3.5, myPosition.z );
 		UpdateRotationWithMe( introRoom );
-		table.position.set( myWorldCenter.x, myWorldCenter.y+0.4, myWorldCenter.z);
+		//table.position.set( myWorldCenter.x, myWorldCenter.y+0.4, myWorldCenter.z);
 
 	// start to animate()!
 	animate(performance ? performance.now() : Date.now());
@@ -483,8 +530,8 @@ function lateInit()
 
 		setTimeout(function(){
 			console.log("ahh!");
-			firstGuy.player.children[0].visible = false;
-			controls.setMovYAnimation( -96.5, 15 );
+			// firstGuy.player.children[0].visible = false;
+			// controls.setMovYAnimation( -96.5, 15 );
 
 			setTimeout(function(){
 				renderer.setClearColor(0x77edda, 1); // daytime
@@ -494,9 +541,9 @@ function lateInit()
 				daytimeChange(true);
 			}, 10000);
 
-			setTimeout(function(){
-				firstGuy.player.children[0].visible = true;
-			}, 14000);
+			// setTimeout(function(){
+			// 	firstGuy.player.children[0].visible = true;
+			// }, 14000);
 		}, 5000);
 	}, 10000);
 }
@@ -638,6 +685,31 @@ function myKeyUp(event){
 	keyIsPressed = false;
 }
 
+function AnimateMonster(time) {
+	// ref: https://github.com/mrdoob/three.js/blob/master/examples/webgl_geometry_extrude_splines.html
+	// var time = Date.now();
+	var looptime = 20 * 1000;
+	var t = ( time % looptime ) / looptime;
+	var pos = monsterPath.parameters.path.getPointAt( t );
+	// interpolation
+	var segments = monsterPath.tangents.length;
+	var pickt = t * segments;
+	var pick = Math.floor( pickt );
+	var pickNext = ( pick + 1 ) % segments;
+	m_binormal.subVectors( monsterPath.binormals[ pickNext ], monsterPath.binormals[ pick ] );
+	m_binormal.multiplyScalar( pickt - pick ).add( monsterPath.binormals[ pick ] );
+	var dir = monsterPath.parameters.path.getTangentAt( t );
+	var offset = 5;
+	//m_normal.copy( m_binormal ).cross( dir );
+	// We move on a offset on its binormal
+	//pos.add( m_normal.clone().multiplyScalar( offset ) );
+	mouth.position.copy( pos );
+	// Using arclength for stablization in look ahead.
+	var lookAt = monsterPath.parameters.path.getPointAt( ( t + 10 / monsterPath.parameters.path.getLength() ) % 1 );
+	mouth.matrix.lookAt(mouth.position, lookAt, m_normal);
+	mouth.rotation.setFromRotationMatrix( mouth.matrix, mouth.rotation.order );
+}
+
 // v.2
 // Request animation frame loop function
 var lastRender = 0;
@@ -715,6 +787,8 @@ function update()
 			lanternGroup.children[i].rotation.z = lanternRun;
 		}
 	}
+
+	AnimateMonster(time);
 
 	//
 	time = Date.now();
