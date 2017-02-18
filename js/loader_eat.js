@@ -118,7 +118,7 @@ function loadModelHighChair( _chair, _table, _stuff, _smallPlate, _bigPlate ) {
 	});
 }
 
-function loadSitModelPlayer( _head, _body, _stomach ){
+function loadSitModelPlayer( _head, _body, _emptyStomach, _fullStomach ){
 	var sp_loader = new THREE.JSONLoader( loadingManger );
 
 	// BODY
@@ -132,8 +132,15 @@ function loadSitModelPlayer( _head, _body, _stomach ){
 		personHead = geometry2;
 	});
 
-	sp_loader.load( _stomach, function( geometry3 ){
-		stomach = geometry3.clone();
+	sp_loader.load( _emptyStomach, function( geometry3 ){
+		stomach = geometry3;
+
+		sp_loader.load( _fullStomach, function( geometry4 ){
+			stomach.morphTargets.push({name: 's_1', vertices: geometry4.vertices });
+			//stomach.computeMorphNormals();
+
+			console.log(stomach);
+		});
 	});
 }
 

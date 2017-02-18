@@ -22,7 +22,10 @@ function PersonEat( _pos, _color, _id, _name, _parent ) {
 	// if it's ME, create inner poop
 	// if( this.whoIam == whoIamInLife ){
 		// 1-0: stomach
-		this.poopMini = new THREE.Mesh( stomach, new THREE.MeshBasicMaterial({color: 0xff0000}) );
+		this.poopMini = new THREE.Mesh( stomach, new THREE.MeshBasicMaterial({map: stomachTex,  morphTargets: true}) );
+		console.log(this.poopMini.morphTargetInfluences);
+		
+		this.poopMini.morphTargetInfluences[0] = 0.5;
 		this.poopMini.name = "miniPoop";
 		this.poopMini.scale.set(0.1,0.1,0.1);
 		this.poopMini.rotation.y += Math.PI;
@@ -75,6 +78,7 @@ function PersonEat( _pos, _color, _id, _name, _parent ) {
 		this.miniMe.scale.multiplyScalar(0.3);
 		this.miniMe.position.set(0,-0.5,1.2);
 		this.miniMe.rotation.y = Math.PI;
+		this.miniMe.visible = false;
 		this.playerBody.add( this.miniMe );
 
 	this.player.add( this.playerBody );
@@ -125,6 +129,13 @@ function PersonEat( _pos, _color, _id, _name, _parent ) {
 	this.chewMiniAnim.pause();
 
 	//
+	this.stomachAnim = new TimelineMax();
+	this.stomachAnim.add( TweenMax.to( this.poopMini.morphTargetInfluences, .3, { endArray: [0.7] }) )
+					.add( TweenMax.to( this.poopMini.morphTargetInfluences, .3, { endArray: [0.3] }) )
+					.add( TweenMax.to( this.poopMini.morphTargetInfluences, .2, { endArray: [0.5] }) );
+	this.stomachAnim.pause();
+
+	//
 	if(_parent != null)
 		_parent.add(this.player);
 	else
@@ -170,6 +181,7 @@ PersonEat.prototype.chew = function() {
 	// else {
 	// 	TweenMax.to( this.playerHead.morphTargetInfluences, .3, { endArray: [1], repeat: 1, yoyo: true});
 	// }
+	this.stomachAnim.restart();
 }
 
 PersonEat.prototype.openMouth = function() {

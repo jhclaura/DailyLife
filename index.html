@@ -282,7 +282,8 @@
 								var newPlayerStartPos = new THREE.Vector3(data.playerStartX, data.playerStartY, data.playerStartZ);
 								var newPlayerStartRotY = data.playerStartRotY;
 
-								var newGuy = new PersonEat(newPlayerStartPos, data.myHex, data.id, data.nname, mouth);
+								// var newGuy = new PersonEat(newPlayerStartPos, data.myHex, data.id, data.nname, mouth);
+								var newGuy = new PersonEat(newPlayerStartPos, data.myHex, data.id, data.nname, null);
 
 								dailyLifePlayerDict[data.id] = newGuy;
 
@@ -417,7 +418,9 @@
 									var oldPlayerName = data[i].nname;
 
 									// var oldPlayer = new Person( oldPlayerStartPos, oldHex, oldPlayerID, oldPlayerName );
-									var oldPlayer = new PersonEat( oldPlayerStartPos, new THREE.Color(), oldPlayerID, oldPlayerName, mouth );
+									// var oldPlayer = new PersonEat( oldPlayerStartPos, new THREE.Color(), oldPlayerID, oldPlayerName, mouth );
+									var oldPlayer = new PersonEat( oldPlayerStartPos, new THREE.Color(), oldPlayerID, oldPlayerName, null );
+									
 									dailyLifePlayerDict[ oldPlayerID ] = oldPlayer;
 									console.log("create history players #" + data[i].id + ", in world #" + data[i].worldId);	
 								// }
@@ -484,12 +487,12 @@
 		<script type="text/javascript" src="js/personEat.js"></script>
 		<script type="text/javascript" src="js/AniObject.js"></script>
 
-		<script type="text/javascript" src="js/controls/DeviceControls_vEat.js"></script>
+		<script type="text/javascript" src="js/controls/DeviceControls_vEat2.js"></script>
 		<script type="text/javascript" src="js/script_functions.js"></script>
 		<script type="text/javascript" src="js/script_setup_eat.js"></script>
 		<script type="text/javascript" src="js/loader_eat.js"></script>
 		
-		<script type="text/javascript" src="js/script_vEat_show.js"></script>
+		<script type="text/javascript" src="js/script_vEat_show2.js"></script>
 
 		<script>
 		  // (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

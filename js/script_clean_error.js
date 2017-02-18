@@ -11,22 +11,22 @@ var time, clock;
 
 var loadedCount = 0;
 
-var myStartX = 0, myStartZ = 10, myStartY = 3.5; //y: 3.5, 100
+var myStartX = 0, myStartZ = -10, myStartY = 0; //2
 var myPosition, myStartRotY, worldBubble, pplCount, pplCountTex, pplCountMat;
 
 var model, texture;
 var dummy;
 var perlin = new ImprovedNoise(), noiseQuality = 1;
 
-var basedURL = "assets/eat/";
-
-var textureLoader, loadingManger;
+var textureLoader, loadingManger, br_mat_loadingManager, starLoadingManager;
+var poop_TLM, poopHeart_TLM, graffiti_TLM, floor_TLM, door_TLM, intestine_TLM;
+var poster_TLM, waterwave_TLM, glow_TLM, person_TLM, skin_TLM, particle_TLM;
 var keyIsPressed;
 
 // WAVE
 	var timeWs = [0, Math.PI/2, Math.PI, -Math.PI/2, Math.PI+0.3, -Math.PI/5, Math.PI/1.1];
 	var frequencyWs = [0.02, 0.01];
-	var frequencyW = 0.02, amplitudeW = 1, offsetW = 0;
+	var frequencyW = 0.02, amplitudeW = 0.1, offsetW = 0;
 	var sinWave, sinWaves = [], cosWaves = [], tanWaves = [], spin;
 	var sinWRun = [], cosWRun = [], tanWRun = [];
 
@@ -92,13 +92,23 @@ var keyIsPressed;
 
 	var switchSound_1 = false;
 
-// STAR
-	var star, starMat, glowTexture, glowTextures = [], starAnimator, starAnimators = [], stars = [];
-	var starFiles = [ basedURL + "images/sStar_1.png", basedURL + "images/sStar_2.png",
-					  basedURL + "images/sStar_3.png", basedURL + "images/sStar_4.png" ];
-
 // TREE
 	var treeTexture, treeGeo, treeMat, trees = [];
+
+// STAR
+	var star, starMat, glowTexture, glowTextures = [], starAnimator, starAnimators = [], stars = [];
+	var starFiles = [ "images/sStar_1.png", "images/sStar_2.png", "images/sStar_3.png", "images/sStar_4.png" ];
+
+
+// Physic
+	Physijs.scripts.worker = 'js/lib/physijs_worker.js';
+	Physijs.scripts.ammo = 'ammo.js';
+
+	var physics_stats, ground;
+	var box_geometry, box_material;
+	var lookingAtSomeone = -1;
+
+	var allThePoops = [], freezeVec = new THREE.Vector3(0,0,0), optimizePoopSize = 8;
 
 // TRANSITION
 	var initTime, meditationTime, celebrationTime, endTime;
@@ -122,20 +132,7 @@ var keyIsPressed;
 	var partyLightMat;
 
 //
-	var planet, truck, curtain, curtainGeo1, curtainGeo2, lanternGroup;
-	var highChair, highChairMat, stomach, stomachTex;
-	var table;
-	var chewerA, chewerB, chewerC, chewerD, chewerTextures = [], chewers = [];
-	var mealTimeIndex = 2;
-
-	var mouth, mouthClosed = false;
-	var looptime = 40 * 1000, monsterPath, monsterPathTube;
-	var m_binormal = new THREE.Vector3();
-	var m_normal = new THREE.Vector3(0,1,0);
-	var intros = {}, introRoom, introRoomObject = {};
-
-	var tablePositions = [];
-	var worldTotal = 18, eaterPerTable = 6, tableAmount = 3;
+	var planet;
 
 ////////////////////////////////////////////////////////////
 
@@ -149,12 +146,18 @@ superInit();			// init automatically
 ///////////////////////////////////////////////////////////
 function superInit(){
 
-	myColor = new THREE.Color();
-
 	//Prevent scrolling for Mobile
 	noScrolling = function(event){
 		event.preventDefault();
 	};
+
+	// HOWLER
+		// sound_forest = new Howl({
+		// 	urls: ['../audios/duet/nightForest.mp3'],
+		// 	loop: true,
+		// 	volume: 0.2
+		// });
+
 
 	time = Date.now();
 
@@ -164,14 +167,11 @@ function superInit(){
 	// RENDERER
 		container = document.getElementById('render-canvas');
 		renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+
 		renderer.setPixelRatio(window.devicePixelRatio);
-		if(mealTimeIndex == 0){
-			renderer.setClearColor(0x77edda, 1); // daytime
-		} else if (mealTimeIndex == 1){
-			renderer.setClearColor(0xffe03e, 1); // noontime
-		} else {
-			renderer.setClearColor(0x34122a, 1);	// nighttime
-		}
+		// renderer.setSize(window.innerWidth, window.innerHeight);
+
+		renderer.setClearColor(0xffff00, 1);
 		container.appendChild(renderer.domElement);
 
 	// VR_EFFECT
@@ -187,22 +187,13 @@ function superInit(){
 
 	// SCENE
 		scene = new THREE.Scene();
+		// scene = new Physijs.Scene();
+		// scene.setGravity(new THREE.Vector3( 0, -30, 0 ));
 
 	// LIGHT
-		if(mealTimeIndex == 0){
-			hemiLight = new THREE.HemisphereLight( 0xf9ff91, 0x3ac5b9, 1); // daytime
-		} else if (mealTimeIndex == 1){
-			hemiLight = new THREE.HemisphereLight( 0xffce91, 0xff9791, 1); // noontime
-		} else {
-			hemiLight = new THREE.HemisphereLight( 0x224659, 0x593522, 1);	// nighttime
-		}
-		hemiLight.intensity = 0.8;
+		hemiLight = new THREE.HemisphereLight( 0xf9ff91, 0x3ac5b9, 1);
+		hemiLight.intensity = 1;
 		scene.add(hemiLight);
-
-		light = new THREE.SpotLight( 0xffffff );
-		light.position.set( 100, 100, -100);
-		light.intensity = 0.3;
-		scene.add(light);
 
 	// CAMERA
 		camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 10000);
@@ -211,14 +202,13 @@ function superInit(){
 	// RAYCASTER!
 		eyerayCaster = new THREE.Raycaster();	
 
-	// for(var i=0; i<20; i++){
-	// 	var pplanet = new THREE.Mesh( new THREE.SphereGeometry(0.5), new THREE.MeshBasicMaterial() );
-	// 	pplanet.position.x = Math.sin(Math.PI*2/20*i)*20;
-	// 	pplanet.position.z = Math.cos(Math.PI*2/20*i)*20;
-	// 	scene.add( pplanet );
-	// }
-	
+	// Sinwave
+		sinWave = new SinWave(timeWs[0], frequencyW, amplitudeW, offsetW);
 
+
+	planet = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshLambertMaterial() );
+	scene.add( planet );
+	
 	//////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -228,39 +218,43 @@ function superInit(){
 	//////////////////////////////////////////////////////////////////////////////////////////
 
 	loadingManger = new THREE.LoadingManager();
-	loadingManger.onProgress = function ( item, loaded, total ) {
-	    // console.log( item, loaded, total );
-	    var loadingPercentage = Math.floor(loaded/total*100);
-	    //loadingTxt.innerHTML = "loading " + loadingPercentage +"%";
-	    console.log("loading " + loadingPercentage +"%");
-	};
+		// loadingManger.onProgress = function ( item, loaded, total ) {
+		//     console.log( item, loaded, total );
+		//     var loadingPercentage = Math.floor(loaded/total*100);
+		//     // loadingTxt.innerHTML = "loading " + loadingPercentage +"%";
+		//     console.log("loading " + loadingPercentage +"%");
+		// };
 
-	loadingManger.onError = function(err) {
-		console.log(err);
-	};
+		// loadingManger.onError = function(err) {
+		// 	console.log(err);
+		// };
 
-	loadingManger.onLoad = function () {
-	    console.log("ALL LOADED!");
-		// startLink.style.display = "";
-		// loadingImg.style.display = "none";
-		// loadingTxt.style.display = "none";
-		readyToStart = true;
+		// loadingManger.onLoad = function () {
+		//     // console.log( "first step all loaded!" );
+		//     CreateStars();
+		// };
 
-		whoIamInLife = 1;
-		meInWorld = 0;
-		AssignIndex();
-		lateInit();
-	};
+	// br_mat_loadingManager = new THREE.LoadingManager();
+	// 	// after loading all the textures for BATHROOM, create bathroom
+	// 	br_mat_loadingManager.onLoad = function () {
+	// 	    console.log( "Ready to load BATHROOM!" );
 
-	textureLoader = new THREE.TextureLoader( loadingManger );
+	// 		loadModelBathroomsV2( "models/bathroom/b_door.js",
+	// 							  "models/bathroom/b_sides.js",
+	// 							  "models/bathroom/b_floor.js",
+	// 							  "models/bathroom/b_smallStuff.js",
+	// 							  "models/bathroom/b_smallWhite.js",
+	// 							  "models/bathroom/paper_bottom.js",
+	// 							  "models/bathroom/paper_top.js",
+	// 							  "models/bathroom2.js",
+	// 							  "models/poster.js" );
+	// 	};
 
-	//
-	// loadModelTruck( basedURL + "models/foodCarts_small/cart_cart.json",
-	// 				basedURL + "models/foodCarts_small/cart_lantern.json",
-	// 				basedURL + "models/foodCarts_small/cart_rooftop.json",
-	// 				basedURL + "models/foodCarts_small/cart_supports.json",
-	// 				basedURL + "models/foodCarts_small/cart_wheels.json",
-	// 				basedURL + "models/foodCarts_small/cart_wood.json" );
+	// starLoadingManager = new THREE.LoadingManager();
+	// 	starLoadingManager.onLoad = function () {
+	// 	    CreateStars();
+	// 	};
+
 
 	stats = new Stats();
 	stats.domElement.style.position = 'absolute';
@@ -269,45 +263,24 @@ function superInit(){
 	stats.domElement.children[ 0 ].style.background = "transparent";
 	stats.domElement.children[ 0 ].children[1].style.display = "none";
 	container.appendChild( stats.domElement );
+
+	// physics_stats = new Stats();
+	// physics_stats.domElement.style.position = 'absolute';
+	// physics_stats.domElement.style.bottom = '55px';
+	// physics_stats.domElement.style.zIndex = 100;
+	// physics_stats.domElement.children[ 0 ].style.background = "transparent";
+	// physics_stats.domElement.children[ 0 ].children[1].style.display = "none";
+	// container.appendChild( physics_stats.domElement );
 	
 	// EVENTS
 	window.addEventListener('resize', onWindowResize, false);
 
 	// After trigger the loading functions
 	// Connect to WebSocket!
-		//connectSocket();
+		// connectSocket();
 
 	//
-	// lateInit();
-
-	whoIamInLife = 1;
-		meInWorld = 0;
-		AssignIndex();
-		lateInit();
-}
-
-function AssignIndex() {
-	// console.log("whoIamInLife: " + whoIamInLife);
-
-	// Assign position
-	// meInWorld = Math.floor(whoIamInLife/18);			// which world
-	meInBGroup = Math.floor(( (whoIamInLife-1)%worldTotal ) / eaterPerTable);		// which table (0~2)
-	meInSGroup = ( (whoIamInLife-1)%worldTotal ) % eaterPerTable;					// which seat of the table (0~5)
-
-	// var tableX = Math.sin(Math.PI*2/eaterPerTable * meInBGroup)*10 + 10;
-	// var tableZ = Math.cos(Math.PI*2/eaterPerTable * meInBGroup)*10 + 10;
-	myWorldCenter = new THREE.Vector3();
-	//myWorldCenter = tablePositions[meInBGroup].clone();
-
-	myStartX = Math.sin(Math.PI*2/eaterPerTable * meInSGroup)*2.5 + myWorldCenter.x;
-	myStartZ = Math.cos(Math.PI*2/eaterPerTable * meInSGroup)*2.5 + myWorldCenter.z;
-	
-	// myStartX = 50;
-	// myStartY = 50;
-	// myStartZ = 50;
-	myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ );
-
-	console.log("Me in world: " + meInWorld + ", table: " + meInBGroup + ", seat: " + meInSGroup);
+	lateInit();
 }
 
 // lateInit() happens after click "Start"
@@ -315,26 +288,12 @@ function lateInit()
 {	
 	// console.log("late init!");
 	document.body.addEventListener('touchmove', noScrolling, false);
-	window.addEventListener('keydown', myKeyPressed, false);
-	window.addEventListener('keyup', myKeyUp, false);
+	// window.addEventListener('keydown', myKeyPressed, false);
+	// window.addEventListener('keyup', myKeyUp, false);
 
 	clock.start();
 
-	// build me!
-	// myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ-5 );
-	console.log(myPosition);
-	//firstGuy = new PersonEat( myPosition, myColor, whoIamInLife, "laura", mouth );
-	//dailyLifePlayerDict[ whoIamInLife ] = firstGuy;
-
-	// secGuy = new PersonEat( myPosition, new THREE.Color(), 1, "andy" );
-	// secGuy.player.position.x = 5;
-
-	// thirdGuy = new PersonEat( myPosition, new THREE.Color(), 2, "zoe" );
-	// thirdGuy.player.position.x = -5;
-
-	// fourthGuy = new PersonEat( myPosition, new THREE.Color(), 3, "corbin" );
-	// fourthGuy.player.position.x = -5;
-	// fourthGuy.player.position.z = 10;
+	myWorldCenter = new THREE.Vector3();
 
 	// create controls
 	controls = new THREE.DeviceControls(camera, myWorldCenter, true);
@@ -346,40 +305,6 @@ function lateInit()
 	trulyFullyStart = true;
 }
 
-function geoFindMe() {
-	if(!navigator.geolocation){
-		console.log("Geolocation is not supported by your browser");
-		return;
-	}
-
-	function success(position){
-		var latitude = position.coords.latitude;
-		var longitude = position.coords.longitude;
-		console.log("geolocation - latitude: " + latitude + ", longitude: " + longitude);
-	}
-
-	function error(){
-		console.log("Unable to retrieve your location");
-	}
-
-	navigator.geolocation.getCurrentPosition(success, error)
-}
-
-function myKeyPressed( event ){
-	if(keyIsPressed)	return;
-	keyIsPressed = true;
-
-	switch ( event.keyCode ) {
-
-		case 49: //1
-			//
-			break;
-	}
-}
-
-function myKeyUp(event){
-	keyIsPressed = false;
-}
 
 // v.2
 // Request animation frame loop function
@@ -402,9 +327,18 @@ function animate(timestamp) {
 
 function update()
 {	
+
+	// TWEEN.update();
 	controls.update( Date.now() - time );
 
 	var dt = clock.getDelta();
+
+	// if(particleGroup && inScCelebration)
+	// 	particleGroup.tick( dt );
+
+	// scene.simulate( undefined, 2 );
+	// physics_stats.update();
+
 
 	// eyeRay!
 		var directionCam = controls.getDirection(1).clone();
@@ -413,29 +347,24 @@ function update()
 		//console.log(intersects);
 
 		if( eyeIntersects.length > 0 ){
-			var iName = eyeIntersects[ 0 ].object.name;
-			iName = iName.split(" ");
-			if(iName.length==2){
-				lookingAtSomeone = iName[0];
-			} else {
-				lookingAtSomeone = -1;
-			}
+			// var iName = eyeIntersects[ 0 ].object.name;
+			// iName = iName.split(" ");
+			// console.log(eyeIntersects[ 0 ].object);
 
 			// if ( eyeIntersects[ 0 ].object == flushHandler ){
 			// 	// ...
 			// }
 
 			// if ( eyeIntersects.length > 1 ) {
-				// if(eyeIntersects[ 1 ].object.name == "miniPoop"){
-				// 	// console.log("See mini poop!");
-				// 	lookAtMiniPoop = true;
-				// } else {
-				// 	lookAtMiniPoop = false;
-				// }
+			// 	// ...
 			// }
 		} else {
-			lookingAtSomeone = -1;
-		}
+			// ...
+		}		
+
+	// Bathroom Light!
+	// if(bathroom.children[1])
+	// 	bathroom.children[1].rotation.z = sinWave.run()/2;
 
 	//
 	time = Date.now();
@@ -444,6 +373,15 @@ function update()
 function render() 
 {	
 	effect.render(scene, camera);
+}
+
+function changeAni ( aniIndex ) {
+
+	animOffset = animOffsetSet[ aniIndex ];
+	keyframe = animOffsetSet[ aniIndex ];
+	currentKeyframe = keyframe;
+	keyduration = keyframeSet[ aniIndex ];
+	aniStep = 0;
 }
 
 function fullscreen() {
@@ -466,4 +404,29 @@ function onWindowResize() {
 
 function isTouchDevice() { 
 	return 'ontouchstart' in window || !!(navigator.msMaxTouchPoints);
+}
+
+function loadingCount() {
+	loadedCount ++;
+
+	if(loadedCount>=8) {
+		// hide the loading gif and display start link
+		startLink.style.display = "";
+		loadingImg.style.display = "none";
+		loadingTxt.style.display = "none";
+		readyToStart = true;
+	}
+}
+
+function loadingCountText( item ) {
+	console.log( "loaded " + item );
+	loadedCount ++;
+
+	if(loadedCount>=7) {
+		// hide the loading gif and display start link
+		startLink.style.display = "";
+		loadingImg.style.display = "none";
+		loadingTxt.style.display = "none";
+		readyToStart = true;
+	}
 }

@@ -253,7 +253,7 @@ function superInit(){
 		}
 
 	// Lookup Table
-		for (let i=0; i<50; i++) {
+		for (var i=0; i<50; i++) {
 	      lookupTable.push(Math.random());
 	    }  
 

@@ -11,7 +11,7 @@ var time, clock;
 
 var loadedCount = 0;
 
-var myStartX = 0, myStartZ = 10, myStartY = 3.5; //y: 3.5, 100
+var myStartX = 0, myStartZ = 10, myStartY = 100; //y: 3.5, 100
 var myPosition, myStartRotY, worldBubble, pplCount, pplCountTex, pplCountMat;
 
 var model, texture;
@@ -240,7 +240,7 @@ function superInit(){
 		eyerayCaster = new THREE.Raycaster();	
 
 	// Sinwave
-		//sinWave = new SinWave(timeWs[0], frequencyW, amplitudeW, offsetW);
+		sinWave = new SinWave(timeWs[0], frequencyW, amplitudeW, offsetW);
 
 		for(var i=0; i<timeWs.length; i++){
 			var sw = new SinWave(timeWs[i], frequencyW, amplitudeW, offsetW);
@@ -406,6 +406,9 @@ function superInit(){
 				mouth.scale.multiplyScalar(2);
 				mouth.position.y = -1.8;
 				scene.add( mouth );
+
+				var staticMouth = mouth.clone();
+				scene.add( staticMouth );
 			} );
 		} );
 	} );
@@ -499,7 +502,7 @@ function lateInit()
 	// build me!
 	// myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ-5 );
 	console.log(myPosition);
-	firstGuy = new PersonEat( myPosition, myColor, whoIamInLife, playerNName, mouth );
+	firstGuy = new PersonEat( myPosition, myColor, whoIamInLife, playerNName, null );
 	dailyLifePlayerDict[ whoIamInLife ] = firstGuy;
 
 	// secGuy = new PersonEat( myPosition, new THREE.Color(), 1, "andy" );
@@ -515,7 +518,9 @@ function lateInit()
 	// create controls
 	controls = new THREE.DeviceControls(camera, myWorldCenter, true);
 	scene.add( controls.getObject() );
-	mouth.add( controls.getObject() );
+
+	if(firstGuy.parent == mouth)
+		mouth.add( controls.getObject() );
 
 	// update stuff position based on myPosition
 		introRoom.position.set( myPosition.x, myPosition.y-3.5, myPosition.z );
@@ -537,8 +542,9 @@ function lateInit()
 
 		setTimeout(function(){
 			console.log("ahh!");
-			// firstGuy.player.children[0].visible = false;
-			// controls.setMovYAnimation( -96.5, 15 );
+
+			firstGuy.player.children[0].visible = false;
+			controls.setMovYAnimation( -96.5, 15 );
 
 			setTimeout(function(){
 				renderer.setClearColor(0x77edda, 1); // daytime
@@ -548,9 +554,11 @@ function lateInit()
 				daytimeChange(true);
 			}, 10000);
 
-			// setTimeout(function(){
-			// 	firstGuy.player.children[0].visible = true;
-			// }, 14000);
+			setTimeout(function(){
+				firstGuy.player.children[0].visible = true;
+				firstGuy.player.children[0].children[4].visible = true;
+			}, 14000);
+
 		}, 5000);
 	}, 10000);
 }
@@ -791,10 +799,10 @@ function update()
 			lookingAtSomeone = -1;
 		}		
 
-	// if(truck.children.length>0){
-	// 	var curtainNum = (sinWave.run()+1)/2;
-	// 	truck.children[1].morphTargetInfluences[0] = curtainNum;
-	// }
+	if(truck.children.length>0){
+		var curtainNum = (sinWave.run()+1)/2;
+		truck.children[7].morphTargetInfluences[0] = curtainNum;
+	}
 
 	if(lanternGroup.children.length>0){
 		for(var i=0; i<lanternGroup.children.length; i++){
