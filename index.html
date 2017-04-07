@@ -334,8 +334,13 @@
 						playerRotY = data.playerRotY;
 						playerQ = new THREE.Quaternion(data.playerQ._x, data.playerQ._y, data.playerQ._z, data.playerQ._w);
 
-						if( dailyLifePlayerDict[ data.index ] )
-							dailyLifePlayerDict[ data.index ].update( playerPosX, playerPosY, playerPosZ, playerRotY, playerQ );
+						if( dailyLifePlayerDict[ data.index ] ){
+							//v.1 - no interpolation
+							//dailyLifePlayerDict[ data.index ].update( playerPosX, playerPosY, playerPosZ, playerRotY, playerQ );
+
+							//v.2
+							dailyLifePlayerDict[ data.index ].updateReal( playerPosX, playerPosY, playerPosZ, playerQ );
+						}
 					}
 
 					// update chewing ONLY IF we are in the same world
@@ -492,7 +497,7 @@
 		<script type="text/javascript" src="js/script_setup_eat.js"></script>
 		<script type="text/javascript" src="js/loader_eat.js"></script>
 		
-		<script type="text/javascript" src="js/script_vEat_show2.js"></script>
+		<script type="text/javascript" src="js/script_vEat_v2.js"></script>
 
 		<script>
 		  // (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

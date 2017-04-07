@@ -327,8 +327,9 @@ function superInit(){
 							basedURL + "models/highChair/hc_smallPlate.json",
 							basedURL + "models/highChair/hc_bigPlate.json" );
 
+		stomachTex = textureLoader.load( basedURL + '/images/stomach.jpg' );
 		loadSitModelPlayer( basedURL + "models/personHead.js",
-							// basedURL + "models/personBody.js",
+							basedURL + "models/personBody.js",
 							basedURL + "models/chewers/body.json",
 							basedURL + "models/stomach.json");
 
@@ -363,6 +364,7 @@ function superInit(){
 			} );
 		} );
 
+		/*
 		var turkeyTex = textureLoader.load( basedURL + 'images/turkey/turkey.jpg' );
 		var turkeyAO = textureLoader.load( basedURL + 'images/turkey/turkey_AO.jpg' );
 		var turkeyNRM = textureLoader.load( basedURL + 'images/turkey/turkey_NM.jpg' );
@@ -391,7 +393,15 @@ function superInit(){
 			avocado.position.set(15,1,7);
 			scene.add( avocado );
 		} );
+		*/
 
+		modelLoader.load( basedURL + "models/avocado2.json", function(geo, mat){
+			var vc_mat = new THREE.MeshPhongMaterial( { color: 0xffffff, vertexColors: THREE.VertexColors, shininess: 0 } );
+			avocado = new THREE.Mesh( geo, vc_mat );
+			avocado.position.set(10,0,0);
+			// candy.scale.multiplyScalar(5);
+			scene.add(avocado);
+		} );
 
 	stats = new Stats();
 	stats.domElement.style.position = 'absolute';

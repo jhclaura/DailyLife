@@ -107,23 +107,25 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	var pitchObject = new THREE.Object3D();
 	pitchObject.add( camera );
 
-	var yawObject = new THREE.Object3D();
+	this.yawObject = new THREE.Object3D();
 	var yawObjectOriginal = new THREE.Object3D();
 
-	yawObject.position.set(myStartX, myStartY, myStartZ);
-	yawObject.add( pitchObject );
+	//this.yawObject.position.set(myStartX, myStartY, myStartZ);
+	this.yawObject.position.copy(myPosition);
+	this.yawObject.add( pitchObject );
 
-	yawObjectOriginal.position.copy(yawObject.position);
+	yawObjectOriginal.position.copy(this.yawObject.position);
 
 	//
 	this.lookAtCenterQ = new THREE.Quaternion();
 	this.worldCenter = worldCenter.clone();
 
 	//LOOKAT_CENTER
+	if(this.autoAlign){
 		var m1 = new THREE.Matrix4();
 		// var center = new THREE.Vector3(0,yawObject.position.y,0);
 		// m1.lookAt( yawObject.position, center, yawObject.up );
-		m1.lookAt( yawObject.position, scope.worldCenter, yawObject.up );
+		m1.lookAt( this.yawObject.position, scope.worldCenter, this.yawObject.up );
 
 		if (thisIsTouchDevice) {
 			this.lookAtCenterQ.setFromRotationMatrix( m1 );
@@ -133,8 +135,8 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			var tmpE = new THREE.Euler(0, 0, 0, 'YXZ');
 			tmpE.setFromQuaternion(tmpQ);
 
-			tmpE.set(0, tmpE.y, 0);
-			yawObject.rotation.copy(tmpE);
+			tmpE.set(0, tmpE.y+Math.PI/2, 0);
+			this.yawObject.rotation.copy(tmpE);
 
 			// yawObject.quaternion.setFromRotationMatrix( m1 );
 		}
@@ -144,7 +146,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		// 	console.log("quaternion changed!");
 		// }
 		// playerStartRotY = yawObject.rotation.y;
-
+	}
 	//
 	this.movingEnabled = true;
 	this.clickingTouchingEnabled = true;
@@ -161,7 +163,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 
 	var PI_2 = Math.PI / 2;
 
-	this.moveSpeed = 0.003;
+	this.moveSpeed = configs.moveSpeed;
 	this.jumpSpeed = 5;
 
 	var _q1 = new THREE.Quaternion();
@@ -184,10 +186,10 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			'camID': camID,
 			// 'peerid': peer_id,
 			'id': -1,
-			'playerStartX': myStartX,
-			'playerStartY': myStartY,
-			'playerStartZ': myStartZ,
-			'playerStartRotY': yawObject.rotation.y,
+			'playerStartX': myPosition.x,
+			'playerStartY': myPosition.y,
+			'playerStartZ': myPosition.z,
+			'playerStartRotY': this.yawObject.rotation.y,
 			'myHex': myColor,
 			'nname': playerNName,
 			'worldId': -1
@@ -290,8 +292,8 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		this.finalQ2.multiply( orientationQuaternionPublic );
 		
 		if (this.autoAlign && this.alpha !== 0) {
-				this.autoAlign = false;
-				scope.align();
+			this.autoAlign = false;
+			scope.align();
 	 	}
 	};
 
@@ -332,7 +334,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			tempQuaternion = new THREE.Quaternion();
 
 			var currentCenter = myWorldCenter.clone();
-			currentCenter.y = yawObject.position.y;
+			currentCenter.y = this.yawObject.position.y;
 			// console.log(currentCenter);
 			// console.log(yawObject.position);
 
@@ -356,7 +358,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			// );
 	
 			// v2
-			tempVector3.copy(yawObject.position).applyQuaternion( tempQuaternion.copy( orientationQuaternionPublic ).inverse(), 'ZXY' );
+			tempVector3.copy(this.yawObject.position).applyQuaternion( tempQuaternion.copy( orientationQuaternionPublic ).inverse(), 'ZXY' );
 			tempMatrix4.lookAt(tempVector3, currentCenter, up);
 			tempQuaternion.setFromRotationMatrix(tempMatrix4);
 			tempEuler.setFromQuaternion(tempQuaternion);
@@ -382,9 +384,9 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		yawObjectOriginal.rotation.y -= movementX * 0.001;
 
 		if( quaternionChanged )
-			yawObject.rotation.y += movementX * 0.001;
+			scope.yawObject.rotation.y += movementX * 0.001;
 		else
-			yawObject.rotation.y -= movementX * 0.001;
+			scope.yawObject.rotation.y -= movementX * 0.001;
 
 		pitchObject.rotation.x -= movementY * 0.001;
 		pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
@@ -394,14 +396,14 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			// if you're not mobile phone
 			// create quaternion from rotation created by mouseMove
 			var tempEuler = new THREE.Euler();
-			tempEuler.set(pitchObject.rotation.x, yawObject.rotation.y, 0, 'YXZ');
+			tempEuler.set(pitchObject.rotation.x, scope.yawObject.rotation.y, 0, 'YXZ');
 			eyeFinalQ.setFromEuler(tempEuler);
 
 			// for rotating things other than fixed eyeScreen
-			tempEuler.set(-pitchObject.rotation.x, yawObject.rotation.y-Math.PI, 0, 'YXZ');
+			tempEuler.set(-pitchObject.rotation.x, scope.yawObject.rotation.y-Math.PI, 0, 'YXZ');
 			eyeFinalQ2.setFromEuler(tempEuler);
 			//
-			eyeFinalQ3.copy(yawObject.quaternion);
+			eyeFinalQ3.copy(scope.yawObject.quaternion);
 		}
 
 		//TIMEOUT_detect mouse stop
@@ -631,7 +633,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 				'type': 'chew',
 				'index': whoIamInLife,
 				'toWhom': lookingAtSomeone,
-				'playerPos': yawObject.position,
+				'playerPos': scope.yawObject.position,
 				'playerDir': scope.getDirection(),
 				'worldId': meInWorld
 			};
@@ -643,7 +645,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	} 
 
 	this.getObject = function () {
-		return yawObject;
+		return this.yawObject;
 	};
 
 	this.isOnObject = function ( boolean ) {
@@ -670,7 +672,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 				// rotation.set( yawObject.rotation.x, yawObject.rotation.y, 0 );
 			}
 			else
-				rotation.set( pitchObject.rotation.x, yawObject.rotation.y, 0 );
+				rotation.set( pitchObject.rotation.x, this.yawObject.rotation.y, 0 );
 
 			v.applyEuler( rotation );
 
@@ -679,34 +681,34 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	}();
 
 	this.rotation = function(){
-		var rr = new THREE.Vector3(yawObject.rotation.x, yawObject.rotation.y, yawObject.rotation.z);
+		var rr = new THREE.Vector3(this.yawObject.rotation.x, this.yawObject.rotation.y, this.yawObject.rotation.z);
 		return rr;
 	};
 
 	this.setRotation = function(newRotation){
-		yawObject.rotation.x = newRotation.x;
-		yawObject.rotation.y = newRotation.y;
-		yawObject.rotation.z = newRotation.z;
+		this.yawObject.rotation.x = newRotation.x;
+		this.yawObject.rotation.y = newRotation.y;
+		this.yawObject.rotation.z = newRotation.z;
 	};
 
 	this.setRotationByQ = function(newRotationQ){
-		yawObject.rotation.setFromQuaternion( newRotationQ );
+		this.yawObject.rotation.setFromQuaternion( newRotationQ );
 	};
 
 	this.setPosX = function(newPosX){
-		yawObject.position.x = newPosX;
+		this.yawObject.position.x = newPosX;
 	};
 
 	this.setPosY = function(newPosY){
-		yawObject.position.y = newPosY;
+		this.yawObject.position.y = newPosY;
 	};
 
 	this.setPosZ = function(newPosZ){
-		yawObject.position.z = newPosZ;
+		this.yawObject.position.z = newPosZ;
 	};
 
 	this.setPosition = function(newPositin){
-		yawObject.position.copy(newPosition);
+		this.yawObject.position.copy(newPosition);
 	};
 
 	this.dirF = function(){
@@ -714,31 +716,31 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	};
 
 	this.posX = function(){
-		return yawObject.position.x;
+		return this.yawObject.position.x;
 	};
 
 	this.posY = function(){
-		return yawObject.position.y;
+		return this.yawObject.position.y;
 	};
 
 	this.posZ = function(){
-		return yawObject.position.z;
+		return this.yawObject.position.z;
 	};
 
 	this.position = function(){
-		return yawObject.position;
+		return this.yawObject.position;
 	};
 
 	this.rotX = function(){
-		return yawObject.rotation.x;
+		return this.yawObject.rotation.x;
 	};
 
 	this.rotY = function(){
-		return yawObject.rotation.y;
+		return this.yawObject.rotation.y;
 	};
 
 	this.rotZ = function(){
-		return yawObject.rotation.z;
+		return this.yawObject.rotation.z;
 	};
 
 	// FOR_MOVING
@@ -762,7 +764,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	this.setMovXAnimation = function(_distance, _time){
 		var v1 = new THREE.Vector3();
 		var v2 = new THREE.Vector3();
-		v2.copy(yawObject.position);
+		v2.copy(this.yawObject.position);
 		v1.copy( xAxis ).applyQuaternion( eyeFinalQ3 );
 		v2.add( v1.multiplyScalar( _distance ) );
 
@@ -771,7 +773,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	this.setMovYAnimation = function(_distance, _time){
 		var v1 = new THREE.Vector3();
 		var v2 = new THREE.Vector3();
-		v2.copy(yawObject.position);
+		v2.copy(this.yawObject.position);
 		v1.copy( yAxis ).applyQuaternion( eyeFinalQ3 );
 		v2.add( v1.multiplyScalar( _distance ) );
 
@@ -780,7 +782,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	this.setMovZAnimation = function(_distance, _time){
 		var v1 = new THREE.Vector3();
 		var v2 = new THREE.Vector3();
-		v2.copy(yawObject.position);
+		v2.copy(this.yawObject.position);
 		v1.copy( zAxis ).applyQuaternion( eyeFinalQ3 );
 		v2.add( v1.multiplyScalar( _distance ) );
 
@@ -812,7 +814,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		// 	.start();
 
 		TweenMax.to(
-			yawObject.position, 
+			this.yawObject.position, 
 			_time,
 			{
 				x: _newPos.x, y: _newPos.y, z: _newPos.z,
@@ -821,10 +823,10 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 					var msg = {
 						'type': 'updatePlayer',
 						'index': whoIamInLife,
-						'playerPosX': yawObject.position.x,
-						'playerPosY': yawObject.position.y,
-						'playerPosZ': yawObject.position.z,
-						'playerRotY': yawObject.rotation.y,
+						'playerPosX': this.yawObject.position.x,
+						'playerPosY': this.yawObject.position.y,
+						'playerPosZ': this.yawObject.position.z,
+						'playerRotY': this.yawObject.rotation.y,
 						'playerQ' : eyeFinalQ2,
 						'eyeQ' : eyeFinalQ,
 						'playerQ3' : eyeFinalQ3,
@@ -884,10 +886,10 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			eyeFinalQ2.copy( this.finalQ2.clone() );
 
 			// rotate camera
-	 		yawObject.rotation.setFromQuaternion( this.finalQ );
+	 		this.yawObject.rotation.setFromQuaternion( this.finalQ );
 
 	 		//
-	 		eyeFinalQ3.copy(yawObject.quaternion);
+	 		eyeFinalQ3.copy(this.yawObject.quaternion);
 	 		eyeFinalQ3._x = 0;
 			eyeFinalQ3._z = 0;
 			eyeFinalQ3.normalize();
@@ -896,13 +898,13 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 	 	this.neckAngle.setFromQuaternion( eyeFinalQ2 );
 			
 		//
-		yawObject.translateY( velocity.y );
-		yawObject.translateX( velocity.x );
+		this.yawObject.translateY( velocity.y );
+		this.yawObject.translateX( velocity.x );
 
 		if( thisIsTouchDevice ){
-			translateOnZAxis( yawObject, velocity.z );
+			translateOnZAxis( this.yawObject, velocity.z );
 		} else {
-			yawObject.translateZ( velocity.z );
+			this.yawObject.translateZ( velocity.z );
 		}
 		
 		//
@@ -915,7 +917,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		// }
 
 		//
- 		eyeFinalQ3.copy(yawObject.quaternion);
+ 		eyeFinalQ3.copy(this.yawObject.quaternion);
  		eyeFinalQ3._x = 0;
 		eyeFinalQ3._z = 0;
 		eyeFinalQ3.normalize();
@@ -923,15 +925,15 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 		////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////
 		//WEB_SOCKET
-		
+		/*
 		if(trulyFullyStart){			
 			var msg = {
 				'type': 'updatePlayer',
 				'index': whoIamInLife,
-				'playerPosX': yawObject.position.x,
-				'playerPosY': yawObject.position.y,
-				'playerPosZ': yawObject.position.z,
-				'playerRotY': yawObject.rotation.y,
+				'playerPosX': this.yawObject.position.x,
+				'playerPosY': this.yawObject.position.y,
+				'playerPosZ': this.yawObject.position.z,
+				'playerRotY': this.yawObject.rotation.y,
 				'playerQ' : eyeFinalQ2,
 				'eyeQ' : eyeFinalQ,
 				'playerQ3' : eyeFinalQ3,
@@ -943,12 +945,12 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 				// console.log('A msg sent by DeviceControls when updating.');
 			}
 		}
-		
+		*/
 		////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////
 
-		// if(firstGuy)
-		// 	firstGuy.update( yawObject.position.x, yawObject.position.y, yawObject.position.z, yawObject.rotation.y, eyeFinalQ2 );
+		if(firstGuy)
+			firstGuy.update( this.yawObject.position.x, this.yawObject.position.y, this.yawObject.position.z,this. yawObject.rotation.y, eyeFinalQ2 );
 	};
 
 	// //debug

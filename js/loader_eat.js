@@ -1,4 +1,67 @@
 
+// m_chopL, m_chopR, m_arm_down, m_arm, m_m_open, m_m_close, m_m_openWide, m_snore
+function loadModelMonster ( _chopR, _chopL, _armD, _arm, _snore, _mOpen, _mClose, _mWOpen, _bowl ) {
+
+	var loader = new THREE.JSONLoader( loadingManger );
+	loader.load(_chopR, function(geometry){ m_chopR = geometry });
+	loader.load(_chopL, function(geometry){ m_chopL = geometry });
+	loader.load(_armD, function(geometry){ m_arm_down = geometry });
+	loader.load(_arm, function(geometry){ m_arm = geometry });
+	loader.load(_snore, function(geometry){ m_snore = geometry });
+	loader.load(_mOpen, function(geometry){ m_m_open = geometry });
+	loader.load(_mClose, function(geometry){ m_m_close = geometry });
+	loader.load(_mWOpen, function(geometry){ m_m_openWide = geometry });
+	loader.load(_bowl, function(geometry){ m_bowl = geometry });
+}
+
+function CreateMonster()
+{
+	var monsterMat = new THREE.MeshLambertMaterial({side: THREE.DoubleSide});
+
+	var c_l = new THREE.Mesh(m_chopL, monsterMat);
+	c_l.position.set(19.9, 2.37, -12.09);
+	//c_l.rotation.y = -0.05;
+	var c_r = new THREE.Mesh(m_chopR, monsterMat);
+	c_r.position.set(22.16, 2.38, -11.2);
+	c_r.rotation.y = -0.1;
+	var a_d = new THREE.Mesh(m_arm_down, monsterMat);
+	a_d.add(c_l);
+	a_d.add(c_r);
+	a_d.position.set(28.06, -8.8, -15.8);
+
+	var aa = new THREE.Mesh(m_arm, monsterMat);
+	aa.position.set(4.75, -4.76, -5.77);
+
+	var monsArm = new THREE.Object3D();
+	monsArm.add(aa);
+	monsArm.add(a_d);
+	monsArm.position.set(19.49, -12.84, 18.19);
+
+	var snore = new THREE.Mesh(m_snore, monsterMat);
+	snore.position.set(-2.4, 19.5, -20.5);
+	TweenMax.to(snore.scale, 3, { x:1.3, y:1.3, z:1.3, repeat:-1, yoyo:true, ease:Power1.easeInOut });
+
+	var bowl = new THREE.Mesh(m_bowl, new THREE.MeshLambertMaterial());
+
+	m_m_open.morphTargets.push({name: 'm1', vertices: m_m_close.vertices});
+	m_m_open.morphTargets.push({name: 'm2', vertices: m_m_openWide.vertices});
+	m_m_open.computeMorphNormals();
+	monster = new THREE.Mesh( m_m_open, new THREE.MeshLambertMaterial({color: 0xe9ceda, morphTargets: true, side: THREE.DoubleSide}) );
+	monster.add(monsArm);
+	monster.add(snore);
+	monster.add(bowl);
+	//monster.position.x = 100;
+	monster.scale.multiplyScalar(2);
+	monster.position.y = -2;
+	scene.add(monster);
+
+	chopPosVector = new THREE.Vector3();
+	chopPosDummy = new THREE.Mesh(new THREE.SphereGeometry(0.1), new THREE.MeshBasicMaterial({color: 0xff0000}));
+	chopPosDummy.position.set(143, -39, -37.5);
+	scene.add(chopPosDummy);
+	//Attach(chopPosDummy, scene, monster.children[0].children[1].children[0]);
+}
+
 function loadModelTruck ( cart, lantern, rooftop, supports, wheels, wood ) {
 
 	var loader = new THREE.JSONLoader( loadingManger );

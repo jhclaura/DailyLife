@@ -9,6 +9,12 @@ WebVRConfig = {
 	TOUCH_PANNER_DISABLED: true
 };
 
+var configs = {
+	'skipIntro': true,
+	'moveSpeed': 0.1 ,//0.003
+	'canFly': true
+};
+
 // PointerLockControls
 // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
 	var element = document.body;

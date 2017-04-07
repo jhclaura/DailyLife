@@ -9,6 +9,12 @@ function PersonEat( _pos, _color, _id, _name, _parent ) {
 	this.ahhRotation;
 	this.nname = _name;
 
+	// for interpolation
+	this.realPosition = new THREE.Vector3();
+	this.realRotation = new THREE.Quaternion();
+	this.realBillboardRotation = new THREE.Quaternion();
+	this.yAxisInQ = new THREE.Quaternion(0,Math.PI/2,0,0);
+
 	// construct physical existence
 	this.player = new THREE.Object3D();
 	this.pMorphMat = new THREE.MeshLambertMaterial( { map: chewerTextures[ _id%4 ], color: this.color, morphTargets: true } );
@@ -166,6 +172,31 @@ PersonEat.prototype.update = function( _playerLocX, _playerLocY, _playerLocZ, _p
 	// if(this.player.children[2]){
 	// 	this.player.children[2].rotation.y = this.ahhRotation.y;
 	// }
+}
+
+PersonEat.prototype.updateReal = function( _playerLocX, _playerLocY, _playerLocZ, _playerQ ) {
+
+	this.realPosition.set(_playerLocX, _playerLocY, _playerLocZ);
+	this.realRotation.copy(_playerQ);
+	var newQ = _playerQ.clone();
+	newQ._x = 0;
+	newQ._z = 0;
+	newQ.normalize();
+	this.realBillboardRotation.copy(newQ);
+}
+
+PersonEat.prototype.transUpdate = function() {
+	this.player.position.lerp(this.realPosition, 0.1);
+	
+	// head
+	if(this.player.children[1]) {
+		this.player.children[1].quaternion.slerp( this.realRotation, 0.2 );
+	}
+	
+	// body
+	if(this.player.children[0]){
+		this.player.children[0].quaternion.slerp( this.realBillboardRotation, 0.2 );
+	}
 }
 
 PersonEat.prototype.chew = function() {
