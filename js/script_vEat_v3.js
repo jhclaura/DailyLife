@@ -37,45 +37,20 @@ var keyIsPressed;
 	var lookDummy, lookVector;
 
 // PLAYERS
-	var skinTexture;
 	var guyBodyGeo, guyLAGeo, guyRAGeo, guyHeadGeo;
-	var personTex;
 	var player, playerBody, playerHead;
 	var firstPlayer, secondPlayer;
 	var firstGuy, firstGuyBody, firstGuyHead, secondGuy, secondGuyBody, secondGuyHead;
-	var QforBodyRotation;
 	var fGuyHandHigh = false, sGuyHandHigh = false;
 	var bodyGeo;
 	var dailyLifeME, colorME, dailyLifePlayers = [];
 	var dailyLifePlayerDict = {};
 
-	var person, personGeo, personMat, toiletTex, toiletMat;
-	var persons = [], personIsWalking = [], personCircle, personAmount = 3;
-	var personsAppeared = false, personsAnied = false, personsWalked = false;
-	var personWalkTimeoutID, personAniInterval, personAniIntervalCounter=0, personAniSequence = [1,3,5,6];
 	var poop, poopGeo, poopTex, poopMat, poopHat, poopHeartTex;
 	var poopM, poopMGeo, poopMTex, poopMMat, poopHeartGeo, poopHeartMat, poopHeart;
-	var personBody, personHead, personToilet;
-	var keyframe, lastKeyframe, currentKeyframe;
-	var animOffset = 1, keyduration = 28;
-	var aniStep = 0, aniTime = 0, slowAni = 0.4;
-	var personKeyframeSet =   [ 28, 15,  1,  8,  1, 12, 10, 1 ];
-	var personAniOffsetSet = [  1, 30, 48, 50, 58, 60, 72, 82 ];	//2: sit freeze; 4: push freeze; 7: stand freeze
-	var personFreeze = false;
 
-// WEB_AUDIO_API!
-	var usingWebAudio = true, bufferLoader, convolver, mixer;
-	var source, buffer, audioBuffer, gainNode, convolverGain;
-	var soundLoaded = false;
-	var masterGain, sampleGain;
-	var audioSources = [], gainNodes = [];
-
-	var sound_sweet = {};
-	var sweetSource;
 	var vecZ = new THREE.Vector3(0,0,1);
 	var vecY = new THREE.Vector3(0,-1,0);
-	var sswM, sswX, sswY, sswZ;
-	var camM, camMX, camMY, camMZ;	
 
 	var _iOSEnabled = false;
 
@@ -142,10 +117,7 @@ var keyIsPressed;
 
 ////////////////////////////////////////////////////////////
 
-// init();				// Init after CONNECTION
 superInit();			// init automatically
-
-// connectSocket();		// Init after superInit
 
 ///////////////////////////////////////////////////////////
 // FUNCTIONS 
@@ -167,7 +139,6 @@ function superInit(){
 		// 	loop: true,
 		// 	volume: 0.2
 		// });
-
 
 	time = Date.now();
 
@@ -250,7 +221,6 @@ function superInit(){
 			sinWaves.push(sw);
 		}
 
-
 	// planet = new THREE.Mesh( new THREE.SphereGeometry(1), new THREE.MeshLambertMaterial() );
 	// scene.add( planet );
 
@@ -275,15 +245,6 @@ function superInit(){
 	};
 
 	loadingManger.onLoad = function () {
-	    // console.log( "first step all loaded!" );
-	    // CreateStars();
-
-	    // lateInit();
-
-	    // 1. load everything
-	    // 2. connect to socket
-	    // 3. late init after name 
-	    // connectSocket();
 
 	    CreateStars();
 	    CreateMonster();
@@ -365,14 +326,6 @@ function superInit(){
 	chewerTextures[2] = textureLoader.load( basedURL + '/images/dude2.jpg' );
 	chewerTextures[3] = textureLoader.load( basedURL + '/images/dude3.jpg' );
 
-	// var p_tex = textureLoader.load( basedURL + '/images/pepperLow.png' );
-	// var p_texNRM = textureLoader.load( basedURL + '/images/pepperNRM.png' );
-	// modelLoader.load( basedURL+"models/pepper_test.json", function( geometry ) {
-	// 	var pepper = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial({map: p_tex, normalMap: p_texNRM, side: THREE.DoubleSide}) );
-	// 	pepper.position.set(0,5,10);
-	// 	scene.add( pepper );
-	// } );
-
 	// line for monster
 	var curveE = new THREE.EllipseCurve(
 		0,0,
@@ -431,7 +384,6 @@ function superInit(){
 
 	for(let _i=0; _i<introFiles.length; _i++){
 		modelLoader.load( introFiles[_i], function( geometry ) {
-			//console.log("load intro: " + _i);
 			var intro = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial({color: 0xffffff, side: THREE.DoubleSide}) );
 			intro.introIndex = _i;
 			if(_i==4){
@@ -469,8 +421,8 @@ function superInit(){
 	// Connect to WebSocket!
 		connectSocket();
 
-	//
-	// lateInit();
+	// => moved to be after_Get_Name_To_Start
+	// lateInit(); 
 }
 
 function AssignIndex() {
@@ -485,14 +437,15 @@ function AssignIndex() {
 	myStartX = Math.sin(Math.PI*2/eaterPerTable * meInSGroup)*2.5 + myWorldCenter.x;
 	myStartZ = Math.cos(Math.PI*2/eaterPerTable * meInSGroup)*2.5 + myWorldCenter.z;
 	
-	// myStartX = 50;
-	// myStartY = 50;
-	// myStartZ = 50;
-	if(configs.skipIntro){
+	if(DL_configs.skipIntro)
+	{		
+		myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ );
+	}
+	else
+	{	
+		// start in monster's mouth
 		//{x: 144, y: -37.5, z: -37}
 		myPosition = new THREE.Vector3( 81.81, -39, -83.8 );
-	} else {
-		myPosition = new THREE.Vector3( myStartX, myStartY, myStartZ );
 	}
 	
 	console.log("Me in world: " + meInWorld + ", table: " + meInBGroup + ", seat: " + meInSGroup);
@@ -542,8 +495,9 @@ function lateInit()
 
 	trulyFullyStart = true;
 
-	//
-	if(!configs.skipIntro){
+	// v.1
+	/*
+	if(!DL_configs.skipIntro){
 		setTimeout(function(){
 			// introRoomFall!
 			TweenMax.to( introRoomObject[0].rotation, 4, { x:Math.PI/2, ease: Back.easeInOut } );
@@ -573,6 +527,19 @@ function lateInit()
 			}, 5000);
 		}, 10000);
 	}
+	*/
+
+	// v.2
+	if(!DL_configs.skipIntro){
+		controls.movingEnabled = false;
+		
+		setTimeout(function(){
+			
+			DoOpenroomAni();
+
+		}, 10000);
+	}
+
 }
 
 function daytimeChange( isDayTime ) {
@@ -607,14 +574,13 @@ function geoFindMe() {
 	navigator.geolocation.getCurrentPosition(success, error)
 }
 
+// TO-DO: pooling the poop heart instead of creating new one
 function createHeart( fromIndex, toIndex ) {
 	// Needs: camera position, camera direction
 
 	var position_from = dailyLifePlayerDict[ fromIndex ].player.position.clone();
 	var position_to = dailyLifePlayerDict[ toIndex ].player.position.clone();
-
 	position_to.subVectors( position_to, position_from ).multiplyScalar(4/6).add( position_from );
-	// position_to = dailyLifePlayerDict[ fromIndex ].player.worldToLocal( position_to );
 
 	var shootT = position_from.distanceTo( position_to );
 
@@ -623,19 +589,6 @@ function createHeart( fromIndex, toIndex ) {
 	poopH.position.copy( dailyLifePlayerDict[ fromIndex ].player.position );
 	poopH.lookAt( dailyLifePlayerDict[ toIndex ].player.position );
 	scene.add(poopH);
-
-	// var mHOut = new TWEEN.Tween(poopH.position)
-	// 			.to( {x: position_to.x,
-	// 				  y: position_to.y-1,
-	// 				  z: position_to.z}, Math.floor(shootT)*400 )
-	// 			.easing( TWEEN.Easing.Quadratic.InOut );
-
-	// var mHGone = new TWEEN.Tween(poopH.scale)
-	// 			.to( {x: 0.01, y: 0.01, z: 0.01}, 1000 )
-	// 			.easing( TWEEN.Easing.Elastic.In )
-	// 			.onComplete(function(){
-	// 				scene.remove(poopH);
-	// 			});
 
 	TweenMax.to( poopH.position, Math.floor(shootT)*0.4,
 					{ x: position_to.x,
@@ -649,9 +602,6 @@ function createHeart( fromIndex, toIndex ) {
 							  	scene.remove(poopH);
 							  } });
 					  } } );
-
-	// mHOut.chain(mHGone);
-	// mHOut.start();
 
 	// sample.trigger( 4, 1 );
 
@@ -767,11 +717,12 @@ function animate(timestamp) {
 
 function update()
 {	
-
 	// TWEEN.update();
 	//controls.update( Date.now() - time );
-
+	
 	var dt = clock.getDelta();
+
+	controls.update( dt*1000 );
 
 	// STAR
 	if(starAnimators.length>0){
@@ -826,20 +777,16 @@ function update()
 
 	//AnimateMonster(time);
 
-	if(controls.yawObject != null && monsterArmMoving){
+	// === OPENING ===
+	if(controls.yawObject != null && monsterArmMoving)
+	{
 		// get the world position of dummy
 		chopPosDummy.getWorldPosition( chopPosVector );
 
 		// update firstGuy.player to it
-		// if(toUpdateCount%12==0)
-		// {
-			controls.yawObject.position.lerp( chopPosVector, 0.1 );
-		// }
-		// toUpdateCount++;
+		controls.yawObject.position.lerp( chopPosVector, 0.1 );
 		// firstGuy.player.position.lerp( chopPosVector, 0.1 );
 	}
-
-	controls.update( dt*1000 );
 
 	// Update all the players
 	for( var p in dailyLifePlayerDict )
@@ -879,7 +826,7 @@ function CreateMonsterAni()
 {
 	monsterTimeline = new TimelineMax({ onComplete:()=>{
 		// monsterArmMoving = false;
-		// controls.freeze = false;
+		// controls.movingEnabled = true;
 
 		if(!landInMonster){
 			monsterTimeline.removeCallback( DropCallBack, "drop" );
@@ -915,8 +862,8 @@ function CreateMonsterAni()
 		]
 		, "drop" );
 
-	monsterTimeline.addCallback( DropCallBack, "drop" );
 	monsterTimeline.addCallback( UpCallback, "up" );
+	monsterTimeline.addCallback( DropCallBack, "drop" );
 
 	monsterTimeline.pause();
 }
@@ -928,8 +875,8 @@ function DropCallBack()
 	// fall
 	TweenMax.to( controls.yawObject.position, 3, {y:3.7, delay: 0.5} )
 	// to table
-	TweenMax.to( controls.yawObject.position, 6, {x: myStartX, z: myStartZ, delay: 2, onComplete:()=>{
-		controls.freeze = false;
+	TweenMax.to( controls.yawObject.position, 6, {x: myStartX, z: myStartZ, delay: 4.5, onComplete:()=>{
+		controls.movingEnabled = true;
 	}} );
 }
 
@@ -937,7 +884,7 @@ function UpCallback()
 {
 	//console.log(chopPosDummy.getWorldPosition());
 	monsterArmMoving = true;
-	controls.freeze = true;
+	//controls.movingEnabled = false;
 }
 
 function PlayMonsterAni()
@@ -956,15 +903,6 @@ function Attach ( child, scene, parent ) {
     var matrixWorldInverse = new THREE.Matrix4();
     matrixWorldInverse.getInverse( parent.matrixWorld );
     child.applyMatrix( matrixWorldInverse );    
-}
-
-function changeAni ( aniIndex ) {
-
-	animOffset = animOffsetSet[ aniIndex ];
-	keyframe = animOffsetSet[ aniIndex ];
-	currentKeyframe = keyframe;
-	keyduration = keyframeSet[ aniIndex ];
-	aniStep = 0;
 }
 
 function UpdatePplCount( thisWorldCount, totalCount, totalVisit ) {

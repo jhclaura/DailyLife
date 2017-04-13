@@ -9,9 +9,9 @@ WebVRConfig = {
 	TOUCH_PANNER_DISABLED: true
 };
 
-var configs = {
-	'skipIntro': true,
-	'moveSpeed': 0.1 ,//0.003
+var DL_configs = {
+	'skipIntro': false,
+	'moveSpeed': 0.003 ,// noraml: 0.003, fast: 0.1
 	'canFly': true
 };
 

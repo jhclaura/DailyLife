@@ -163,7 +163,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 
 	var PI_2 = Math.PI / 2;
 
-	this.moveSpeed = configs.moveSpeed;
+	this.moveSpeed = DL_configs.moveSpeed;
 	this.jumpSpeed = 5;
 
 	var _q1 = new THREE.Quaternion();
@@ -430,6 +430,7 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			case 38: // up
 			case 87: // w
 				moveForward = true;
+				console.log("move forward!");
 				break;
 
 			case 37: // left
@@ -858,6 +859,9 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			// 		object.position.copy( state.position ).multiplyScalar( scope.scale );
 			// 	}
 			// }
+
+
+		console.log();
 
 		delta *= 0.5;
 
