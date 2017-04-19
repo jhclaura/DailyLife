@@ -11,7 +11,7 @@ var time, clock;
 
 var loadedCount = 0;
 
-var myStartX = 0, myStartZ = 10, myStartY = 100; //y: 3.5, 100
+var myStartX = 0, myStartZ = 10, myStartY = 3.5; //y: 3.5, 100
 var myPosition, myStartRotY, worldBubble, pplCount, pplCountTex, pplCountMat;
 
 var model, texture;
@@ -115,6 +115,8 @@ var keyIsPressed;
 
 	var toUpdateCount = 0;
 
+	var foodShaderMat, foodShaderMat_uniforms, foodShaderMat_attributes;
+
 ////////////////////////////////////////////////////////////
 
 superInit();			// init automatically
@@ -131,7 +133,7 @@ function superInit(){
 		event.preventDefault();
 	};
 
-	// geoFindMe();
+	// GeoFindMe();
 
 	// HOWLER
 		// sound_forest = new Howl({
@@ -142,19 +144,24 @@ function superInit(){
 
 	time = Date.now();
 
-	// var d = new Date();
-	// var n = d.getHours();
+	var d = new Date();
+	var n = d.getHours();
 
-	// if(n>5 && n<11){
-	// 	console.log("it's breakfast time!");
-	// 	mealTimeIndex = 0;
-	// }else if(n>=11 && n<17){
-	// 	console.log("it's lunch time!");
-	// 	mealTimeIndex = 1;
-	// }else{
-	// 	console.log("it's dinner time!");
-	// 	mealTimeIndex = 2;
-	// }
+	if(n>5 && n<11)
+	{
+		console.log("it's breakfast time!");
+		mealTimeIndex = 0;
+	}
+	else if(n>=11 && n<17)
+	{
+		console.log("it's lunch time!");
+		mealTimeIndex = 1;
+	}
+	else
+	{
+		console.log("it's dinner time!");
+		mealTimeIndex = 2;
+	}
 
 	// THREE.JS -------------------------------------------
 		clock = new THREE.Clock();
@@ -246,7 +253,11 @@ function superInit(){
 
 	loadingManger.onLoad = function () {
 
-	    CreateStars();
+		if(mealTimeIndex == 2)
+		{
+		    CreateStars();
+		}
+
 	    CreateMonster();
 
 	    console.log("ALL LOADED!");
@@ -397,6 +408,66 @@ function superInit(){
 		scene.add(introRoom);
 	}
 
+	var steakTex = textureLoader.load( basedURL + '/images/steak.jpg' );
+
+	foodShaderMat_uniforms = {
+		amplitude: { type: 'f', value: 0.2 },
+		time: { type: 'f', value: 0 },
+		textureImg: { type: 't', value: steakTex },
+		direction: { type: 'f', value: 1.0 }
+	};
+
+	foodShaderMat_uniforms2 = {
+		amplitude: { type: 'f', value: 0.2 },
+		time: { type: 'f', value: 0 },
+		textureImg: { type: 't', value: steakTex },
+		direction: { type: 'f', value: -1.0 }
+	};
+
+	// one per vertex
+	foodShaderMat_attributes = {
+		displacement: { tyep: 'f', value: [] }
+	};
+
+	var v_shader = document.getElementById('food_vs').textContent;
+	var f_shader = document.getElementById('food_fs').textContent;
+	var f_tex_shader = document.getElementById('food_tex_fs').textContent;
+
+	modelLoader.load( basedURL + "models/avocado3.json", function(geo, mat){
+
+		// === SHADER_STUFF
+			var verts = geo.vertices;
+			var values = foodShaderMat_attributes.displacement.value;
+
+		// === END_OF_SHADER_STUFF
+		var vc_mat = new THREE.ShaderMaterial( {
+			uniforms: foodShaderMat_uniforms,
+			vertexShader: v_shader,
+			fragmentShader: f_shader,
+			vertexColors: THREE.VertexColors,
+			side: THREE.DoubleSide
+		} );
+		avocado = new THREE.Mesh( geo, vc_mat );
+		avocado.scale.multiplyScalar(.5);
+		avocado.position.set(10,.5,0);		
+		scene.add(avocado);
+	} );
+
+	modelLoader.load( basedURL + "models/steak.json", function(geo, mat){
+
+		var vc_mat = new THREE.ShaderMaterial( {
+			uniforms: foodShaderMat_uniforms2,
+			vertexShader: v_shader,
+			fragmentShader: f_tex_shader,
+			vertexColors: THREE.VertexColors,
+			side: THREE.DoubleSide
+		} );
+		steak = new THREE.Mesh( geo, vc_mat );
+		steak.scale.multiplyScalar(0.5);
+		steak.position.set(10,0.5,3);		
+		scene.add(steak);
+	} );
+
 	//=========================================================================
 	stats = new Stats();
 	stats.domElement.style.position = 'absolute';
@@ -532,7 +603,7 @@ function lateInit()
 	// v.2
 	if(!DL_configs.skipIntro){
 		controls.movingEnabled = false;
-		
+
 		setTimeout(function(){
 			
 			DoOpenroomAni();
@@ -555,7 +626,7 @@ function daytimeChange( isDayTime ) {
 	// 52103b, (32.2, 6.3, 23.1)
 }
 
-function geoFindMe() {
+function GeoFindMe() {
 	if(!navigator.geolocation){
 		console.log("Geolocation is not supported by your browser");
 		return;
@@ -724,6 +795,10 @@ function update()
 
 	controls.update( dt*1000 );
 
+	// SHADER
+		foodShaderMat_uniforms.time.value += dt;
+		foodShaderMat_uniforms2.time.value += dt;
+
 	// STAR
 	if(starAnimators.length>0){
 		for(var i=0; i<starAnimators.length; i++){
@@ -825,9 +900,6 @@ function DoOpenroomAni()
 function CreateMonsterAni()
 {
 	monsterTimeline = new TimelineMax({ onComplete:()=>{
-		// monsterArmMoving = false;
-		// controls.movingEnabled = true;
-
 		if(!landInMonster){
 			monsterTimeline.removeCallback( DropCallBack, "drop" );
 			monsterTimeline.removeCallback( UpCallback, "up" );
@@ -877,12 +949,14 @@ function DropCallBack()
 	// to table
 	TweenMax.to( controls.yawObject.position, 6, {x: myStartX, z: myStartZ, delay: 4.5, onComplete:()=>{
 		controls.movingEnabled = true;
+
+		monsterTimeline.reverse();
+		
 	}} );
 }
 
 function UpCallback()
 {
-	//console.log(chopPosDummy.getWorldPosition());
 	monsterArmMoving = true;
 	//controls.movingEnabled = false;
 }
@@ -916,7 +990,6 @@ function UpdatePplCount( thisWorldCount, totalCount, totalVisit ) {
 }
 
 function LoadStarTexture() {
-	// var textureLoader = new THREE.TextureLoader( starLoadingManager );
 	var textureLoader = new THREE.TextureLoader( loadingManger );
 	
 	for(var i=0; i<starFiles.length; i++){
@@ -925,9 +998,6 @@ function LoadStarTexture() {
 			glowTextures.push(glowTexture);
 			starAnimator = new TextureAnimator( glowTexture, 4, 1, 8, 60, [0,1,2,3,2,1,3,2] );
 			starAnimators.push(starAnimator);
-			// console.log(i);
-			// if(index==3)
-			// 	CreateStars();
 		} );
 	}	
 }

@@ -430,7 +430,6 @@ THREE.DeviceControls = function ( camera, worldCenter ) {
 			case 38: // up
 			case 87: // w
 				moveForward = true;
-				console.log("move forward!");
 				break;
 
 			case 37: // left

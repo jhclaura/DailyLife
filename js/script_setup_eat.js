@@ -10,7 +10,7 @@ WebVRConfig = {
 };
 
 var DL_configs = {
-	'skipIntro': false,
+	'skipIntro': true,
 	'moveSpeed': 0.003 ,// noraml: 0.003, fast: 0.1
 	'canFly': true
 };

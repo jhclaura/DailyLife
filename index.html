@@ -471,6 +471,59 @@
 			}
 		</script>
 
+		<script type="x-shader/x-vertex" id="food_vs">
+
+			varying vec3 vNormal;
+			varying vec2 vUv;
+			varying vec3 vColor;
+			// varying vec3 col;
+			attribute float displacement;
+			uniform float amplitude;
+			uniform float time;
+			uniform float direction;
+
+			void main() {
+				vNormal = normal;
+				vUv = uv;
+				vColor = color;
+				// vec3 newPosition = position + normal * vec3( displacement * amplitude );
+				// vec3 newPosition = position + normal * vec3( sin(time) * amplitude );
+				// float dir = mod(position.y, 0.2);
+				vec3 newPosition = vec3( 
+					position.x + sin(time * position.y) * amplitude * (0.5 + direction * 0.5),
+					position.y + sin(time * position.x) * amplitude * (0.5 - direction * 0.5),
+					position.z + sin(time * position.y) * amplitude / 2.0
+				);
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
+			}
+		</script>
+
+		<script type="x-shader/x-fragment" id="food_fs">
+
+			varying vec3 vNormal;
+			varying vec2 vUv;
+			varying vec3 vColor;
+			// varying vec3 col;
+
+			void main() {
+				gl_FragColor = vec4( vColor.rgb, 1.0 );
+			}
+		</script>
+
+		<script type="x-shader/x-fragment" id="food_tex_fs">
+
+			varying vec3 vNormal;
+			varying vec2 vUv;
+			varying vec3 vColor;
+			uniform sampler2D textureImg;
+
+			void main() {
+				vec4 texColor = texture2D( textureImg, vUv );
+
+				gl_FragColor = vec4( mix( texColor.xyz, vColor.rgb, 0.0 ), 1.0 );
+			}
+		</script>
+
 		<!-- WebVR Boilerplate -->
 		<script src="js/lib/effects/VREffect.js"></script>
 		<script src="js/lib/webvr-polyfill.js"></script>
